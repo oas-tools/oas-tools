@@ -1,0 +1,21 @@
+language: node_js
+
+node_js:
+  - "6"
+
+sudo: required
+
+services:
+  - docker
+
+before_script:
+  - npm install grunt-cli -g
+
+script:
+  - grunt test
+
+after_success:
+  - REGEXP="release\s[0-9]+\.[0-9]+\.[0-9]+";
+    if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [[ "$TRAVIS_COMMIT_MESSAGE" =~ $REGEXP ]]; then
+    grunt build;
+    fi

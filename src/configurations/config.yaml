@@ -1,0 +1,13 @@
+production:
+  server: 
+    port: 5000
+
+  loglevel: info
+  logfile: './logs/pro-logs.log'
+
+development:
+  server: 
+    port: 5000
+    
+  loglevel: debug
+  logfile: './logs/dev-logs.log'
