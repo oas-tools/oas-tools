@@ -1,7 +1,5 @@
 'use strict';
 
-console.log("Started application!");
-
 var fs = require('fs'), path = require('path'), http = require('http');
 
 var express = require("express");

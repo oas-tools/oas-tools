@@ -18,8 +18,7 @@ var http = require('http');
  * @param {string} method - Method requested by the client.
  */
 function specContainsPath(paths, requestedUrl, method) {
-  auxReq.loggerFunction(paths);
-  auxReq.loggerFunction("--------------------------");
+  auxReq.loggerFunction("Requested method-url pair:");
   auxReq.loggerFunction(method + " - " + requestedUrl);
   var res = false;
   if (paths.hasOwnProperty(requestedUrl)) {
@@ -43,7 +42,6 @@ function checkRequestData(paths, requestedUrl, method, req){
   var wrongParameters = [];
   if(paths[requestedUrl][method].hasOwnProperty('parameters')){
     var params = paths[requestedUrl][method]['parameters'];
-    auxReq.loggerFunction(params);
     for(var i = 0; i<params.length;i++){
       if(params[i].required.toString() == 'true'){
         var name = params[i].name;
@@ -51,7 +49,6 @@ function checkRequestData(paths, requestedUrl, method, req){
         if(req[location][name] == undefined){
           missingParameters.push([name,location]);
         }else if(params[i].schema.type.toString() != Type.string(req[location][name])){ //in the case of array, check also type of its items!
-          auxReq.loggerFunction(req[location][name]);
           auxReq.loggerFunction("compared types: "+ params[i].schema.type.toString() + " --- " + Type.string(req[location][name]))
           wrongParameters.push(name);
         }
@@ -60,7 +57,6 @@ function checkRequestData(paths, requestedUrl, method, req){
   }
   res.push(missingParameters);
   res.push(wrongParameters);
-  console.log(res);
   return res;
 }
 
