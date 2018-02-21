@@ -31,3 +31,5 @@ exports.listPets = function(args, res, next) { // the following two work the sam
   //res.status(200).end(JSON.stringify(pets));
   res.status(200).send(pets);
 }
+
+exports.pets = pets;

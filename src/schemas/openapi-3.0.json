@@ -54,7 +54,7 @@
             "properties": {
                 "$ref": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 }
             },
             "description": "A simple object to allow referencing other components in the specification, internally and externally.  The Reference Object is defined by JSON Reference and follows the same structure, behavior and rules.   For this specification, reference resolution is done as defined by the JSON Reference specification and not by the JSON Schema specification."
@@ -74,7 +74,7 @@
                 },
                 "termsOfService": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
                 "contact": {
                     "$ref": "#/definitions/Contact"
@@ -98,9 +98,9 @@
                 "name": {
                     "type": "string"
                 },
-                "url": {
+                "uri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
                 "email": {
                     "type": "string",
@@ -122,9 +122,9 @@
                 "name": {
                     "type": "string"
                 },
-                "url": {
+                "uri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 }
             },
             "patternProperties": {
@@ -181,7 +181,7 @@
                 "^x-": {}
             },
             "additionalProperties": false,
-            "description": "An object representing a Server Variable for server URL template substitution."
+            "description": "An object representing a Server Variable for server uri template substitution."
         },
         "Components": {
             "type": "object",
@@ -564,7 +564,7 @@
                 },
                 "namespace": {
                     "type": "string",
-                    "format": "url"
+                    "format": "uri"
                 },
                 "prefix": {
                     "type": "string"
@@ -723,7 +723,7 @@
                 "value": {},
                 "externalValue": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 }
             },
             "patternProperties": {
@@ -917,7 +917,7 @@
                 "^x-": {}
             },
             "additionalProperties": false,
-            "description": "Holds the relative paths to the individual endpoints and their operations. The path is appended to the URL from the `Server Object` in order to construct the full URL.  The Paths MAY be empty, due to ACL constraints."
+            "description": "Holds the relative paths to the individual endpoints and their operations. The path is appended to the uri from the `Server Object` in order to construct the full uri.  The Paths MAY be empty, due to ACL constraints."
         },
         "PathItem": {
             "type": "object",
@@ -1140,15 +1140,15 @@
         "ExternalDocumentation": {
             "type": "object",
             "required": [
-                "url"
+                "uri"
             ],
             "properties": {
                 "description": {
                     "type": "string"
                 },
-                "url": {
+                "uri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 }
             },
             "patternProperties": {
@@ -2085,7 +2085,7 @@
             "type": "object",
             "required": [
                 "type",
-                "openIdConnectUrl"
+                "openIdConnecturi"
             ],
             "properties": {
                 "type": {
@@ -2094,9 +2094,9 @@
                         "openIdConnect"
                     ]
                 },
-                "openIdConnectUrl": {
+                "openIdConnecturi": {
                     "type": "string",
-                    "format": "url"
+                    "format": "uri"
                 },
                 "description": {
                     "type": "string"
@@ -2132,17 +2132,17 @@
         "ImplicitOAuthFlow": {
             "type": "object",
             "required": [
-                "authorizationUrl",
+                "authorizationuri",
                 "scopes"
             ],
             "properties": {
-                "authorizationUrl": {
+                "authorizationuri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
-                "refreshUrl": {
+                "refreshuri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
                 "scopes": {
                     "type": "object",
@@ -2159,16 +2159,16 @@
         "PasswordOAuthFlow": {
             "type": "object",
             "required": [
-                "tokenUrl"
+                "tokenuri"
             ],
             "properties": {
-                "tokenUrl": {
+                "tokenuri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
-                "refreshUrl": {
+                "refreshuri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
                 "scopes": {
                     "type": "object",
@@ -2185,16 +2185,16 @@
         "ClientCredentialsFlow": {
             "type": "object",
             "required": [
-                "tokenUrl"
+                "tokenuri"
             ],
             "properties": {
-                "tokenUrl": {
+                "tokenuri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
-                "refreshUrl": {
+                "refreshuri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
                 "scopes": {
                     "type": "object",
@@ -2211,21 +2211,21 @@
         "AuthorizationCodeOAuthFlow": {
             "type": "object",
             "required": [
-                "authorizationUrl",
-                "tokenUrl"
+                "authorizationuri",
+                "tokenuri"
             ],
             "properties": {
-                "authorizationUrl": {
+                "authorizationuri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
-                "tokenUrl": {
+                "tokenuri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
-                "refreshUrl": {
+                "refreshuri": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
                 "scopes": {
                     "type": "object",
@@ -2255,7 +2255,7 @@
             "properties": {
                 "operationRef": {
                     "type": "string",
-                    "format": "uriref"
+                    "format": "uri"
                 },
                 "parameters": {
                     "type": "object",
@@ -2307,7 +2307,7 @@
             "patternProperties": {
                 "^x-": {}
             },
-            "description": "A map of possible out-of band callbacks related to the parent operation. Each value in the map is a Path Item Object that describes a set of requests that may be initiated by the API provider and the expected responses. The key value used to identify the callback object is an expression, evaluated at runtime, that identifies a URL to use for the callback operation."
+            "description": "A map of possible out-of band callbacks related to the parent operation. Each value in the map is a Path Item Object that describes a set of requests that may be initiated by the API provider and the expected responses. The key value used to identify the callback object is an expression, evaluated at runtime, that identifies a uri to use for the callback operation."
         },
         "Encoding": {
             "type": "object",

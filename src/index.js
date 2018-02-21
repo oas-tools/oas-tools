@@ -17,63 +17,69 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-
 'use strict';
 
-/*
- * Put here your dependecies
+var _ = require('lodash-compat');
+var ZSchema = require("z-schema");
+var fs = require('fs');
+var path = require('path');
+var spec;
+var debug = true;
+
+/**
+ * Auxiliar function to print data. Allows deactivation
+ * @param {object} dataToPrint - Data to be printed using console.log.
  */
-var express = require('express'),
-    helmet = require('helmet'),
-    logger = require('./logger/logger'),
-    moment = require('moment'),
-    Promise = require('bluebird'),
-    config = require('./configurations/config');
+var loggerFunction = function loggerFunction(dataToPrint) {
+  if (debug == true) {
+    console.log(dataToPrint);
+  }
+}
 
-/*
- * If you are going to use express, please include helmet library 
- * in order to increase security in your webapp
+
+/**
+ * Function to initialize middlewares
+ *@param {object} specDoc - Specification file, specDoc from the index.js.
+ *@param {function} callback - Function that initializes middlewares one by one in the index.js file.
  */
+var initializeMiddleware = function initializeMiddleware(specDoc, callback) {
+  spec = specDoc;
 
-var port = process.env.PORT || config.server.port;
-var app = express();
-app.use(helmet());
-app.use('/', express.static(__dirname + '/../public'));
-app.listen(port);
+  if (_.isUndefined(specDoc)) {
+    throw new Error('specDoc is required');
+  } else if (!_.isPlainObject(specDoc)) {
+    throw new TypeError('specDoc must be an object');
+  }
 
+  if (_.isUndefined(callback)) {
+    throw new Error('callback is required');
+  } else if (!_.isFunction(callback)) {
+    throw new TypeError('callback must be a function');
+  }
 
-/*
- * Export functions and Objects
- */
-module.exports = {
-    myfunction: _myfunction,
-    myPromiseFunction: _myPromiseFunction
+  var validator = new ZSchema({
+    ignoreUnresolvableReferences: true
+  });
+
+  var schemaV3 = fs.readFileSync(path.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
+  schemaV3 = JSON.parse(schemaV3);
+
+  validator.validate(specDoc, schemaV3, function(err, valid) {
+    if (err) {
+      throw new Error('specDoc is not valid: ');
+      loggerFunction(err);
+    } else {
+      loggerFunction(valid);
+    }
+  });
+
+  callback({
+    OASRouter: require('./middleware/oas-router'),
+    OASValidator: require('./middleware/oas-validator')
+  });
 };
 
-
-/*
- * Implement the functions
- */
-function _myfunction(param1, param2) {
-
-    logger.info('Hello world!');
-    logger.info('Param1: %s', param1);
-    logger.info('Param2: %s', param2);
-
-    logger.custom('Date: %s', moment().toISOString());
-
-    return param1 + "-" + param2;
-
-}
-
-function _myPromiseFunction(param1, param2) {
-
-    return new Promise(function (resolve, reject) {
-        if (param1 && param2) {
-            resolve(param1 + "-" + param2);
-        } else {
-            reject(new Error("Params are required"));
-        }
-    });
-
-}
+module.exports = {
+  initializeMiddleware: initializeMiddleware,
+  loggerFunction: loggerFunction,
+};
