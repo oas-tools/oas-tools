@@ -6,16 +6,7 @@ var fs = require('fs');
 var path = require('path');
 var spec;
 var debug = true;
-
-/**
- * Auxiliar function to print data. Allows deactivation
- * @param {object} dataToPrint - Data to be printed using console.log.
- */
-var loggerFunction = function loggerFunction(dataToPrint) {
-  if (debug == true) {
-    console.log(dataToPrint);
-  }
-}
+var logger = require('./logger/logger');
 
 
 /**
@@ -48,9 +39,9 @@ var initializeMiddleware = function initializeMiddleware(specDoc, callback) {
   validator.validate(specDoc, schemaV3, function(err, valid) {
     if (err) {
       throw new Error('specDoc is not valid: ');
-      loggerFunction("Error: "+err);
+      logger.info("Error: " + err);
     } else {
-      loggerFunction("Valid specification file");
+      logger.info("Valid specification file");
     }
   });
 
@@ -62,5 +53,4 @@ var initializeMiddleware = function initializeMiddleware(specDoc, callback) {
 
 module.exports = {
   initializeMiddleware: initializeMiddleware,
-  loggerFunction: loggerFunction,
 };
