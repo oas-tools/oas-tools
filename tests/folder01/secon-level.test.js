@@ -1,8 +1,8 @@
 /*!
-project-template-nodejs 0.0.0, built on: 2017-03-30
-Copyright (C) 2017 ISA group
-http://www.isa.us.es/
-https://github.com/isa-group/project-template-nodejs
+OAS-tools module 0.0.0, built on: 2017-03-30
+Copyright (C) 2017 Ignacio Peluaga Lozada (ISA Group)
+https://github.com/ignpelloz
+https://github.com/isa-group/project-oas-tools
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

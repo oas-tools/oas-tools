@@ -1,26 +1,26 @@
 'use strict';
 
 var pets = [{
-    name: "Wrong", /* This object doesn't match the requirements of the specification file, the warning should be printed! */
+    name: "Wrong", /* This object doesn't match the requirements of the specification file */
     tag: "Wrong object as it doesn't have id"
   },
   {
-    id: "1",
+    id: 1,
     name: "Wolf",
     tag: "Barks at the moon"
   },
   {
-    id: "2",
+    id: 2,
     name: "Cat",
     tag: "Boring animal"
   },
   {
-    id: "3",
+    id: 3,
     name: "Rabbit",
     tag: "Eats carrots"
   },
   {
-    id: "4",
+    id: "4", /* wrong object as this is string instead of integer */
     name: "Bat",
     tag: "Ozzy's breakfast"
   }

@@ -55,7 +55,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-      x-router-controller: "Creator" #This is a custom controller
+      #x-router-controller: "Creator" #Commented this as now there is only one controller with all the operations
 components:
   schemas:
     Pet:
