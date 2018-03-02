@@ -26,12 +26,11 @@ var fs = require('fs');
 var path = require('path');
 var http = require('http');
 var logger = require('../logger/logger');
+var deref = require('json-schema-deref');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: true
 });
-var deref = require('json-schema-deref');
-
 
 /**
  * Checks whether the provided specification file contains the requested url in the req value. If it contains it, then it must be checked whether the requested method is
