@@ -41,10 +41,9 @@ var validator = new ZSchema({
  * @param {string} method - Method requested by the client.
  */
 function specContainsPath(paths, requestedUrl, method) {
-  logger.info("Requested method-url pair:");
-  logger.info(method + " - " + requestedUrl);
+  logger.info("Requested method-url pair: " + method + " - " + requestedUrl);
   var res = false;
-  if (paths.hasOwnProperty(requestedUrl)) {
+  if (paths.hasOwnProperty(requestedUrl)) { //TODO check here whether there can be parameters in the url! like /pets/{id}
     if (paths[requestedUrl].hasOwnProperty(method)) {
       res = true;
     }
@@ -73,25 +72,24 @@ function checkRequestData(paths, requestedUrl, method, req) {
 
         if (req[location][name] == undefined) { //if the request is missing a required parameter acording to the spec: warning
           missingParameters.push([name, location]);
-        }
-        else{ // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
-          var value = JSON.parse(req[location][name]); //new String(req[location][name]);
-
+        } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
+          try {
+            var value = JSON.parse(req[location][name]);
+          } catch (err) {
+            var value = new String(req[location][name]);
+          }
           validator.validate(value, schema, function(err, valid) {
-
             if (err) {
               wrongParameters.push(name);
               if (Array.isArray(err)) {
                 err = err[0];
               }
-
               if (err.code == "UNKNOWN_FORMAT") {
                 var registeredFormats = ZSchema.getRegisteredFormats();
                 logger.info("UNKNOWN_FORMAT error - Registered Formats: ");
                 logger.info(registeredFormats);
               }
               throw new Error(err.message);
-
             } else {
               logger.info("Valid parameter on request");
             }
@@ -105,31 +103,52 @@ function checkRequestData(paths, requestedUrl, method, req) {
   return res;
 }
 
-exports = module.exports = function(specDoc) {
-  deref(specDoc, function(err, fullSchema) {
+/**
+ * Returns a string containing all the warnings/errors from the validation.
+ * @param {object} missingOrWrongParameters - Array containing the missing and wrong parameters on the request acording to the specification file
+ */
+function errorsToString(missingOrWrongParameters, res) {
+  var msg = "";
+  if (missingOrWrongParameters[0].length > 0) {
+    msg = msg + "The following parameters were required but weren't sent in the request: \n" + missingOrWrongParameters[0];
+  }
+  if (missingOrWrongParameters[1].length > 0) {
+    msg = msg + "\nThe following parameters were not of the right type: \n" + missingOrWrongParameters[1];
+  }
+  return msg;
+}
+
+exports = module.exports = function(options) {
+  deref(options, function(err, fullSchema) {
     logger.info("Specification file dereferenced");
-    specDoc = fullSchema;
+    options = fullSchema;
   });
   return function OASValidator(req, res, next) {
-    logger.info("______________________________________________________"); // separates initialization loggs and app execution loggs
-    var spec = specDoc;
+    var msg;
+    var spec = options; //this is actually the oasDoc as passed in the initializeMiddleware to the validator middleware
     var requestedUrl = req.url.split("?")[0]; //allows requests with parameters in the query
     var method = req.method.toLowerCase();
     res.locals.requestedUlr = requestedUrl;
-
     if (specContainsPath(spec.paths, requestedUrl, method) == true) { //In case the spec file contains the requested url, validate the request parameters
       var missingOrWrongParameters = checkRequestData(spec.paths, requestedUrl, method, req);
-      if (missingOrWrongParameters[0].length > 0) {
-        logger.info("WARNING: the following parameters were required but weren't sent in the request:");
-        logger.info(missingOrWrongParameters[0]);
+      msg = errorsToString(missingOrWrongParameters, res);
+      if (msg.length > 0) {
+        if (process.env.STRICT == true) {
+          logger.error(msg);
+          res.status(400).send({
+            message: msg
+          });
+        } else {
+          logger.warning(msg);
+          res.locals.spec = spec;
+          next();
+        }
+      } else {
+        res.locals.spec = spec;
+        next();
       }
-      if (missingOrWrongParameters[1].length > 0) {
-        logger.info("WARNING: the following parameters were not of the right type:");
-        logger.info(missingOrWrongParameters[1]);
-      }
-      res.locals.spec = spec;
-      next();
     } else { //In case the requested url is not in the spec file, inform the user
+      logger.warning("The requested path is not in the specification file");
       res.status(400).send({
         message: "The requested path is not in the specification file"
       });

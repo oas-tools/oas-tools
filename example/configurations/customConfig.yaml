@@ -1,0 +1,7 @@
+#Should I use here also 'production' and 'development' ?
+
+loglevel: info
+logfile: './logs/dev-logs.log'
+enableLogs: true
+strictCheck: false
+controllers: './controllers'

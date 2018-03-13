@@ -25,12 +25,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 var winston = require('winston');
 var config = require('../configurations/config');
-var enableLogs = true;
+
 
 /**
  * Configure here your custom levels.
  * */
-var customLeves = {
+var customLevels = {
   levels: {
     error: 7,
     warning: 8,
@@ -48,11 +48,10 @@ var customLeves = {
 };
 
 winston.emitErrs = true;
-
-if (enableLogs == true) {
+if (process.env.LOGS == true) {
   var logger = new winston.Logger({
-    levels: customLeves.levels,
-    colors: customLeves.colors,
+    levels: customLevels.levels,
+    colors: customLevels.colors,
     transports: [
       new winston.transports.File({
         level: config.loglevel,
@@ -74,8 +73,8 @@ if (enableLogs == true) {
   });
 }else{
   var logger = new winston.Logger({
-    levels: customLeves.levels,
-    colors: customLeves.colors,
+    levels: customLevels.levels,
+    colors: customLevels.colors,
     exitOnError: false
   });
 }

@@ -25,20 +25,26 @@ var pets = [{
     tag: "Ozzy's breakfast"
   }
 ]
-
+var identifier = 5;
 exports.createPets = function(args, res, next) {
   var newPet = {
-    id: "5",
+    id: identifier,
     name: "newPet",
     tag: "just for testing..."
   };
   pets.push(newPet);
+  identifier = identifier+1;
   res.status(201).send();
 }
 
-exports.listPets = function(args, res, next) { // the following two work the same way:
-  //res.status(200).end(JSON.stringify(pets));
+exports.listPets = function(args, res, next) {
   res.status(200).send(pets);
+}
+
+exports.showPetById = function (args,res,next){
+  res.status.send(200).send({
+    message: "The controller for showPetById is not implemented yet but works!"
+  });
 }
 
 exports.pets = pets;

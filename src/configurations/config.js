@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 'use strict';
 
-
 /**
  * Module dependecies.
  * */
@@ -60,4 +59,4 @@ function _addConfiguration(uri, encoding) {
 /*
  * Setup default config location
  */
-config.addConfiguration('config.yaml', 'utf8');
+config.addConfiguration('configs.yaml', 'utf8');
