@@ -21,7 +21,8 @@
     "mocha": "^5.0.1",
     "moment": "^2.17.1",
     "request": "^2.79.0",
-    "winston": "^2.4.0"
+    "winston": "^2.4.0",
+    "snyk": "^1.69.10"
   },
   "devDependencies": {
     "bower": "^1.8.0",
@@ -33,7 +34,9 @@
   "scripts": {
     "start": "node index.js",
     "postinstall": "bower install",
-    "test": "grunt test"
+    "test": "grunt test",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "keywords": [
     "OpenAPI",
@@ -49,5 +52,6 @@
     "type": "git",
     "url": "https://github.com/isa-group/project-oas-tools.git",
     "github": "https://github.com/isa-group/project-oas-tools"
-  }
+  },
+  "snyk": true
 }
