@@ -1,0 +1,13 @@
+production: # If the user doesn't specify custom configurations use this: show warnings withour stopping execution
+  loglevel: info
+  logfile: './logs/pro-logs.log'
+  enableLogs: true
+  strict: false
+  controllers:
+
+development:
+  loglevel: debug
+  logfile: './logs/dev-logs.log'
+  enableLogs: true
+  strict: true
+  controllers:

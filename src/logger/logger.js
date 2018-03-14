@@ -48,7 +48,7 @@ var customLevels = {
 };
 
 winston.emitErrs = true;
-if (process.env.LOGS == true) {
+if (process.env.LOGS == 'true') {
   var logger = new winston.Logger({
     levels: customLevels.levels,
     colors: customLevels.colors,

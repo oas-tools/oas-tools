@@ -9,9 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "js-yaml": "^3.10.0",
+    "js-yaml": "^3.11.0",
     "jsdoc": "^3.5.5",
     "lodash-compat": "^3.10.2",
+    "path": "^0.12.7",
     "type-of-is": "^3.5.1",
     "z-schema": "^3.19.1"
   }

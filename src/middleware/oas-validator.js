@@ -133,7 +133,7 @@ exports = module.exports = function(options) {
       var missingOrWrongParameters = checkRequestData(spec.paths, requestedUrl, method, req);
       msg = errorsToString(missingOrWrongParameters, res);
       if (msg.length > 0) {
-        if (process.env.STRICT == true) {
+        if (process.env.STRICT == 'true') {
           logger.error(msg);
           res.status(400).send({
             message: msg

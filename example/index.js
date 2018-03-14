@@ -17,7 +17,7 @@ var options_string = './configurations/customConfig.yaml';
 
 //  -object: then it is an object that follows the structure of a config file and has all the setConfigurations
 var options_object = {controllers : path.join(__dirname, './controllers'),
-              enableLogs: false,
+              enableLogs: true,
               strict: false
             };
 
