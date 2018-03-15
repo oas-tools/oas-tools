@@ -42,12 +42,40 @@ var validator = new ZSchema({
  */
 function specContainsPath(paths, requestedUrl, method) {
   logger.info("Requested method-url pair: " + method + " - " + requestedUrl);
-  var res = false;
-  if (paths.hasOwnProperty(requestedUrl)) { //TODO check here whether there can be parameters in the url! like /pets/{id}
+  //console.log("Paths: " +  JSON.stringify(paths));
+  var res = undefined;
+  if (paths.hasOwnProperty(requestedUrl)) {
     if (paths[requestedUrl].hasOwnProperty(method)) {
-      res = true;
+      res = requestedUrl;
+    }
+  }else{
+    requestedUrl = requestedUrl.split('/').filter(Boolean);
+    var paths_array = Object.keys(paths);
+    for(var i = 0; i<paths_array.length; i++){
+      console.log("WTF is this: " + paths_array[i])
+      var x = paths_array[i].split('/').filter(Boolean);
+      console.log("Comparing: " + requestedUrl + " and " + x);
+      if(requestedUrl.length == x.length){
+        if(requestedUrl[0] == x[0]){
+          console.log("SAME SPLIT'S SIZES AND BEGGINING!");
+          res = paths_array[i];
+          break;
+        }
+      }
     }
   }
+
+  /* paths = {schema:'/pets'};
+  validator.validate(requestedUrl, paths, function(err, valid) {
+    console.log("validate: " + requestedUrl + " with: " + JSON.stringify(paths));
+    if(err){
+      logger.info(err);
+      return false;
+    }else{
+      logger.info("No error when validating the requested path!");
+      return true;
+    }
+  }); */
   return res;
 }
 
@@ -65,6 +93,7 @@ function checkRequestData(paths, requestedUrl, method, req) {
   if (paths[requestedUrl][method].hasOwnProperty('parameters')) {
     var params = paths[requestedUrl][method]['parameters'];
     for (var i = 0; i < params.length; i++) {
+
       if (params[i].required.toString() == 'true') {
         var name = params[i].name;
         var location = params[i].in;
@@ -78,6 +107,8 @@ function checkRequestData(paths, requestedUrl, method, req) {
           } catch (err) {
             var value = new String(req[location][name]);
           }
+          console.log("CHECK HOW VALIDATION IS DONE IN CASE OF QUERY PARAMETERS!");
+          console.log(value + " - " + JSON.stringify(schema));
           validator.validate(value, schema, function(err, valid) {
             if (err) {
               wrongParameters.push(name);
@@ -128,9 +159,12 @@ exports = module.exports = function(options) {
     var spec = options; //this is actually the oasDoc as passed in the initializeMiddleware to the validator middleware
     var requestedUrl = req.url.split("?")[0]; //allows requests with parameters in the query
     var method = req.method.toLowerCase();
-    res.locals.requestedUlr = requestedUrl;
-    if (specContainsPath(spec.paths, requestedUrl, method) == true) { //In case the spec file contains the requested url, validate the request parameters
-      var missingOrWrongParameters = checkRequestData(spec.paths, requestedUrl, method, req);
+    //res.locals.requestedUlr = requestedUrl;
+    var reqPath = specContainsPath(spec.paths, requestedUrl, method);
+    res.locals.requestedUlr = reqPath;
+    console.log("Devuelto de specContainsPath: " + reqPath);
+    if (reqPath != undefined) { //In case the spec file contains the requested url, validate the request parameters
+      var missingOrWrongParameters = checkRequestData(spec.paths, reqPath, method, req);
       msg = errorsToString(missingOrWrongParameters, res);
       if (msg.length > 0) {
         if (process.env.STRICT == 'true') {

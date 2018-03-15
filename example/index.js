@@ -9,11 +9,11 @@ var oasTools = require('../src/index.js'); //src folder, not inside node-modules
 var jsyaml = require('js-yaml');
 var serverPort = 8383;
 
-var spec = fs.readFileSync(path.join(__dirname, 'oai-spec.yaml'), 'utf8');
+var spec = fs.readFileSync(path.join(__dirname, 'oai-spec.yaml'), 'utf8'); //this one works
 var oasDoc = jsyaml.safeLoad(spec);
 
 //  -string: then it is the locations of a file containing all the configurations (controllers, enable logs, strict check...)
-var options_string = './configurations/customConfig.yaml';
+var options_string =  path.join(__dirname, './configurations/customConfig.yaml');
 
 //  -object: then it is an object that follows the structure of a config file and has all the setConfigurations
 var options_object = {controllers : path.join(__dirname, './controllers'),
@@ -22,8 +22,7 @@ var options_object = {controllers : path.join(__dirname, './controllers'),
             };
 
 //  -if the user doesnt define these options, then the default config file must be used.
-
-oasTools.configure(options_object); //this is optional! User is not forced to use apply this, SO THIS DOESN'T CONTAIN THE SPEC-FILE!
+//oasTools.configure(options_string);
 
 //validate spec file and initialize middlewares
 oasTools.initializeMiddleware(oasDoc, function (middleware) {

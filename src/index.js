@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 var _ = require('lodash-compat');
 var fs = require('fs');
 var path = require('path');
-var path = require('js-yaml');
+var jsyaml = require('js-yaml');
 var logger;
 var ZSchema = require("z-schema");
 var validator = new ZSchema({
@@ -36,14 +36,13 @@ var customConfigurations = false;
  *@param {object} options - Parameter containing controllers location, enable logs, and strict checks. It can be a STRING or an OBJECT.
  */
 var configure = function configure(options) {
-  console.log(options);
   customConfigurations = true;
   if (typeof options == 'string') { //in this case 'options' specifies the location of a custom config file
-    try{
-      var config = fs.readFileSync(path.join(__dirname, options), 'utf8');
+    try {
+      var config = fs.readFileSync(options, 'utf8');
       var options = jsyaml.safeLoad(config);
-    }catch(err){
-      console.log("The specified configuration file wasn't found at " +path.join(__dirname, options)+ ".  Default configurations will be set");
+    } catch (err) {
+      console.log("The specified configuration file wasn't found at " + options + ".  Default configurations will be set");
       setDefaultConfigurations();
     }
   }
@@ -61,33 +60,26 @@ var configure = function configure(options) {
 };
 
 /**
- * Function to set default configurations. If the user doesn't specify configurations 'production' must be used
- */
-function setDefaultConfigurations() {
-  if (process.env.OAS_DEV == 'true') { //env variable development is set
-    var configString = fs.readFileSync(path.join(__dirname, '/configurations/configs.yaml'), 'utf8');
-    var newConfigurations = jsyaml.safeLoad(configString) //Isn't it enough with just the readFileSync line?
-    configure(newConfigurations.development);
-  } else { // env variable is set
-    var configString = fs.readFileSync(path.join(__dirname, '/configurations/configs.yaml'), 'utf8');
-    var newConfigurations = jsyaml.safeLoad(configString) //Isn't it enough with just the readFileSync line?
-    configure(newConfigurations.production);
-  }
-}
-
-/**
  * Function to initialize middlewares
  *@param {object} options - Parameter containing controllers location, Specification file, and others.
  *@param {function} callback - Function that initializes middlewares one by one in the index.js file.
  */
 var initializeMiddleware = function initializeMiddleware(oasDoc, callback) {
 
-  logger = require('./logger/logger'); //NOT DEFINITIVE SOLUTION!
 
-  if (customConfigurations == false) {
-    setDefaultConfigurations();
+
+  if (customConfigurations == false) { // Set default configurations.
+    var configString = fs.readFileSync(path.join(__dirname, '/configurations/configs.yaml'), 'utf8');
+    var newConfigurations = jsyaml.safeLoad(configString)
+    if (process.env.OAS_DEV == 'true') { //env variable development is set
+      configure(newConfigurations.development);
+    } else { // env variable is not set
+      configure(newConfigurations.production);
+    }
   }
 
+  logger = require('./logger/logger'); //NOT DEFINITIVE SOLUTION!
+  
   if (_.isUndefined(oasDoc)) {
     throw new Error('oasDoc is required');
   } else if (!_.isPlainObject(oasDoc)) {

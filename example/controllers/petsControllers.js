@@ -42,7 +42,7 @@ exports.listPets = function(args, res, next) {
 }
 
 exports.showPetById = function (args,res,next){
-  res.status.send(200).send({
+  res.status(200).send({
     message: "The controller for showPetById is not implemented yet but works!"
   });
 }

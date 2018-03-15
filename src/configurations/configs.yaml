@@ -1,13 +1,13 @@
 production: # If the user doesn't specify custom configurations use this: show warnings withour stopping execution
   loglevel: info
   logfile: './logs/pro-logs.log'
-  enableLogs: true
+  enableLogs: false
   strict: false
-  controllers:
+  controllers: '../../example/controllers' #Asume that the user will place the controllers in here (path from its src)
 
 development:
   loglevel: debug
   logfile: './logs/dev-logs.log'
-  enableLogs: true
-  strict: true
-  controllers:
+  enableLogs: false
+  strict: false
+  controllers: '../../example/controllers' #Asume that the user will place the controllers in here (path from its src)

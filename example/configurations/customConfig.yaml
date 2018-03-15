@@ -4,4 +4,4 @@ loglevel: info
 logfile: './logs/dev-logs.log'
 enableLogs: true
 strictCheck: false
-controllers: './controllers'
+controllers: 'C:\Users\ipelu\OneDrive\Documentos\GitHub\project-oas-tools\example\controllers'

@@ -79,6 +79,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      x-router-controller: "petsControllers" 
 components:
   schemas:
     Pet:

@@ -12,6 +12,7 @@
     "express": "^4.16.2",
     "fs": "0.0.1-security",
     "js-yaml": "^3.10.0",
+    "path": "^0.12.7",
     "swagger-tools": "^0.10.3",
     "url": "^0.11.0",
     "window": "^4.2.5",
