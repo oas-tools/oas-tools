@@ -44,7 +44,7 @@ paths:
       tags:
         - pets
       responses:
-        '201':
+        '201':  
           description: Update status
           content:
             application/json:
