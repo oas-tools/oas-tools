@@ -45,7 +45,11 @@ paths:
         - pets
       responses:
         '201':
-          description: Null response
+          description: Update status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pets"
         default:
           description: unexpected error
           content:
@@ -79,7 +83,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-      x-router-controller: "petsControllers" 
+      x-router-controller: "petsControllers"
 components:
   schemas:
     Pet:

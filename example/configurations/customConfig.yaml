@@ -1,7 +1,7 @@
 #Should I use here also 'production' and 'development' ?
-
-loglevel: info
+loglevel: debug
 logfile: './logs/dev-logs.log'
-enableLogs: true
-strictCheck: false
+strict: false
+router: true
+validator: true
 controllers: 'C:\Users\ipelu\OneDrive\Documentos\GitHub\project-oas-tools\example\controllers'

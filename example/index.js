@@ -3,7 +3,9 @@
 var fs = require('fs'), path = require('path'), http = require('http');
 
 var express = require("express");
+var bodyParser = require('body-parser')
 var app = express();
+app.use(bodyParser.json());
 var oasTools = require('../src/index.js'); //src folder, not inside node-modules
 //var oasTools = require('oas-tools'); //Use this once the module is inside node_modules
 var jsyaml = require('js-yaml');
@@ -17,20 +19,25 @@ var options_string =  path.join(__dirname, './configurations/customConfig.yaml')
 
 //  -object: then it is an object that follows the structure of a config file and has all the setConfigurations
 var options_object = {controllers : path.join(__dirname, './controllers'),
-              enableLogs: true,
-              strict: false
+              loglevel: 13,
+              strict: false,
+              router: true,
+              validator: true
             };
 
 //  -if the user doesnt define these options, then the default config file must be used.
-//oasTools.configure(options_string);
+//oasTools.configure(options_object);
+
 
 //validate spec file and initialize middlewares
-oasTools.initializeMiddleware(oasDoc, function (middleware) {
+oasTools.initializeMiddleware(oasDoc, app, function () {
+  /*
   // Validate incoming requests
   app.use(middleware.OASValidator());
 
   // Route validated requests to appropriate controller
   app.use(middleware.OASRouter());
+  */
 
   // Start the server
   http.createServer(app).listen(serverPort, function() {

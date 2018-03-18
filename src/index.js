@@ -23,8 +23,10 @@ var _ = require('lodash-compat');
 var fs = require('fs');
 var path = require('path');
 var jsyaml = require('js-yaml');
-var logger;
+var config = require('./configurations'),
+  logger = config.logger;
 var ZSchema = require("z-schema");
+var deref = require('json-schema-deref');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true
 });
@@ -36,50 +38,39 @@ var customConfigurations = false;
  *@param {object} options - Parameter containing controllers location, enable logs, and strict checks. It can be a STRING or an OBJECT.
  */
 var configure = function configure(options) {
-  customConfigurations = true;
-  if (typeof options == 'string') { //in this case 'options' specifies the location of a custom config file
-    try {
-      var config = fs.readFileSync(options, 'utf8');
-      var options = jsyaml.safeLoad(config);
-    } catch (err) {
-      console.log("The specified configuration file wasn't found at " + options + ".  Default configurations will be set");
-      setDefaultConfigurations();
+
+  console.log("------------llamada a initializeMiddleware");
+
+  config.setConfigurations(options);
+
+};
+
+/**
+ * Transforms yamle's spec path format to Express format.
+ *@param {object} path - Path to transform.
+ */
+function transformToExpress(path) {
+  var res = "";
+  for (var c in path) {
+    if (path[c] == '{') {
+      res = res + ':';
+    } else if (path[c] == '}') {
+      res = res + '';
+    } else {
+      res = res + path[c];
     }
   }
-  if (options.controllers != undefined) {
-    //create local variable and use it for the router inside the callback at initializeMiddleware or create env variable?
-    process.env.CTRLS = options.controllers;
-    controllers = options.controllers;
-  }
-  if (options.enableLogs != undefined) {
-    process.env.LOGS = options.enableLogs;
-  }
-  if (options.strict != undefined) {
-    process.env.STRICT = options.strict;
-  }
-};
+  return res;
+}
 
 /**
  * Function to initialize middlewares
  *@param {object} options - Parameter containing controllers location, Specification file, and others.
  *@param {function} callback - Function that initializes middlewares one by one in the index.js file.
  */
-var initializeMiddleware = function initializeMiddleware(oasDoc, callback) {
+var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) {
 
 
-
-  if (customConfigurations == false) { // Set default configurations.
-    var configString = fs.readFileSync(path.join(__dirname, '/configurations/configs.yaml'), 'utf8');
-    var newConfigurations = jsyaml.safeLoad(configString)
-    if (process.env.OAS_DEV == 'true') { //env variable development is set
-      configure(newConfigurations.development);
-    } else { // env variable is not set
-      configure(newConfigurations.production);
-    }
-  }
-
-  logger = require('./logger/logger'); //NOT DEFINITIVE SOLUTION!
-  
   if (_.isUndefined(oasDoc)) {
     throw new Error('oasDoc is required');
   } else if (!_.isPlainObject(oasDoc)) {
@@ -95,7 +86,7 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, callback) {
   var schemaV3 = fs.readFileSync(path.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
   schemaV3 = JSON.parse(schemaV3);
 
-  validator.validate(oasDoc, schemaV3, function(err, valid) {
+  validator.validate(oasDoc, schemaV3, function (err, valid) {
     if (err) {
       throw new Error('oasDoc is not valid: ');
       logger.info("Error: " + err);
@@ -104,16 +95,52 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, callback) {
     }
   });
 
-  callback({ //now this changes depending on whether the user used setConfiguration() or not!
-    OASRouter: function() {
-      var OASRouter = require('./middleware/oas-router');
-      return OASRouter.call(undefined, controllers); // ROUTER NEEDS JUST CONTROLLERS
-    },
-    OASValidator: function() {
-      var OASValidator = require('./middleware/oas-validator');
-      return OASValidator.call(undefined, oasDoc); // VALIDATOR NEEDS JUST SPEC-FILE
-    },
+  //dereference original specification file
+  deref(oasDoc, function (err, fullSchema) {
+    logger.info("Specification file dereferenced");
+    oasDoc = fullSchema;
   });
+
+  //ESTO SOBRA SI ESTÁ LO DE ARRIBA?
+  var OASRouterMid = function () {
+    var OASRouter = require('./middleware/oas-router');
+    return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
+  };
+  var OASValidatorMid = function () {
+    var OASValidator = require('./middleware/oas-validator');
+    return OASValidator.call(undefined, oasDoc); // VALIDATOR NEEDS JUST SPEC-FILE
+  };
+
+
+  var paths = oasDoc.paths;
+  for (path in paths) {
+    for (var method in paths[path]) {
+      var expressPath = transformToExpress(path);
+      switch (method) {
+        case 'get':
+          app.get(expressPath, OASValidatorMid()); //Remember how I used this in SOS! app.get(BASE_API_PATH + "/elections-voting-stats/:province", function(request, response) { ... });
+          break;
+        case 'post':
+          app.post(expressPath, OASValidatorMid());
+          break;
+        case 'put':
+          app.put(expressPath, OASValidatorMid());
+          break;
+        default:
+          app.delete(expressPath, OASValidatorMid());
+          break;
+      }
+    }
+  }
+
+  if (config.validator == true) {
+    app.use(OASValidatorMid());
+  }
+  if (config.router == true) {
+    app.use(OASRouterMid());
+  }
+
+  callback();
 };
 
 module.exports = {

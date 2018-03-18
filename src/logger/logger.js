@@ -1,27 +1,3 @@
-/*!
-OAS-tools module 0.0.0, built on: 2017-03-30
-Copyright (C) 2017 Ignacio Peluaga Lozada (ISA Group)
-https://github.com/ignpelloz
-https://github.com/isa-group/project-oas-tools
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-
-'use strict';
-
-/**
- * Module dependecies.
- * */
 
 var winston = require('winston');
 var config = require('../configurations/config');
@@ -43,44 +19,30 @@ var customLevels = {
     warning: 'yellow',
     custom: 'magenta',
     info: 'white',
-    debug: 'black'
+    debug: 'blue'
   }
 };
 
 winston.emitErrs = true;
-if (process.env.LOGS == 'true') {
-  var logger = new winston.Logger({
-    levels: customLevels.levels,
-    colors: customLevels.colors,
-    transports: [
-      new winston.transports.File({
-        level: config.loglevel,
-        filename: config.logfile,
-        handleExceptions: true,
-        json: false,
-        maxsize: 5242880, //5MB
-        colorize: false
-      }),
-      new winston.transports.Console({
-        level: config.loglevel,
-        handleExceptions: true,
-        json: false,
-        colorize: true,
-        timestamp: true
-      })
-    ],
-    exitOnError: false
-  });
-}else{
-  var logger = new winston.Logger({
-    levels: customLevels.levels,
-    colors: customLevels.colors,
-    exitOnError: false
-  });
-}
-
-
-/*
- * Export functions and Objects
- */
-module.exports = logger;
+var logger = new winston.Logger({
+  levels: customLevels.levels,
+  colors: customLevels.colors,
+  transports: [
+    new winston.transports.File({
+      level: config.loglevel,
+      filename: config.logfile,
+      handleExceptions: true,
+      json: false,
+      maxsize: 5242880, //5MB
+      colorize: false
+    }),
+    new winston.transports.Console({
+      level: config.loglevel,
+      handleExceptions: true,
+      json: false,
+      colorize: true,
+      timestamp: true
+    })
+  ],
+  exitOnError: false
+});

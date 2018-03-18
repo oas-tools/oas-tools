@@ -25,11 +25,12 @@ var yaml = require('js-yaml');
 var fs = require('fs');
 var path = require('path');
 var http = require('http');
-var logger = require('../logger/logger');
+var config = require('../configurations'),
+    logger = config.logger;
 var deref = require('json-schema-deref');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
-  ignoreUnknownFormats: true
+  ignoreUnknownFormats: true //config.ignoreUnknownFormats
 });
 
 /**
@@ -42,7 +43,6 @@ var validator = new ZSchema({
  */
 function specContainsPath(paths, requestedUrl, method) {
   logger.info("Requested method-url pair: " + method + " - " + requestedUrl);
-  //console.log("Paths: " +  JSON.stringify(paths));
   var res = undefined;
   if (paths.hasOwnProperty(requestedUrl)) {
     if (paths[requestedUrl].hasOwnProperty(method)) {
@@ -52,12 +52,9 @@ function specContainsPath(paths, requestedUrl, method) {
     requestedUrl = requestedUrl.split('/').filter(Boolean);
     var paths_array = Object.keys(paths);
     for(var i = 0; i<paths_array.length; i++){
-      console.log("WTF is this: " + paths_array[i])
       var x = paths_array[i].split('/').filter(Boolean);
-      console.log("Comparing: " + requestedUrl + " and " + x);
       if(requestedUrl.length == x.length){
-        if(requestedUrl[0] == x[0]){
-          console.log("SAME SPLIT'S SIZES AND BEGGINING!");
+        if(requestedUrl[0] == x[0]){ //SAME SPLIT'S SIZES AND BEGGINING!
           res = paths_array[i];
           break;
         }
@@ -107,8 +104,6 @@ function checkRequestData(paths, requestedUrl, method, req) {
           } catch (err) {
             var value = new String(req[location][name]);
           }
-          console.log("CHECK HOW VALIDATION IS DONE IN CASE OF QUERY PARAMETERS!");
-          console.log(value + " - " + JSON.stringify(schema));
           validator.validate(value, schema, function(err, valid) {
             if (err) {
               wrongParameters.push(name);
@@ -150,24 +145,20 @@ function errorsToString(missingOrWrongParameters, res) {
 }
 
 exports = module.exports = function(options) {
-  deref(options, function(err, fullSchema) {
-    logger.info("Specification file dereferenced");
-    options = fullSchema;
-  });
   return function OASValidator(req, res, next) {
+
     var msg;
     var spec = options; //this is actually the oasDoc as passed in the initializeMiddleware to the validator middleware
     var requestedUrl = req.url.split("?")[0]; //allows requests with parameters in the query
     var method = req.method.toLowerCase();
-    //res.locals.requestedUlr = requestedUrl;
+    res.locals.requestedUrl = requestedUrl;
     var reqPath = specContainsPath(spec.paths, requestedUrl, method);
-    res.locals.requestedUlr = reqPath;
-    console.log("Devuelto de specContainsPath: " + reqPath);
+    res.locals.reqPath = reqPath;
     if (reqPath != undefined) { //In case the spec file contains the requested url, validate the request parameters
       var missingOrWrongParameters = checkRequestData(spec.paths, reqPath, method, req);
       msg = errorsToString(missingOrWrongParameters, res);
       if (msg.length > 0) {
-        if (process.env.STRICT == 'true') {
+        if (config.strict == true) {
           logger.error(msg);
           res.status(400).send({
             message: msg
