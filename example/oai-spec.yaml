@@ -38,13 +38,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       #No controller specified here, so the Default one must be used
+      x-router-controller: "Default"
     post:
       summary: Create a pet
       operationId: createPets
       tags:
         - pets
       responses:
-        '201':  
+        '201':
           description: Update status
           content:
             application/json:
@@ -56,6 +57,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+      x-router-controller: "Default"
       #x-router-controller: "Creator" #Commented this as now there is only one controller with all the operations
   /pets/{petId}:
     get:
@@ -83,7 +85,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-      x-router-controller: "petsControllers"
+      x-router-controller: "Default"
 components:
   schemas:
     Pet:
