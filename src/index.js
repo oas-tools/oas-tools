@@ -119,26 +119,32 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
       switch (method) {
         case 'get':
           app.get(expressPath, OASValidatorMid()); //Remember how I used this in SOS! app.get(BASE_API_PATH + "/elections-voting-stats/:province", function(request, response) { ... });
+          app.get(expressPath, OASRouterMid()); //Remember how I used this in SOS! app.get(BASE_API_PATH + "/elections-voting-stats/:province", function(request, response) { ... });
           break;
         case 'post':
           app.post(expressPath, OASValidatorMid());
+          app.post(expressPath, OASRouterMid());
           break;
         case 'put':
           app.put(expressPath, OASValidatorMid());
+          app.put(expressPath, OASRouterMid());
           break;
         default:
           app.delete(expressPath, OASValidatorMid());
+          app.delete(expressPath, OASRouterMid());
           break;
       }
     }
   }
 
+/*
   if (config.validator == true) {
     app.use(OASValidatorMid());
   }
   if (config.router == true) {
     app.use(OASRouterMid());
   }
+*/
 
   callback();
 };

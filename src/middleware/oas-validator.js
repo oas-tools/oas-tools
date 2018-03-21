@@ -25,8 +25,9 @@ var yaml = require('js-yaml');
 var fs = require('fs');
 var path = require('path');
 var http = require('http');
+var urlModule = require('url');
 var config = require('../configurations'),
-    logger = config.logger;
+  logger = config.logger;
 var deref = require('json-schema-deref');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
@@ -48,13 +49,13 @@ function specContainsPath(paths, requestedUrl, method) {
     if (paths[requestedUrl].hasOwnProperty(method)) {
       res = requestedUrl;
     }
-  }else{
+  } else {
     requestedUrl = requestedUrl.split('/').filter(Boolean);
     var paths_array = Object.keys(paths);
-    for(var i = 0; i<paths_array.length; i++){
+    for (var i = 0; i < paths_array.length; i++) {
       var x = paths_array[i].split('/').filter(Boolean);
-      if(requestedUrl.length == x.length){
-        if(requestedUrl[0] == x[0]){ //SAME SPLIT'S SIZES AND BEGGINING!
+      if (requestedUrl.length == x.length) {
+        if (requestedUrl[0] == x[0]) { //SAME SPLIT'S SIZES AND BEGGINING!
           res = paths_array[i];
           break;
         }
@@ -77,6 +78,18 @@ function specContainsPath(paths, requestedUrl, method) {
 }
 
 /**
+ *
+ * @param {string} req - The whole req object from the client request.
+ */
+function locationFormat(location) {
+  var res = location;
+  if (location == "path") {
+    res = "params";
+  }
+  return res;
+}
+
+/**
  * Checks if the data provided in the request is valid acording to what is specified in the oas specification file
  * @param {object} paths - Portion of code in yaml containing the path section from the spec file.
  * @param {string} requestedUrl - Requested url by the client. If the request had parameters in the query those won't be part of this variable.
@@ -95,6 +108,8 @@ function checkRequestData(paths, requestedUrl, method, req) {
         var name = params[i].name;
         var location = params[i].in;
         var schema = params[i].schema;
+
+        location = locationFormat(location);
 
         if (req[location][name] == undefined) { //if the request is missing a required parameter acording to the spec: warning
           missingParameters.push([name, location]);
@@ -136,23 +151,28 @@ function checkRequestData(paths, requestedUrl, method, req) {
 function errorsToString(missingOrWrongParameters, res) {
   var msg = "";
   if (missingOrWrongParameters[0].length > 0) {
-    msg = msg + "The following parameters were required but weren't sent in the request: \n" + missingOrWrongParameters[0];
+    msg = msg + "The following parameters were required but weren't sent in the request: " + missingOrWrongParameters[0];
   }
   if (missingOrWrongParameters[1].length > 0) {
-    msg = msg + "\nThe following parameters were not of the right type: \n" + missingOrWrongParameters[1];
+    msg = msg + "\nThe following parameters were not of the right type: " + missingOrWrongParameters[1];
   }
   return msg;
 }
 
+
 exports = module.exports = function(options) {
   return function OASValidator(req, res, next) {
+
+    console.log("-----------VALIDATOR----------- req.params: " + JSON.stringify(req.params))
 
     var msg;
     var spec = options; //this is actually the oasDoc as passed in the initializeMiddleware to the validator middleware
     var requestedUrl = req.url.split("?")[0]; //allows requests with parameters in the query
+
     var method = req.method.toLowerCase();
     res.locals.requestedUrl = requestedUrl;
-    var reqPath = specContainsPath(spec.paths, requestedUrl, method);
+    var reqPath = specContainsPath(spec.paths, requestedUrl, method); //TODO: use here baseUrl or the whole requested url?
+
     res.locals.reqPath = reqPath;
     if (reqPath != undefined) { //In case the spec file contains the requested url, validate the request parameters
       var missingOrWrongParameters = checkRequestData(spec.paths, reqPath, method, req);

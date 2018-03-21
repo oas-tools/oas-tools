@@ -2,7 +2,6 @@
 
 var pets = [{
     name: "Wrong",
-    /* This object doesn't match the requirements of the specification file */
     tag: "Wrong object as it doesn't have id"
   },
   {
@@ -22,16 +21,18 @@ var pets = [{
   },
   {
     id: "4",
-    /* wrong object as this is string instead of integer */
     name: "Bat",
-    tag: "Ozzy's breakfast"
+    tag: "Wrong object as its id is string instead of integer"
   }
-]
+];
 
 /**
- *
+ *  Creates a pet
  */
 exports.createPets = function(args, res, next) {
+
+  console.log("IS IT HERE???")
+
   if (args.body != undefined) {
     pets.push(args.body);
     res.status(201).send("New pet created");
@@ -41,17 +42,16 @@ exports.createPets = function(args, res, next) {
 }
 
 /**
- *
+ *  Retrieves the whole pets collection
  */
 exports.listPets = function(args, res, next) {
   res.status(200).send(pets.slice(0, args.query.limit));
 }
 
 /**
- *
+ *  Retrieves a single pet
  */
 exports.showPetById = function(args, res, next) {
-  /*
   var res_pet = pets[args.params.petId];
   if (res_pet != undefined) {
     res.status(200).send(res_pet);
@@ -60,35 +60,30 @@ exports.showPetById = function(args, res, next) {
       message: "There is no pet with id " + args.params.petId
     });
   }
-  */
-  var res_pet = pets[res.locals.petId];
-  if (res_pet != undefined) {
-    res.status(200).send(res_pet);
-  } else {
-    res.status(404).send({
-      message: "There is no pet with id " + res.locals.petId
-    });
-  }
 }
 
 /**
- *
+ *  Deletes a single pet from the collection
  */
 exports.deletePet = function(args, res, next) {
-  var res_pet = pets[res.locals.petId];
-  if (res_pet != undefined) {
-    var index = pets.indexOf(res_pet);
-    pets.splice(index, 1);
-    res.status(204).send();
-  } else {
+  var index = -1;
+  for(var i = 0; i<pets.length; i++){
+    if(pets[i].id == args.params.petId){
+      index = i;
+    }
+  }
+  if(index == -1){
     res.status(404).send({
-      message: "There is no pet with id " + res.locals.petId + " to be deleted"
+      message: "There is no pet with id " + args.params.petId + " to be deleted"
     });
+  }else{
+    pets.splice(index,1);
+    res.status(200).send();
   }
 }
 
 /**
- *
+ *  Deletes all the pets in the collection
  */
 exports.deletePets = function(args, res, next) {
   pets.splice(0,pets.length);
@@ -96,10 +91,10 @@ exports.deletePets = function(args, res, next) {
 }
 
 /**
- *
+ *  Updates a pet
  */
 exports.updatePet = function(args, res, next) {
-  var res_pet = pets[res.locals.petId];
+  var res_pet = pets[args.params.petId];
   if (res_pet != undefined) {
     var index = pets.indexOf(res_pet);
     pets.splice(index, 1);
@@ -111,7 +106,7 @@ exports.updatePet = function(args, res, next) {
     }
   } else {
     res.status(404).send({
-      message: "There is no pet with id " + res.locals.petId + " to be updated"
+      message: "There is no pet with id " + args.params.petId + " to be updated"
     });
   }
 }

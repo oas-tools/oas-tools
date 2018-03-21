@@ -21,6 +21,7 @@
     "mocha": "^5.0.1",
     "moment": "^2.17.1",
     "request": "^2.79.0",
+    "url": "^0.11.0",
     "winston": "^2.4.0"
   },
   "devDependencies": {

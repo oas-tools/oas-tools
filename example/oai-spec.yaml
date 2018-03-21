@@ -38,7 +38,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       #No controller specified here, so the Default one must be used
-      x-router-controller: "Default"
+      x-router-controller: "petsControllers"
     post:
       summary: Create a pet
       operationId: createPets
@@ -57,7 +57,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-      x-router-controller: "Default"
+      x-router-controller: "petsControllers"
       #x-router-controller: "Creator" #Commented this as now there is only one controller with all the operations
     delete:
         description: deletes all the pets
@@ -71,6 +71,7 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Error'
+        x-router-controller: "petsControllers"
   /pets/{petId}:
     get:
       summary: Info for a specific pet
@@ -97,7 +98,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-      x-router-controller: "Default"
+      x-router-controller: "petsControllers"
     put:
       description: updates a pet based on its petId
       operationId: updatePet
@@ -118,17 +119,17 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Error'
+      x-router-controller: "petsControllers"
     delete:
       description: deletes a single pet based on the ID supplied
       operationId: deletePet
       parameters:
-        - name: id
+        - name: petId
           in: path
-          description: ID of pet to delete
           required: true
+          description: The id of the pet to delete
           schema:
-            type: integer
-            format: int64
+            type: string
       responses:
         '204':
           description: pet deleted
@@ -138,6 +139,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+      x-router-controller: "petsControllers"
 components:
   schemas:
     Pet:
