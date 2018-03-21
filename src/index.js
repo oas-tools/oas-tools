@@ -88,8 +88,8 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
 
   validator.validate(oasDoc, schemaV3, function (err, valid) {
     if (err) {
-      throw new Error('oasDoc is not valid: ');
-      logger.info("Error: " + err);
+      logger.error("Error: " + JSON.stringify(err));
+      //throw new Error('oasDoc is not valid: ');
     } else {
       logger.info("Valid specification file");
     }

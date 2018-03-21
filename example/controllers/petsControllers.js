@@ -28,41 +28,28 @@ var pets = [{
   }
 ]
 
+/**
+ *
+ */
 exports.createPets = function(args, res, next) {
-
-  /*
-  var newPet = {
-    id: 99,
-    name: "newPet",
-    tag: "just for testing..."
-  };
-  pets.push(newPet);
-  res.status(201).send();
-  */
-
-  var msg;
   if (args.body != undefined) {
-    console.log("-----------There is body: " + JSON.stringify(args.body));
     pets.push(args.body);
     res.status(201).send("New pet created");
   } else {
     res.status(201).send("No pet was sent in the body of the request");
   }
-  
 }
 
+/**
+ *
+ */
 exports.listPets = function(args, res, next) {
-  /*
-  if (args.query.limit != undefined) {
-    var subPets = pets.slice(0, args.query.limit);
-    res.status(200).send(subPets);
-  } else {
-    res.status(200).send(pets);
-  }
-  */
   res.status(200).send(pets.slice(0, args.query.limit));
 }
 
+/**
+ *
+ */
 exports.showPetById = function(args, res, next) {
   /*
   var res_pet = pets[args.params.petId];
@@ -84,22 +71,49 @@ exports.showPetById = function(args, res, next) {
   }
 }
 
+/**
+ *
+ */
 exports.deletePet = function(args, res, next) {
   var res_pet = pets[res.locals.petId];
   if (res_pet != undefined) {
     var index = pets.indexOf(res_pet);
-    pets.splice(i, 1);
-    res.status(200).send(pets);
+    pets.splice(index, 1);
+    res.status(204).send();
   } else {
     res.status(404).send({
-      message: "There is no pet with id " + res.locals.petId
+      message: "There is no pet with id " + res.locals.petId + " to be deleted"
     });
   }
 }
 
+/**
+ *
+ */
 exports.deletePets = function(args, res, next) {
-  pets = [];
-  res.status(200).send(pets);
+  pets.splice(0,pets.length);
+  res.status(200).send();
+}
+
+/**
+ *
+ */
+exports.updatePet = function(args, res, next) {
+  var res_pet = pets[res.locals.petId];
+  if (res_pet != undefined) {
+    var index = pets.indexOf(res_pet);
+    pets.splice(index, 1);
+    if (args.body != undefined) {
+      pets.push(args.body);
+      res.status(201).send("Updated pet");
+    } else {
+      res.status(201).send("No pet was sent in the body of the update request");
+    }
+  } else {
+    res.status(404).send({
+      message: "There is no pet with id " + res.locals.petId + " to be updated"
+    });
+  }
 }
 
 exports.pets = pets;
