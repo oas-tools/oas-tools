@@ -81,7 +81,7 @@ function checkResponse(res, oldSend, spec, method, url, content) {
   logger.debug("  -url: " + url);
   logger.debug("  -data: " + data);
   var responseCodeSection = spec.paths[url][method].responses[code]; //Section of the spec file starting at a response code
-  if (responseCodeSection == undefined) {
+  if (responseCodeSection == undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the spec file
     msg = msg + "Wrong response code: " + code;
     if (config.strict == true) {
       logger.error(msg);
@@ -91,7 +91,7 @@ function checkResponse(res, oldSend, spec, method, url, content) {
       logger.warning(msg);
       oldSend.apply(res, content);
     }
-  } else { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the spec file
+  } else {
     if (responseCodeSection.hasOwnProperty('content')) { //if there is no content property for the given response then there is nothing to validate.
       var validSchema = responseCodeSection.content['application/json'].schema;
       logger.info("Schema to use for validation: "+ JSON.stringify(validSchema));
@@ -113,6 +113,8 @@ function checkResponse(res, oldSend, spec, method, url, content) {
           oldSend.apply(res, content);
         }
       });
+    }else{
+        oldSend.apply(res, content);
     }
   }
 }
@@ -186,9 +188,6 @@ exports = module.exports = function(controllers) {
   logger.info("Controller initialized at: " + controllers);
   return function OASRouter(req, res, next) {
 
-    console.log("-------ROUTER----------------- req.params: " + JSON.stringify(req.params))
-
-    var msg;
     var spec = res.locals.spec;
     var url = res.locals.reqPath; //requested path version on the spec file
     var requestedUrl = res.locals.requestedUrl;

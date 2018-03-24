@@ -26,11 +26,11 @@ var pets = [{
   }
 ];
 
-
 /**
  *  Creates a pet
  */
 exports.createPets = function(args, res, next) {
+
   if (args.body != undefined) {
     pets.push(args.body);
     res.status(201).send("New pet created");
@@ -39,14 +39,12 @@ exports.createPets = function(args, res, next) {
   }
 }
 
-
 /**
  *  Retrieves the whole pets collection
  */
 exports.listPets = function(args, res, next) {
   res.status(200).send(pets.slice(0, args.query.limit));
 }
-
 
 /**
  *  Retrieves a single pet
@@ -61,7 +59,6 @@ exports.showPetById = function(args, res, next) {
     });
   }
 }
-
 
 /**
  *  Deletes a single pet from the collection
@@ -79,24 +76,23 @@ exports.deletePet = function(args, res, next) {
     });
   } else {
     pets.splice(index, 1);
-    res.status(204).send("Deleted pet with id " + args.params.petId);
+    res.status(200).send();
   }
 }
-
 
 /**
  *  Deletes all the pets in the collection
  */
 exports.deletePets = function(args, res, next) {
   pets.splice(0, pets.length);
-  res.status(204).send("All pets were deleted");
+  res.status(200).send();
 }
-
 
 /**
  *  Updates a pet
  */
 exports.updatePet = function(args, res, next) {
+  console.log("Este!!!!")
   var index = -1;
   for (var i = 0; i < pets.length; i++) {
     if (pets[i].id == args.params.petId) {

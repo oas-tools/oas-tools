@@ -78,7 +78,7 @@ function specContainsPath(paths, requestedUrl, method) {
 }
 
 /**
- *
+ * Returns the Express version of the OAS name for location.
  * @param {string} req - The whole req object from the client request.
  */
 function locationFormat(location) {
@@ -130,6 +130,7 @@ function checkRequestData(paths, requestedUrl, method, req) {
                 logger.info("UNKNOWN_FORMAT error - Registered Formats: ");
                 logger.info(registeredFormats);
               }
+              console.log(err)
               throw new Error(err.message);
             } else {
               logger.info("Valid parameter on request");
@@ -162,8 +163,6 @@ function errorsToString(missingOrWrongParameters, res) {
 
 exports = module.exports = function(options) {
   return function OASValidator(req, res, next) {
-
-    console.log("-----------VALIDATOR----------- req.params: " + JSON.stringify(req.params))
 
     var msg;
     var spec = options; //this is actually the oasDoc as passed in the initializeMiddleware to the validator middleware

@@ -4,6 +4,7 @@ production: # If the user doesn't specify custom configurations use this: show w
   enableLogs: true
   strict: false
   controllers: '../../example/controllers' #Asume that the user will place the controllers in here (path from its src)
+  #controllers: '../../tests/testServer/controllers' #Asume that the user will place the controllers in here (path from its src)
   router: true
   validator: true
 
@@ -12,6 +13,7 @@ development:
   logfile: './logs/dev-logs.log'
   strict: false
   controllers: '../../example/controllers' #Asume that the user will place the controllers in here (path from its src)
+  #controllers: '../../tests/testServer/controllers' #Asume that the user will place the controllers in here (path from its src)
   router: true
   validator: true
 
