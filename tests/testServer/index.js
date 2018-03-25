@@ -30,3 +30,5 @@ oasTools.initializeMiddleware(oasDoc, app, function () {
     console.log("________________________________________________________________");
   });
 });
+
+module.exports = app;
