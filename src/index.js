@@ -102,7 +102,7 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
     };
     var OASValidatorMid = function() {
       var OASValidator = require('./middleware/oas-validator');
-      return OASValidator.call(undefined, oasDoc); // VALIDATOR NEEDS JUST SPEC-FILE
+      return OASValidator.call(undefined, oasDoc, app._router.stack); // VALIDATOR NEEDS JUST SPEC-FILE
     };
 
     var paths = oasDoc.paths;
@@ -145,6 +145,16 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
         }
       }
     }
+
+    /*
+    for (var i = 0; i < app._router.stack.length; i++) {
+      if (app._router.stack[i].route != undefined) {
+        console.log(app._router.stack[i].route.stack[0].method + " -> " + app._router.stack[i].route.path)
+        console.log("---------------------------------")
+      }
+    }
+    */
+
     callback();
   });
 };
