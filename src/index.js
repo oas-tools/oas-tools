@@ -83,8 +83,9 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
 
   validator.validate(oasDoc, schemaV3, function(err, valid) {
     if (err) {
-      logger.error("Error: " + JSON.stringify(err));
+      logger.error("oasDoc is not valid: " + JSON.stringify(err));
       //throw new Error('oasDoc is not valid: ');
+      process.exit();
     } else {
       logger.info("Valid specification file");
     }
@@ -94,7 +95,7 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
     logger.info("Specification file dereferenced");
     oasDoc = fullSchema;
 
-    //THE FOLLOWING THREE SECTIONS ARE INSIDE THE deref CALL BECAUSE OTHERWISE oasDoc WOULDN'T HAVE THE RIGHT VALUE 'fullSchema'
+    //THE FOLLOWING THREE SECTIONS ARE INSIDE THE deref CALL BECAUSE OTHERWISE oasDoc WOULDN'T HAVE THE RIGHT VALUE of 'fullSchema'
     var OASRouterMid = function() {
       var OASRouter = require('./middleware/oas-router');
       return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS

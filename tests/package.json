@@ -4,7 +4,6 @@
   "description": "",
   "main": "advanced.js",
   "scripts": {
-    "start": "node index.js",
     "test": "mocha ./basic.js --timeout 10000"
   },
   "author": "",

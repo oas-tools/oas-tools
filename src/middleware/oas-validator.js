@@ -38,7 +38,7 @@ var validator = new ZSchema({
  * Checks whether the provided specification file contains the requested url in the req value. If it contains it, then it must be checked whether the requested method is
  * specified in the specification for that requested url.
  * If this requested peer has a match in the specification file then this function returns true, otherwise it must return false.
- * @param {object} paths - Portion of code in yaml containing the path section from the spec file.
+ * @param {object} paths - Portion of code in yaml containing the path section from the oasDoc file.
  * @param {string} requestedUrl - Requested url by the client. If the request had parameters in the query those won't be part of this variable.
  * @param {string} method - Method requested by the client.
  */
@@ -91,7 +91,7 @@ function locationFormat(location) {
 
 /**
  * Checks if the data provided in the request is valid acording to what is specified in the oas specification file
- * @param {object} paths - Portion of code in yaml containing the path section from the spec file.
+ * @param {object} paths - Portion of code in yaml containing the path section from the oasDoc file.
  * @param {string} requestedUrl - Requested url by the client. If the request had parameters in the query those won't be part of this variable.
  * @param {string} method - Method requested by the client.
  * @param {string} req - The whole req object from the client request.
@@ -111,7 +111,7 @@ function checkRequestData(paths, requestedUrl, method, req) {
 
         location = locationFormat(location);
 
-        if (req[location][name] == undefined) { //if the request is missing a required parameter acording to the spec: warning
+        if (req[location][name] == undefined) { //if the request is missing a required parameter acording to the oasDoc: warning
           missingParameters.push([name, location]);
         } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
           try {
@@ -121,6 +121,7 @@ function checkRequestData(paths, requestedUrl, method, req) {
           }
           validator.validate(value, schema, function(err, valid) {
             if (err) {
+              console.log("ERROR AL VALIDAR: " + value + " CON " + JSON.stringify(schema));
               wrongParameters.push(name);
               if (Array.isArray(err)) {
                 err = err[0];
@@ -161,20 +162,19 @@ function errorsToString(missingOrWrongParameters, res) {
 }
 
 
-exports = module.exports = function(options) {
+exports = module.exports = function(oasDoc) {
   return function OASValidator(req, res, next) {
 
     var msg;
-    var spec = options; //this is actually the oasDoc as passed in the initializeMiddleware to the validator middleware
     var requestedUrl = req.url.split("?")[0]; //allows requests with parameters in the query
 
     var method = req.method.toLowerCase();
     res.locals.requestedUrl = requestedUrl;
-    var reqPath = specContainsPath(spec.paths, requestedUrl, method); //TODO: use here baseUrl or the whole requested url?
-
+    var reqPath = specContainsPath(oasDoc.paths, requestedUrl, method); //TODO: use here baseUrl or the whole requested url?
     res.locals.reqPath = reqPath;
-    if (reqPath != undefined) { //In case the spec file contains the requested url, validate the request parameters
-      var missingOrWrongParameters = checkRequestData(spec.paths, reqPath, method, req);
+
+    if (reqPath != undefined) { //In case the oasDoc file contains the requested url, validate the request parameters
+      var missingOrWrongParameters = checkRequestData(oasDoc.paths, reqPath, method, req);
       msg = errorsToString(missingOrWrongParameters, res);
       if (msg.length > 0) {
         if (config.strict == true) {
@@ -184,14 +184,14 @@ exports = module.exports = function(options) {
           });
         } else {
           logger.warning(msg);
-          res.locals.spec = spec;
+          res.locals.oasDoc = oasDoc;
           next();
         }
       } else {
-        res.locals.spec = spec;
+        res.locals.oasDoc = oasDoc;
         next();
       }
-    } else { //In case the requested url is not in the spec file, inform the user
+    } else { //In case the requested url is not in the oasDoc file, inform the user
       logger.warning("The requested path is not in the specification file");
       res.status(400).send({
         message: "The requested path is not in the specification file"

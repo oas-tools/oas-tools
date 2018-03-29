@@ -1,10 +1,6 @@
 'use strict';
 
 var pets = [{
-    name: "Wrong",
-    tag: "Wrong object as it doesn't have id"
-  },
-  {
     id: 1,
     name: "Wolf",
     tag: "Barks at the moon"
@@ -20,9 +16,9 @@ var pets = [{
     tag: "Eats carrots"
   },
   {
-    id: "4",
+    id: 4,
     name: "Bat",
-    tag: "Wrong object as its id is string instead of integer"
+    tag: "Ozzy's breakfast"
   }
 ];
 
@@ -50,13 +46,20 @@ exports.listPets = function(args, res, next) {
  *  Retrieves a single pet
  */
 exports.showPetById = function(args, res, next) {
-  var res_pet = pets[args.params.petId];
-  if (res_pet != undefined) {
-    res.status(200).send(res_pet);
-  } else {
+  var res_pet;
+  for (var i = 0; i<pets.length; i++) {
+    if (pets[i].id == args.params.petId) {
+      res_pet = pets[i];
+      break;
+    }
+  }
+  console.log(res_pet)
+  if (res_pet == undefined) {
     res.status(404).send({
       message: "There is no pet with id " + args.params.petId
     });
+  } else {
+    res.status(200).send(res_pet);
   }
 }
 
@@ -92,7 +95,6 @@ exports.deletePets = function(args, res, next) {
  *  Updates a pet
  */
 exports.updatePet = function(args, res, next) {
-  console.log("Este!!!!")
   var index = -1;
   for (var i = 0; i < pets.length; i++) {
     if (pets[i].id == args.params.petId) {

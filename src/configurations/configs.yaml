@@ -1,10 +1,9 @@
-production: # If the user doesn't specify custom configurations use this: show warnings withour stopping execution
+#THIS FILE MUST CONTAIN ALL THE CONFIGURATION VARIABLES! as it will be used as the default configs so it must initialize all of them.
+
+production:
   loglevel: info
   logfile: './logs/pro-logs.log'
-  enableLogs: true
   strict: false
-  controllers: '../../example/controllers' #Asume that the user will place the controllers in here (path from its src)
-  #controllers: '../../tests/testServer/controllers' #Asume that the user will place the controllers in here (path from its src)
   router: true
   validator: true
 
@@ -12,13 +11,11 @@ development:
   loglevel: debug
   logfile: './logs/dev-logs.log'
   strict: false
-  controllers: '../../example/controllers' #Asume that the user will place the controllers in here (path from its src)
-  #controllers: '../../tests/testServer/controllers' #Asume that the user will place the controllers in here (path from its src)
+  controllers: '../../tests/testServer/controllers' #once I find out how to use user's index.js __dirname in my module's index.js I must remove this line
   router: true
   validator: true
 
-#error: 7,
-#warning: 8,
-#custom: 9,
-#info: 12,
-#debug: 13
+
+# loglevel: info -> prints all but debug logs
+# loglevel: debug -> prints all logs
+# loglevel: error -> prints only error logs

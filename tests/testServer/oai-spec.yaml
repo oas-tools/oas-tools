@@ -38,7 +38,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       #No controller specified here, so the Default one must be used
-      x-router-controller: "petsControllers"
+      #x-router-controller: "petsControllers"
     post:
       summary: Create a pet
       operationId: createPets
@@ -57,8 +57,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-      x-router-controller: "petsControllers"
-      #x-router-controller: "Creator" #Commented this as now there is only one controller with all the operations
+      #x-router-controller: "petsControllers"
     delete:
         description: deletes all the pets
         operationId: deletePets
@@ -71,7 +70,7 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Error'
-        x-router-controller: "petsControllers"
+        #x-router-controller: "petsControllers"
   /pets/{petId}:
     get:
       summary: Info for a specific pet
@@ -84,7 +83,7 @@ paths:
           required: true
           description: The id of the pet to retrieve
           schema:
-            type: string
+            type: integer
       responses:
         '200':
           description: Expected response to a valid request
@@ -98,7 +97,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-      x-router-controller: "petsControllers"
+      #x-router-controller: "petsControllers"
     put:
       description: updates a pet based on its petId
       operationId: updatePet
@@ -119,7 +118,7 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Error'
-      x-router-controller: "petsControllers"
+      #x-router-controller: "petsControllers"
     delete:
       description: deletes a single pet based on the ID supplied
       operationId: deletePet
@@ -129,7 +128,7 @@ paths:
           required: true
           description: The id of the pet to delete
           schema:
-            type: string
+            type: integer
       responses:
         '204':
           description: pet deleted
@@ -139,7 +138,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      x-router-controller: "petsControllers"
+      #x-router-controller: "petsControllers"
 components:
   schemas:
     Pet:

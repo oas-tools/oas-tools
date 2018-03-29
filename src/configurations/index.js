@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 
+
 'use strict';
 
 /**
@@ -43,7 +44,7 @@ module.exports.setProperty = function (propertyName, newValue) {
 };
 
 
-/*
+/**
  * Implement the functions
  */
 function _setConfigurations(options, encoding) {
@@ -62,19 +63,23 @@ function _setConfigurations(options, encoding) {
     newConfigurations = options;
   }
 
+  if(newConfigurations.controllers == undefined){
+    console.log("'controllers': path.join(__dirnameOfUsersIndexJS, './controllers')");
+  }
+  //If newConfigurations does indeed contain 'controllers', it will be initialized inside the following lop:
   for (var c in newConfigurations) {
     this.setProperty(c, newConfigurations[c]);
   }
 }
 
-/*
- * Setup default config location
+/**
+ * Setup default configurations
  */
 config.setConfigurations(path.join(__dirname, 'configs.yaml'), 'utf8');
 
 /**
  * Configure here your custom levels.
- * */
+ */
 var customLevels = {
   levels: {
     error: 7,
@@ -94,25 +99,51 @@ var customLevels = {
 
 winston.emitErrs = true;
 
-module.exports.logger = new winston.Logger({
-  levels: customLevels.levels,
-  colors: customLevels.colors,
-  transports: [
-    new winston.transports.File({
-      level: config.loglevel,
-      filename: config.logfile,
-      handleExceptions: true,
-      json: false,
-      maxsize: 5242880, //5MB
-      colorize: false
-    }),
-    new winston.transports.Console({
-      level: config.loglevel,
-      handleExceptions: true,
-      json: false,
-      colorize: true,
-      timestamp: true
-    })
-  ],
-  exitOnError: false
-});
+function consoleLogger(){
+  module.exports.logger = new winston.Logger({
+    levels: customLevels.levels,
+    colors: customLevels.colors,
+    transports: [
+      new winston.transports.Console({
+        level: config.loglevel,
+        handleExceptions: true,
+        json: false,
+        colorize: true,
+        timestamp: true
+      })
+    ],
+    exitOnError: false
+  });
+}
+
+if(config.logfile != undefined){
+  try{
+    module.exports.logger = new winston.Logger({
+      levels: customLevels.levels,
+      colors: customLevels.colors,
+      transports: [
+        new winston.transports.File({
+          level: config.loglevel,
+          filename: config.logfile,
+          handleExceptions: true,
+          json: false,
+          maxsize: 5242880, //5MB
+          colorize: false
+        }),
+        new winston.transports.Console({
+          level: config.loglevel,
+          handleExceptions: true,
+          json: false,
+          colorize: true,
+          timestamp: true
+        })
+      ],
+      exitOnError: false
+    });
+  }catch(err){
+    logger.error("It was not possible to load the log file! " + err);
+    consoleLogger();
+  }
+}else{
+  consoleLogger();
+}
