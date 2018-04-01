@@ -52,6 +52,35 @@ describe('Pets', () => {
     });
   });
 
+  //Test the route: GET /pets?limit=3
+  describe('/GET pets?limit=3', () => {
+    it('it should GET the first 3 pets', (done) => {
+      chai.request(server)
+        .get('/pets?limit=3')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('Array');
+          res.body.length.should.be.eql(3);
+          done();
+        });
+    });
+  });
+
+  //Test the route: GET /unknownPath
+  describe('/GET unknownPath', () => {
+    it('it should show a message informing of unknown path', (done) => {
+      chai.request(server)
+        .get('/unknownPath')
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          res.body.message.should.be.eql("The requested path is not in the specification file");
+          done();
+        });
+    });
+  });
+
   //Test the route: GET /pets/:id
   describe('/GET/:id pets', () => {
     it('it should GET a pet by the given id', (done) => {

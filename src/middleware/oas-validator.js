@@ -203,7 +203,7 @@ exports = module.exports = function(oasDoc, appRoutes) {
       }
     } else { //In case the requested url is not in the oasDoc file, inform the user
       logger.warning("The requested path is not in the specification file");
-      res.status(400).send({
+      res.status(404).send({
         message: "The requested path is not in the specification file"
       });
     }

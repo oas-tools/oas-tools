@@ -146,6 +146,13 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
       }
     }
 
+    if (config.validator == true) {
+      app.use(OASValidatorMid());
+    }
+    if (config.router == true) {
+      app.use(OASRouterMid());
+    }
+
     callback();
   });
 };
