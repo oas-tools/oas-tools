@@ -31,90 +31,85 @@ var config = require('../configurations'),
 var deref = require('json-schema-deref');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
-  ignoreUnknownFormats: true //config.ignoreUnknownFormats
+  ignoreUnknownFormats: config.ignoreUnknownFormats
 });
 
-
 /**
- * Returns the oas version of a express like path
- * @param {object} expressVersion - Path in express version.
+ * Returns the OAS version of a Express-like path.
+ * @param {object} path - Path in Express format.
  */
-function getOASversion(path){
-  var res = "";
+function getOASversion(path) {
+  var oasVersion = "";
   for (var c in path) {
     if (path[c] == ':') {
-      res = res + '{';
+      oasVersion = oasVersion + '{';
     } else {
-      res = res + path[c];
+      oasVersion = oasVersion + path[c];
     }
   }
-  return res+'}';
+  return oasVersion + '}';
 }
 
 /**
- * Checks whether the provided specification file contains the requested url in the req value. If it contains it, then it must be checked whether the requested method is
- * specified in the specification for that requested url.
- * If this requested peer has a match in the specification file then this function returns true, otherwise it must return false.
+ * Checks whether the provided specification file contains the requested url in the req value.
+* If it contains it, then it must be checked whether the requested method is specified in the specification for that requested url.
+ * If this requested peer has a match in the specification file then this function returns this matching path, otherwise it must return undefined.
  * @param {object} paths - Portion of code in yaml containing the path section from the oasDoc file.
  * @param {string} requestedUrl - Requested url by the client. If the request had parameters in the query those won't be part of this variable.
  * @param {string} method - Method requested by the client.
- * @param {string} appRoutes - Registered routes
- * @param {string} params - Params on the requested url
+ * @param {string} appRoutes - Registered routes.
+ * @param {string} params - Params on the requested url.
  */
 function specContainsPath(paths, requestedUrl, method, appRoutes, params) {
   logger.info("Requested method-url pair: " + method + " - " + requestedUrl);
-  var res = undefined;
+  var requestedSpecPath = undefined;
   if (paths.hasOwnProperty(requestedUrl)) {
     if (paths[requestedUrl].hasOwnProperty(method)) {
-      res = requestedUrl;
+      requestedSpecPath = requestedUrl;
     }
   } else {
     for (var i = 0; i < appRoutes.length; i++) { //loop over all the paths in the oasDoc
       if (appRoutes[i].route != undefined) {
-        try{
-
+        try {
           logger.info(appRoutes[i].route.stack[0].method + " -> " + appRoutes[i].route.path + " -> " + appRoutes[i].keys[0].name);
-          if(Object.keys(appRoutes[i].keys[0]).length==Object.keys(params).length+2){
-            if(appRoutes[i].route.stack[0].method == method){
-              res = getOASversion(appRoutes[i].route.path);
+          if (Object.keys(appRoutes[i].keys[0]).length == Object.keys(params).length + 2) {
+            if (appRoutes[i].route.stack[0].method == method) {
+              requestedSpecPath = getOASversion(appRoutes[i].route.path);
               break;
             }
           }
-        }catch(err){
+        } catch (err) {
           logger.info(appRoutes[i].route.stack[0].method + " -> " + appRoutes[i].route.path + " -> (no parameters)");
         }
       }
     }
   }
-  console.log("RETURN: " + res)
-  return res;
+  return requestedSpecPath;
 }
 
 /**
  * Returns the Express version of the OAS name for location.
- * @param {string} req - The whole req object from the client request.
+ * @param {string} location - Location of a parameter. 'in' of the oasDoc file for that parameter.
  */
 function locationFormat(location) {
-  var res = location;
+  var expressLocation = location;
   if (location == "path") {
-    res = "params";
+    expressLocation = "params";
   }
-  return res;
+  return expressLocation;
 }
 
 /**
- * Checks if the data provided in the request is valid acording to what is specified in the oas specification file
- * @param {object} paths - Portion of code in yaml containing the path section from the oasDoc file.
+ * Checks if the data provided in the request is valid acording to what is specified in the oas specification file.
+ * @param {object} paths - Paths section of the oasDoc file.
  * @param {string} requestedUrl - Requested url by the client. If the request had parameters in the query those won't be part of this variable.
  * @param {string} method - Method requested by the client.
  * @param {string} req - The whole req object from the client request.
  */
 function checkRequestData(paths, requestedUrl, method, req) {
-  console.log("En valor de requestedUrl en checkRequestData: " + requestedUrl)
-  var res = [];
+  var missingOrWrongParameters = [];
   var missingParameters = [];
   var wrongParameters = [];
-  console.log("VALOR DE requestedUrl EN checkRequestData: " + requestedUrl)
   if (paths[requestedUrl][method].hasOwnProperty('parameters')) {
     var params = paths[requestedUrl][method]['parameters'];
     for (var i = 0; i < params.length; i++) {
@@ -128,7 +123,8 @@ function checkRequestData(paths, requestedUrl, method, req) {
 
         if (req[location][name] == undefined) { //if the request is missing a required parameter acording to the oasDoc: warning
           missingParameters.push([name, location]);
-        } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
+        }
+        else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
           try {
             var value = JSON.parse(req[location][name]);
           } catch (err) {
@@ -136,7 +132,6 @@ function checkRequestData(paths, requestedUrl, method, req) {
           }
           validator.validate(value, schema, function(err, valid) {
             if (err) {
-              console.log("ERROR AL VALIDAR: " + value + " CON " + JSON.stringify(schema));
               wrongParameters.push(name);
               if (Array.isArray(err)) {
                 err = err[0];
@@ -148,7 +143,8 @@ function checkRequestData(paths, requestedUrl, method, req) {
               }
               console.log(err)
               throw new Error(err.message);
-            } else {
+            }
+            else {
               logger.info("Valid parameter on request");
             }
           });
@@ -156,16 +152,16 @@ function checkRequestData(paths, requestedUrl, method, req) {
       }
     }
   }
-  res.push(missingParameters);
-  res.push(wrongParameters);
-  return res;
+  missingOrWrongParameters.push(missingParameters);
+  missingOrWrongParameters.push(wrongParameters);
+  return missingOrWrongParameters;
 }
 
 /**
  * Returns a string containing all the warnings/errors from the validation.
- * @param {object} missingOrWrongParameters - Array containing the missing and wrong parameters on the request acording to the specification file
+ * @param {object} missingOrWrongParameters - Array containing the missing and wrong parameters on the request acording to the specification file.
  */
-function errorsToString(missingOrWrongParameters, res) {
+function errorsToString(missingOrWrongParameters) {
   var msg = "";
   if (missingOrWrongParameters[0].length > 0) {
     msg = msg + "The following parameters were required but weren't sent in the request: " + missingOrWrongParameters[0];
@@ -181,17 +177,15 @@ exports = module.exports = function(oasDoc, appRoutes) {
 
   return function OASValidator(req, res, next) {
 
-    var msg;
     var requestedUrl = req.url.split("?")[0]; //allows requests with parameters in the query
-
-    var method = req.method.toLowerCase();
     res.locals.requestedUrl = requestedUrl;
-    var reqPath = specContainsPath(oasDoc.paths, requestedUrl, method, appRoutes, req.params); //TODO: use here baseUrl or the whole requested url?
-    res.locals.reqPath = reqPath;
+    var method = req.method.toLowerCase();
+    var requestedSpecPath = specContainsPath(oasDoc.paths, requestedUrl, method, appRoutes, req.params);
 
-    if (reqPath != undefined) { //In case the oasDoc file contains the requested pair method-url: validate the request parameters
-      var missingOrWrongParameters = checkRequestData(oasDoc.paths, reqPath, method, req);
-      msg = errorsToString(missingOrWrongParameters, res);
+    if (requestedSpecPath != undefined) { //In case the oasDoc file contains the requested pair method-url: validate the request parameters
+      res.locals.requestedSpecPath = requestedSpecPath;
+      var missingOrWrongParameters = checkRequestData(oasDoc.paths, requestedSpecPath, method, req);
+      var msg = errorsToString(missingOrWrongParameters);
       if (msg.length > 0) {
         if (config.strict == true) {
           logger.error(msg);

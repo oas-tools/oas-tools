@@ -6,6 +6,7 @@ production:
   strict: false
   router: true
   validator: true
+  ignoreUnknownFormats: true
 
 development:
   loglevel: debug
@@ -14,6 +15,7 @@ development:
   controllers: '../../tests/testServer/controllers' #once I find out how to use user's index.js __dirname in my module's index.js I must remove this line
   router: true
   validator: true
+  ignoreUnknownFormats: true
 
 
 # loglevel: info -> prints all but debug logs

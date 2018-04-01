@@ -146,15 +146,6 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
       }
     }
 
-    /*
-    for (var i = 0; i < app._router.stack.length; i++) {
-      if (app._router.stack[i].route != undefined) {
-        console.log(app._router.stack[i].route.stack[0].method + " -> " + app._router.stack[i].route.path)
-        console.log("---------------------------------")
-      }
-    }
-    */
-
     callback();
   });
 };
