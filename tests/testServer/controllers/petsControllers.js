@@ -19,6 +19,11 @@ var pets = [{
     id: 4,
     name: "Bat",
     tag: "Ozzy's breakfast"
+  },
+  {
+    id: 10,
+    name: "Pig",
+    tag: "Looking for mud"
   }
 ];
 
@@ -26,12 +31,15 @@ var pets = [{
  *  Creates a pet
  */
 exports.createPets = function(args, res, next) {
-
-  if (args.body != undefined) {
-    pets.push(args.body);
-    res.status(201).send("New pet created");
+  console.log("///qué hay en args.body: " + JSON.stringify(args.body))
+  if (!args.body.id && !args.body.tag && !args.body.name) {
+    res.status(400).send({
+      code: 400,
+      message: "No pet was sent in the body of the request"
+    });
   } else {
-    res.status(201).send("No pet was sent in the body of the request");
+    pets.push(args.body);
+    res.status(201).send(pets);
   }
 }
 
@@ -47,13 +55,12 @@ exports.listPets = function(args, res, next) {
  */
 exports.showPetById = function(args, res, next) {
   var res_pet;
-  for (var i = 0; i<pets.length; i++) {
+  for (var i = 0; i < pets.length; i++) {
     if (pets[i].id == args.params.petId) {
       res_pet = pets[i];
       break;
     }
   }
-  console.log(res_pet)
   if (res_pet == undefined) {
     res.status(404).send({
       message: "There is no pet with id " + args.params.petId
@@ -79,7 +86,7 @@ exports.deletePet = function(args, res, next) {
     });
   } else {
     pets.splice(index, 1);
-    res.status(200).send();
+    res.status(204).send(); //{message: "Pet successfully deleted!"}
   }
 }
 
@@ -88,7 +95,7 @@ exports.deletePet = function(args, res, next) {
  */
 exports.deletePets = function(args, res, next) {
   pets.splice(0, pets.length);
-  res.status(200).send();
+  res.status(204).send(); //{message: "All pets successfully deleted!"}
 }
 
 /**
@@ -100,9 +107,14 @@ exports.updatePet = function(args, res, next) {
     if (pets[i].id == args.params.petId) {
       if (args.body != undefined) {
         pets[i] = args.body;
-        res.status(201).send("Updated pet");
+        res.status(200).send({
+          message: "Updated pet"
+        });
       } else {
-        res.status(201).send("No pet was sent in the body of the update request");
+        res.status(400).send({
+          code: 400,
+          message: "No pet was sent in the body of the update request"
+        });
       }
     }
   }

@@ -2,7 +2,7 @@
 
 production:
   loglevel: info
-  logfile: './logs/pro-logs.log'
+  #logfile: './logs/pro-logs.log'
   strict: false
   router: true
   validator: true
@@ -10,7 +10,7 @@ production:
 
 development:
   loglevel: debug
-  logfile: './logs/dev-logs.log'
+  #logfile: './logs/dev-logs.log'
   strict: false
   controllers: '../../tests/testServer/controllers' #once I find out how to use user's index.js __dirname in my module's index.js I must remove this line
   router: true

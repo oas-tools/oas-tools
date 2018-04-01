@@ -210,6 +210,7 @@ exports = module.exports = function(controllers) {
     var oldSend = res.send;
     res.send = function(data) { //intercept the response from the controller to check and validate it
       arguments[0] = JSON.stringify(arguments[0]); //Avoids res.send being executed twice: https://stackoverflow.com/questions/41489528/why-is-res-send-being-called-twice
+      res.header("Content-Type", "application/json;charset=utf-8");
       checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, arguments);
     }
     executeFunctionByName(opID, controller, req, res, next);

@@ -30,6 +30,11 @@ describe('Pets', () => {
       id: 4,
       name: "Bat",
       tag: "Ozzy's breakfast"
+    },
+    {
+      id: 10,
+      name: "Pig",
+      tag: "Looking for mud"
     }
   ];
 
@@ -39,7 +44,6 @@ describe('Pets', () => {
       chai.request(server)
         .get('/pets')
         .end((err, res) => {
-          console.log("QUÉ HAY EN RES: " + JSON.stringify(res.text));
           res.should.have.status(200);
           res.body.should.be.a('Array');
           res.body.length.should.be.eql(auxRequire.pets.length);
@@ -51,64 +55,54 @@ describe('Pets', () => {
   //Test the route: GET /pets/:id
   describe('/GET/:id pets', () => {
     it('it should GET a pet by the given id', (done) => {
-      let pet = new Pet({
+      let pet = { //pet already contained in the pets array
         id: 10,
         name: "Pig",
         tag: "Looking for mud"
-      });
-      console.log("CREATED PET: " + pet)
-      pet.save((err, pet) => {
-        chai.request(server)
-          .get('/pets/' + pet.id)
-          .send(pet)
-          .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.a('object');
-            res.body.should.have.property('id');
-            res.body.should.have.property('name');
-            res.body.should.have.property('tag');
-            res.body.should.have.property('id').eql(pet.id);
-            done();
-          });
-      });
+      };
+      chai.request(server)
+        .get('/pets/' + pet.id)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('id');
+          res.body.should.have.property('name');
+          res.body.should.have.property('tag');
+          res.body.should.have.property('id').eql(pet.id);
+          res.body.should.have.property('name').eql(pet.name);
+          res.body.should.have.property('tag').eql(pet.tag);
+          done();
+        });
     });
   });
 
   //Test the route: POST /pets
   describe('/POST pets', () => {
-    it('it should not POST a pet without tag field', (done) => { //tag is not required actually...and besides that, this depends on the value of strict!
+    it('it should POST a pet ', (done) => {
       let pet = {
         id: 11,
-        name: "Pig",
+        name: "Frog",
+        tag: "Green animal"
       }
+      var prePostSize = auxRequire.pets.length;
       chai.request(server)
         .post('/pets')
         .send(pet)
         .end((err, res) => {
           res.should.have.status(201);
-          res.body.should.be.a('object');
-          res.body.should.have.property('errors');
-          res.body.errors.should.have.property('pages');
-          res.body.errors.pages.should.have.property('kind').eql('required');
+          res.body.should.be.a('Array');
+          res.body.length.should.be.eql(prePostSize + 1);
           done();
         });
     });
-    it('it should POST a pet ', (done) => {
-      let pet = {
-        id: 10,
-        name: "Pig",
-        tag: "Looking for mud"
-      }
+    it('it should not accept a POST request without a pet in the body', (done) => {
       chai.request(server)
         .post('/pets')
-        .send(pet)
         .end((err, res) => {
-          res.should.have.status(201);
+          res.should.have.status(400);
           res.body.should.be.a('object');
-          res.body.should.have.property('message').eql('Pet successfully added!');
-          res.body.pet.should.have.property('id');
-          res.body.pet.should.have.property('name');
-          res.body.pet.should.have.property('tag');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
           done();
         });
     });
@@ -117,27 +111,25 @@ describe('Pets', () => {
   //Test the route: PUT /pets/:id
   describe('/PUT/:id pet', () => {
     it('it should UPDATE a pet given the id', (done) => {
-      let pet = new Pet({
+      var pet = {
         id: 10,
         name: "Pig",
-        tag: "Pet updated by the mocha+chai test"
-      });
-      pet.save((err, pet) => {
-        chai.request(server)
-          .put('/pets/' + pet.id)
-          .send({
-            id: 10,
-            name: "Pig",
-            tag: "Nothing"
-          })
-          .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.a('object');
-            res.body.should.have.property('message').eql('Pet updated!');
-            res.body.book.should.have.property('tag').eql("Nothing");
-            done();
-          });
-      });
+        tag: "Looking for mud"
+      };
+      chai.request(server)
+        .put('/pets/' + pet.id)
+        .send({
+          id: 10,
+          name: "Pig",
+          tag: "Pet updated by the mocha+chai test"
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          res.body.message.should.be.eql("Updated pet");
+          done();
+        });
     });
   });
 
@@ -149,36 +141,29 @@ describe('Pets', () => {
         name: "Pig",
         tag: "Looking for mud"
       });
-      pet.save((err, pet) => {
         chai.request(server)
           .delete('/pets/' + pet.id)
           .end((err, res) => {
             res.should.have.status(204);
-            res.body.should.be.a('object');
-            res.body.should.have.property('message').eql('Pet successfully deleted!');
-            res.body.result.should.have.property('ok').eql(1);
-            res.body.result.should.have.property('n').eql(1);
+            /*res.body.should.be.a('object');
+            res.body.should.have.property('message').eql('Pet successfully deleted!');*/
             done();
           });
-      });
     });
   });
 
   //Test the route: DELETE /pets
   describe('/DELETE pets', () => {
     it('it should DELETE all pets', (done) => {
-      pet.save((err, pet) => {
         chai.request(server)
           .delete('/pets')
           .end((err, res) => {
             res.should.have.status(204);
-            res.body.should.be.a('object');
-            res.body.should.have.property('message').eql('All pets successfully deleted!');
-            res.body.result.should.have.property('ok').eql(1);
-            res.body.result.should.have.property('n').eql(1);
+            /*res.body.should.be.a('object');
+            res.body.should.have.property('message').eql('All pets successfully deleted!');*/
             done();
           });
-      });
     });
   });
+
 });
