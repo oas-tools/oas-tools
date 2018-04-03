@@ -79,7 +79,7 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
   logger.debug("  -oasDoc: " + oasDoc);
   logger.debug("  -method: " + method);
   logger.debug("  -requestedSpecPath: " + requestedSpecPath);
-  logger.debug("  -data: " + data);
+  logger.debug("  -data: " + JSON.parse(data));
   var responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses[code]; //Section of the oasDoc file starting at a response code
   if (responseCodeSection == undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
     msg = msg + "Wrong response code: " + code;
@@ -100,13 +100,14 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
       var data = JSON.parse(data); //Without this everything is string so type validation wouldn't happen
       validator.validate(data, validSchema, function(err, valid) {
         if (err) {
-          msg = msg + "Wrong data in the response. " + processErr(err) + "\n" + JSON.stringify(data);
+          msg = msg + "Wrong data in the response. " + processErr(err)
         }
         if (msg.length > 0) {
           if (config.strict == true) {
             logger.error(msg);
             content[0] = JSON.stringify({
-              message: msg
+              message: msg,
+              content: data
             });
             oldSend.apply(res, content);
           } else {

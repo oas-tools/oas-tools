@@ -63,8 +63,9 @@ function _setConfigurations(options, encoding) {
     newConfigurations = options;
   }
 
-  if(newConfigurations.controllers == undefined){
-    console.log("'controllers': path.join(__dirnameOfUsersIndexJS, './controllers')");
+  if(newConfigurations.controllers == undefined){ //TODO: Fix this!
+    newConfigurations.controllers = path.join(process.cwd(), './controllers'); //when doing 'node index.js'
+    //newConfigurations.controllers = path.join(process.cwd(), './testServer/controllers'); //when doing 'npm tests' and test file is not where index.js is
   }
   //If newConfigurations does indeed contain 'controllers', it will be initialized inside the following lop:
   for (var c in newConfigurations) {
@@ -117,7 +118,6 @@ function consoleLogger(){
 }
 
 if(config.logfile != undefined){
-  try{
     module.exports.logger = new winston.Logger({
       levels: customLevels.levels,
       colors: customLevels.colors,
@@ -140,10 +140,6 @@ if(config.logfile != undefined){
       ],
       exitOnError: false
     });
-  }catch(err){
-    logger.error("It was not possible to load the log file! " + err);
-    consoleLogger();
-  }
 }else{
   consoleLogger();
 }

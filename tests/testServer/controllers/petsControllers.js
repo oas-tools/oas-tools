@@ -16,22 +16,21 @@ var pets = [{
     tag: "Eats carrots"
   },
   {
-    id: 4,
-    name: "Bat",
-    tag: "Ozzy's breakfast"
-  },
-  {
     id: 10,
     name: "Pig",
     tag: "Looking for mud"
+  },
+  {
+    id: 11,
+    name: "Bat",
+    tag: "At night"
   }
 ];
 
 /**
- *  Creates a pet
+ *  Creates a pet: Here the controller should not check whether there is a pet in the request body, that must be done by oas-tools!
  */
 exports.createPets = function(args, res, next) {
-  console.log("///qué hay en args.body: " + JSON.stringify(args.body))
   if (!args.body.id && !args.body.tag && !args.body.name) {
     res.status(400).send({
       code: 400,
@@ -99,12 +98,13 @@ exports.deletePets = function(args, res, next) {
 }
 
 /**
- *  Updates a pet
+ *  Updates a pet: Here the controller should not check whether there is a pet in the request body, that must be done by oas-tools!
  */
 exports.updatePet = function(args, res, next) {
-  var index = -1;
+  var present = false;
   for (var i = 0; i < pets.length; i++) {
     if (pets[i].id == args.params.petId) {
+      present = true;
       if (args.body != undefined) {
         pets[i] = args.body;
         res.status(200).send({
@@ -117,6 +117,10 @@ exports.updatePet = function(args, res, next) {
         });
       }
     }
+  }if(present==false){
+    res.status(404).send({
+      message: "There is no pet with id " + args.params.petId
+    });
   }
 }
 

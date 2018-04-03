@@ -34,4 +34,11 @@ oasTools.initializeMiddleware(oasDoc, app, function() {
   });
 });
 
+app.get('/info', function(req, res) {
+  res.send({
+    infoDE: "Diese ist eine sehr einfach API die benutzt unsere oas-tools module!",
+    infoEN: "This is a very simple API that uses the oas-tools Module!"
+  });
+});
+
 module.exports = app;

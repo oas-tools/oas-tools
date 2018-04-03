@@ -44,6 +44,13 @@ paths:
       operationId: createPets
       tags:
         - pets
+      requestBody:
+        description: Pet to add to the store
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
       responses:
         '201':
           description: Update status
@@ -102,13 +109,20 @@ paths:
       description: updates a pet based on its petId
       operationId: updatePet
       parameters:
-          - name: id
+          - name: petId
             in: path
             description: ID of pet to update
             required: true
             schema:
               type: integer
               format: int64
+      requestBody:
+        description: Pet to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
       responses:
           '200':
             description: pet updated
