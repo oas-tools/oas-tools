@@ -279,7 +279,6 @@ function deleteTests() {
     });
   });
 
-  /*
   //Test the route: DELETE /pets
   describe('/DELETE pets', () => {
     it('it should DELETE all pets', (done) => {
@@ -293,8 +292,6 @@ function deleteTests() {
           });
     });
   });
-  */
-
 }
 
 describe('Pets', () => {
