@@ -2,7 +2,7 @@ This repository contains the code being developed for the coming oas-tools npm m
 
 The folder oas-tools inside /src contains the project as a npm module, ready to be placed inside node_modules and used.
 
-The folder example inside /tests contains a very simple NodeJS application that uses the developed module.
+The folder testServer inside /tests contains a very simple NodeJS application that uses the developed module.
 
 ## Latest release
 
@@ -18,7 +18,7 @@ For running:
 
 **OAS-tools module** is open-source software available under the GNU General Public License (GPL) version 3 (GPL v3).
 
-All including documentation and code are copyrighted and the copyright is owned by [ISA Group](http://www.isa.us.es), 
+All including documentation and code are copyrighted and the copyright is owned by [ISA Group](http://www.isa.us.es),
 [University of Sevilla](http://www.us.es), unauthorized reproduction or distribution of this copyrighted work is illegal.
 For commercial licensing terms, please [contact](./extra/contact.md) for any inquiry.
 
