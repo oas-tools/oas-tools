@@ -64,8 +64,8 @@ function _setConfigurations(options, encoding) {
   }
 
   if(newConfigurations.controllers == undefined){ //TODO: Fix this!
-    newConfigurations.controllers = path.join(process.cwd(), './controllers'); //when doing 'node index.js'
-    //newConfigurations.controllers = path.join(process.cwd(), './testServer/controllers'); //when doing 'npm tests' and test file is not where index.js is
+    //newConfigurations.controllers = path.join(process.cwd(), './controllers'); //when doing 'node index.js'
+    newConfigurations.controllers = path.join(process.cwd(), './testServer/controllers'); //when doing 'npm tests' and test file is not where index.js is
   }
   //If newConfigurations does indeed contain 'controllers', it will be initialized inside the following lop:
   for (var c in newConfigurations) {

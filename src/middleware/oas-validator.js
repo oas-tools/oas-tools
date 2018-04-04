@@ -85,7 +85,7 @@ function checkRequestData(paths, requestedSpecPath, method, res, req, callback) 
     var requestBody = paths[requestedSpecPath][method]['requestBody'];
 
     if (requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
-      if (req.body == undefined) {
+      if (req.body == undefined || JSON.stringify(req.body) == '{}') {
         var msg = "Missing object in the request body";
         if (config.strict == true) {
           logger.error(msg);

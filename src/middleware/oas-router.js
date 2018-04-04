@@ -79,7 +79,7 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
   logger.debug("  -oasDoc: " + oasDoc);
   logger.debug("  -method: " + method);
   logger.debug("  -requestedSpecPath: " + requestedSpecPath);
-  logger.debug("  -data: " + JSON.parse(data));
+  logger.debug("  -data: " + data);
   var responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses[code]; //Section of the oasDoc file starting at a response code
   if (responseCodeSection == undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
     msg = msg + "Wrong response code: " + code;
@@ -109,6 +109,9 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
               message: msg,
               content: data
             });
+            //res.status(400).send(content);
+            res.status(400);
+            //res.statusCode = 400;
             oldSend.apply(res, content);
           } else {
             logger.warning(msg);

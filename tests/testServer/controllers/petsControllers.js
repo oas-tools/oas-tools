@@ -1,7 +1,7 @@
 'use strict';
 
 var pets = [{
-    id: 1,
+    id: "1",
     name: "Wolf",
     tag: "Barks at the moon"
   },
@@ -21,25 +21,22 @@ var pets = [{
     tag: "Looking for mud"
   },
   {
-    id: 11,
+    //id: 11,
     name: "Bat",
     tag: "At night"
   }
 ];
 
+function setCorrectPets(newPets) {
+  pets = newPets;
+}
+
 /**
  *  Creates a pet: Here the controller should not check whether there is a pet in the request body, that must be done by oas-tools!
  */
 exports.createPets = function(args, res, next) {
-  if (!args.body.id && !args.body.tag && !args.body.name) {
-    res.status(400).send({
-      code: 400,
-      message: "No pet was sent in the body of the request"
-    });
-  } else {
-    pets.push(args.body);
-    res.status(201).send(pets);
-  }
+  pets.push(args.body);
+  res.status(201).send(pets);
 }
 
 /**
@@ -117,7 +114,8 @@ exports.updatePet = function(args, res, next) {
         });
       }
     }
-  }if(present==false){
+  }
+  if (present == false) {
     res.status(404).send({
       message: "There is no pet with id " + args.params.petId
     });
@@ -125,3 +123,4 @@ exports.updatePet = function(args, res, next) {
 }
 
 exports.pets = pets;
+exports.setCorrectPets = setCorrectPets;

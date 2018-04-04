@@ -9,21 +9,21 @@ var auxRequire = require('./testServer/controllers/petsControllers.js');
 
 
 function getTests() {
-  //Test the route: GET /pets
-  describe('/GET pets?limit=10', () => {
-    it('it shouldn´t GET all the pets but show a message with errors (missing or wrong parameters)', (done) => {
+  describe('/GET pets', () => {
+
+    it('it should get and error informing the required parameter limit was not specified in the query', (done) => {
       chai.request(server)
-        .get('/pets?limit=10')
+        .get('/pets')
         .end((err, res) => {
           res.should.have.status(400);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
-          res.body.message.should.contain("Wrong data in the response");
+          res.body.message.should.contain("Missing parameter limit in query");
           done();
         });
     });
 
-    auxRequire.pets = [{ //now all pets are valid: match types and contain all required parameters
+    var newPets = [{
         id: 1,
         name: "Wolf",
         tag: "Barks at the moon"
@@ -50,9 +50,22 @@ function getTests() {
       }
     ];
 
+    it('it shouldn´t GET all the pets but show a message with errors (missing/wrong parameters)', (done) => {
+      chai.request(server)
+        .get('/pets?limit=10')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          res.body.message.should.contain("Wrong data in the response");
+          auxRequire.setCorrectPets(newPets);
+          done();
+        });
+    });
+
     it('it should GET all the pets', (done) => {
       chai.request(server)
-        .get('/pets')
+        .get('/pets?limit=' + auxRequire.pets.length)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('Array');
@@ -60,10 +73,7 @@ function getTests() {
           done();
         });
     });
-  });
 
-  //Test the route: GET /pets?limit=3
-  describe('/GET pets?limit=3', () => {
     it('it should GET the first 3 pets', (done) => {
       chai.request(server)
         .get('/pets?limit=3')
@@ -74,27 +84,9 @@ function getTests() {
           done();
         });
     });
-  });
 
-  //Test the route: GET /unknownPath
-  describe('/GET unknownPath', () => {
-    it('it should show a message informing of unknown path', (done) => {
-      chai.request(server)
-        .get('/unknownPath')
-        .end((err, res) => {
-          res.should.have.status(404);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
-          res.body.message.should.be.eql("The requested path is not in the specification file");
-          done();
-        });
-    });
-  });
-
-  //Test the route: GET /pets/:id
-  describe('/GET/:id pets', () => {
     it('it should GET a pet by the given id', (done) => {
-      let pet = { //pet already contained in the pets array
+      let pet = {
         id: 10,
         name: "Pig",
         tag: "Looking for mud"
@@ -113,18 +105,15 @@ function getTests() {
           done();
         });
     });
-  });
 
-  //Test the route: GET /pets/:id
-  describe('/GET/:id pets', () => {
-    it('it should not GET a pet by an id of type string instead of integer', (done) => { //TODO: It must receive the error from the validator!
+    it('it should not GET a pet by an id of type string instead of integer', (done) => {
       chai.request(server)
         .get('/pets/badId')
         .end((err, res) => {
-          res.should.have.status(200);
+          res.should.have.status(400);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
-          res.body.message.should.be.eql("The following parameters were not of the right type: petId");
+          res.body.message.should.contain("Wrong parameter petId in params");
           done();
         });
     });
@@ -132,7 +121,6 @@ function getTests() {
 }
 
 function postTests() {
-  //Test the route: POST /pets
   describe('/POST pets', () => {
     it('it should POST a pet ', (done) => {
       let pet = {
@@ -157,9 +145,8 @@ function postTests() {
         .end((err, res) => {
           res.should.have.status(400);
           res.body.should.be.a('object');
-          res.body.should.have.property('code');
           res.body.should.have.property('message');
-          res.body.message.should.be.eql("No pet was sent in the body of the request");
+          res.body.message.should.be.eql("Missing object in the request body");
           done();
         });
     });
@@ -176,7 +163,6 @@ function postTests() {
           res.should.have.status(400);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
-          //res.body.message.should.be.eql("Parameter of wrong type");
           done();
         });
     });
@@ -192,17 +178,13 @@ function postTests() {
           res.should.have.status(400);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
-          //res.body.message.should.be.eql("Parameter missing");
           done();
         });
     });
-
   });
-
 }
 
 function putTests() {
-  //Test the route: PUT /pets/:id
   describe('/PUT/:id pet', () => {
     it('it should UPDATE a pet given the id', (done) => {
       var pet = {
@@ -233,7 +215,6 @@ function putTests() {
           res.should.have.status(400);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
-          //res.body.message.should.be.eql("Parameter missing");
           done();
         });
     });
@@ -250,7 +231,7 @@ function putTests() {
           res.should.have.status(400);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
-          //res.body.message.should.be.eql("Wrong parameter type");
+          deleteTests();
           done();
         });
     });
@@ -259,8 +240,6 @@ function putTests() {
 }
 
 function deleteTests() {
-
-  //Test the route: DELETE /pets/:id
   describe('/DELETE/:id pets', () => {
     it('it should DELETE a pet given the id', (done) => {
       let pet = new Pet({
@@ -272,31 +251,23 @@ function deleteTests() {
         .delete('/pets/' + pet.id)
         .end((err, res) => {
           res.should.have.status(204);
-          /*res.body.should.be.a('object');
-          res.body.should.have.property('message').eql('Pet successfully deleted!');*/
           done();
         });
     });
   });
 
-  //Test the route: DELETE /pets
-  describe('/DELETE pets', () => {
-    it('it should DELETE all pets', (done) => {
-        chai.request(server)
-          .delete('/pets')
-          .end((err, res) => {
-            res.should.have.status(204);
-            //res.body.should.be.a('object');
-            //res.body.should.have.property('message').eql('All pets successfully deleted!');
-            done();
-          });
-    });
+  it('it should DELETE all pets', (done) => {
+    chai.request(server)
+      .delete('/pets')
+      .end((err, res) => {
+        res.should.have.status(204);
+        done();
+      });
   });
 }
 
 describe('Pets', () => {
   getTests();
-  //postTests();
-  //putTests();
-  //deleteTests();
+  postTests();
+  putTests();
 });
