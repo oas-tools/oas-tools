@@ -117,6 +117,18 @@ function getTests() {
           done();
         });
     });
+    it('it should not GET a pet by an id that does not exist in the DB', (done) => {
+      var someId = 666;
+      chai.request(server)
+        .get('/pets/' + someId)
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          res.body.message.should.be.eql("There is no pet with id " + someId);
+          done();
+        });
+    });
   });
 }
 
@@ -235,12 +247,30 @@ function putTests() {
           done();
         });
     });
+    it('it should not update a pet whose id does not exist in the DB', (done) => {
+      var someId = 666;
+      var pet = {
+        id: 90,
+        name: "Useless",
+        tag: "This is here just to avoid another error"
+      };
+      chai.request(server)
+        .put('/pets/' + someId)
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          res.body.message.should.be.eql("There is no pet with id " + someId);
+          done();
+        });
+    });
   });
 
 }
 
 function deleteTests() {
-  describe('/DELETE/:id pets', () => {
+  describe('/DELETE pets', () => {
     it('it should DELETE a pet given the id', (done) => {
       let pet = new Pet({
         id: 10,
@@ -254,20 +284,46 @@ function deleteTests() {
           done();
         });
     });
-  });
-
-  it('it should DELETE all pets', (done) => {
-    chai.request(server)
-      .delete('/pets')
-      .end((err, res) => {
-        res.should.have.status(204);
-        done();
-      });
+    it('Should show an error message when trying to delete an object that does not exist in the DB', (done) => {
+      var someId = 666;
+      chai.request(server)
+        .delete('/pets/' + someId)
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          res.body.message.should.be.eql("There is no pet with id " + someId + " to be deleted");
+          done();
+        });
+    });
+    it('Before deleting all pets...it should GET all the pets: all of them matching oas-doc constraints', (done) => {
+      chai.request(server)
+        .get('/pets?limit=' + auxRequire.pets.length)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('Array');
+          res.body.length.should.be.eql(auxRequire.pets.length);
+          done();
+        });
+    });
+    it('it should DELETE all pets and then send GET request to check length==0', (done) => {
+      chai.request(server)
+        .delete('/pets')
+        .end((err, res) => {
+          res.should.have.status(204);
+          chai.request(server).get('/pets?limit=10').end((err,res)=> {
+            res.should.have.status(200);
+            res.body.should.be.a('Array');
+            res.body.length.should.be.eql(0);
+          });
+          done();
+        });
+    });
   });
 }
 
 describe('Pets', () => {
   getTests();
   postTests();
-  putTests();
+  putTests(); //this one calls deletePets()
 });

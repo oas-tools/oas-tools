@@ -102,17 +102,14 @@ exports.updatePet = function(args, res, next) {
   for (var i = 0; i < pets.length; i++) {
     if (pets[i].id == args.params.petId) {
       present = true;
-      if (args.body != undefined) {
-        pets[i] = args.body;
-        res.status(200).send({
-          message: "Updated pet"
-        });
-      } else {
-        res.status(400).send({
-          code: 400,
-          message: "No pet was sent in the body of the update request"
-        });
-      }
+      pets[i] = args.body;
+      res.status(200).send({
+        message: "Updated pet"
+      });
+      res.status(400).send({
+        code: 400,
+        message: "No pet was sent in the body of the update request"
+      });
     }
   }
   if (present == false) {

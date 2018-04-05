@@ -76,7 +76,9 @@ function locationFormat(location) {
  * @param {string} method - Method requested by the client.
  * @param {string} req - The whole req object from the client request.
  */
-function checkRequestData(paths, requestedSpecPath, method, res, req, callback) {
+function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
+  var paths = oasDoc.paths;
+  var keepGoing = true;
   var missingOrWrongParameters = [];
   var missingParameters = [];
   var wrongParameters = [];
@@ -89,6 +91,7 @@ function checkRequestData(paths, requestedSpecPath, method, res, req, callback) 
         var msg = "Missing object in the request body";
         if (config.strict == true) {
           logger.error(msg);
+          keepGoing = false;
           res.status(400).send({ //TODO: it must send bad request
             message: msg
           });
@@ -102,6 +105,7 @@ function checkRequestData(paths, requestedSpecPath, method, res, req, callback) 
         var err = validator.validate(data, validSchema);
         //validator.validate(data, validSchema, function(err, valid) {
         if (err == false) {
+          keepGoing = false;
           if (Array.isArray(err)) {
             err = err[0];
           }
@@ -137,6 +141,7 @@ function checkRequestData(paths, requestedSpecPath, method, res, req, callback) 
           var msg = "Missing parameter " + name + " in " + location;
           if (config.strict == true) {
             logger.error(msg);
+            keepGoing = false;
             res.status(400).send({ //TODO: it must send bad request
               message: msg
             });
@@ -152,6 +157,7 @@ function checkRequestData(paths, requestedSpecPath, method, res, req, callback) 
           var err = validator.validate(value, schema);
           //validator.validate(value, schema, function(err, valid) {
           if (err == false) {
+            keepGoing = false;
             if (Array.isArray(err)) {
               err = err[0];
             }
@@ -177,7 +183,10 @@ function checkRequestData(paths, requestedSpecPath, method, res, req, callback) 
       }
     }
   }
-  callback();
+  if(keepGoing == true){
+    res.locals.oasDoc = oasDoc;
+    next();
+  }
 }
 
 exports = module.exports = function(oasDoc, appRoutes) {
@@ -191,9 +200,6 @@ exports = module.exports = function(oasDoc, appRoutes) {
     var requestedSpecPath = getOASversion(req.route.path);
 
     res.locals.requestedSpecPath = requestedSpecPath;
-    checkRequestData(oasDoc.paths, requestedSpecPath, method, res, req, function() {
-      res.locals.oasDoc = oasDoc;
-      next();
-    });
+    checkRequestData(oasDoc, requestedSpecPath, method, res, req, next);
   }
 }

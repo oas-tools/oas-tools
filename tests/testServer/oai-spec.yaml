@@ -98,6 +98,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Pet"
+        '404':
+          description: pet not found
         default:
           description: unexpected error
           content:
@@ -126,6 +128,8 @@ paths:
       responses:
           '200':
             description: pet updated
+          '404':
+            description: pet not found
           default:
             description: unexpected error
             content:
@@ -146,6 +150,8 @@ paths:
       responses:
         '204':
           description: pet deleted
+        '404':
+          description: pet not found
         default:
           description: unexpected error
           content:
