@@ -26,7 +26,8 @@ var config = require('../configurations'),
   logger = config.logger;
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
-  ignoreUnknownFormats: true
+  ignoreUnknownFormats: config.ignoreUnknownFormats,
+  assumeAdditional: true
 });
 var controllers;
 

@@ -1,5 +1,3 @@
-let mongoose = require("mongoose");
-let Pet = require('./testServer/model/pet');
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('./testServer');
@@ -19,6 +17,17 @@ function getTests() {
           res.body.should.be.a('object');
           res.body.should.have.property('message');
           res.body.message.should.contain("Missing parameter limit in query");
+          done();
+        });
+    });
+    it('it should get and error informing the required parameter limit was not of the right type', (done) => {
+      chai.request(server)
+        .get('/pets?limit=pepe')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          res.body.message.should.contain("Wrong parameter limit in query");
           done();
         });
     });
@@ -47,6 +56,11 @@ function getTests() {
         id: 10,
         name: "Pig",
         tag: "Looking for mud"
+      },
+      {
+        id: 200,
+        name: "AnimalZ",
+        tag: "It is not wrong anymore"
       }
     ];
 
@@ -86,7 +100,7 @@ function getTests() {
     });
 
     it('it should GET a pet by the given id', (done) => {
-      let pet = {
+      var pet = {
         id: 10,
         name: "Pig",
         tag: "Looking for mud"
@@ -134,13 +148,13 @@ function getTests() {
 
 function postTests() {
   describe('/POST pets', () => {
+    var prePostSize = auxRequire.pets.length;
     it('it should POST a pet ', (done) => {
-      let pet = {
+      var pet = {
         id: 11,
         name: "Frog",
         tag: "Green animal"
       }
-      var prePostSize = auxRequire.pets.length;
       chai.request(server)
         .post('/pets')
         .send(pet)
@@ -148,6 +162,21 @@ function postTests() {
           res.should.have.status(201);
           res.body.should.be.a('Array');
           res.body.length.should.be.eql(prePostSize + 1);
+          done();
+        });
+    });
+    it('it should POST a pet without tag ', (done) => {
+      var pet = {
+        id: 40,
+        name: "IdontHaveTag"
+      }
+      chai.request(server)
+        .post('/pets')
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(201);
+          res.body.should.be.a('Array');
+          res.body.length.should.be.eql(prePostSize + 2);
           done();
         });
     });
@@ -163,7 +192,7 @@ function postTests() {
         });
     });
     it('it should not POST a pet whose id is of type string instead of integer', (done) => {
-      let pet = {
+      var pet = {
         id: "20",
         name: "Frog",
         tag: "Green animal"
@@ -178,10 +207,86 @@ function postTests() {
           done();
         });
     });
+    it('it should not POST a pet which is a string instead of a JSON object', (done) => {
+      var pet = "I_AM_A_PET";
+      chai.request(server)
+        .post('/pets')
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          done();
+        });
+    });
+    it('it should not POST a pet whose name is of type integer instead of string', (done) => {
+      var pet = {
+        id: 29,
+        name: 12345,
+        tag: "Green animal"
+      }
+      chai.request(server)
+        .post('/pets')
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          done();
+        });
+    });
     it('it should not POST a pet which does not have id', (done) => {
-      let pet = {
+      var pet = {
         name: "Horse",
         tag: "Another animal"
+      }
+      chai.request(server)
+        .post('/pets')
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          done();
+        });
+    });
+    it('it should not POST a pet which has more properties than the ones defined in the oas-doc', (done) => {
+      var pet = {
+        id: 46,
+        name: "Horse",
+        tag: "Another animal",
+        extraProperty: "Extra content"
+      }
+      chai.request(server)
+        .post('/pets')
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          done();
+        });
+    });
+    it('it should not POST a pet which does not have name', (done) => {
+      var pet = {
+        id: 23,
+        tag: "Another animal"
+      }
+      chai.request(server)
+        .post('/pets')
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          done();
+        });
+    });
+    it('it should not POST a pet whose tag is of type integer instead of string', (done) => {
+      var pet = {
+        id: 29,
+        name: "SomeName",
+        tag: 12345
       }
       chai.request(server)
         .post('/pets')
@@ -215,10 +320,58 @@ function putTests() {
           done();
         });
     });
+    it('it should UPDATE a pet by removing its tag', (done) => {
+      var pet = {
+        id: 10,
+        name: "Pig",
+      };
+      chai.request(server)
+        .put('/pets/' + pet.id)
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          res.body.message.should.be.eql("Updated pet");
+          done();
+        });
+    });
     it('it should not UPDATE a pet without id', (done) => {
       var pet = {
         name: "Pig",
         tag: "Pet updated by the mocha+chai test"
+      };
+      chai.request(server)
+        .put('/pets/' + 2)
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          done();
+        });
+    });
+    it('it should not UPDATE a pet without name', (done) => {
+      var pet = {
+        id: 23,
+        tag: "Pet updated by the mocha+chai test"
+      };
+      chai.request(server)
+        .put('/pets/' + 2)
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          done();
+        });
+    });
+    it('it should not UPDATE a pet with more properties than the ones defined in the oas-doc', (done) => {
+      var pet = {
+        id: 23,
+        name: "AnimalX",
+        tag: "Pet with extra property",
+        extraProperty: "Extra property"
       };
       chai.request(server)
         .put('/pets/' + 2)
@@ -243,7 +396,38 @@ function putTests() {
           res.should.have.status(400);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
-          deleteTests();
+          done();
+        });
+    });
+    it('it should not UPDATE a pet whose tag is of type integer instead of string', (done) => {
+      var pet = {
+        id: 2,
+        name: "SomeNameHere",
+        tag: 111
+      };
+      chai.request(server)
+        .put('/pets/' + pet.id)
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          done();
+        });
+    });
+    it('it should not UPDATE a pet whose id is of type string instead of integer', (done) => {
+      var pet = {
+        id: "2",
+        name: "animal1",
+        tag: "Pet updated by the mocha+chai test"
+      };
+      chai.request(server)
+        .put('/pets/' + pet.id)
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
           done();
         });
     });
@@ -265,24 +449,63 @@ function putTests() {
           done();
         });
     });
+    it('it should not UPDATE a pet with a string instead of a JSON object', (done) => {
+      var pet = "I_AM_A_PET";
+      chai.request(server)
+        .put('/pets/' + 2)
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          done();
+        });
+    });
+    it('it should show an error message indicating wrong type for the specified petId in the path', (done) => {
+      var pet = {
+        id: 68,
+        name: "Hello",
+        tag: "Pet updated by the mocha+chai test"
+      };
+      chai.request(server)
+        .put('/pets/badId')
+        .send(pet)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
+          deleteTests();
+          done();
+        });
+    });
   });
-
 }
 
 function deleteTests() {
   describe('/DELETE pets', () => {
     it('it should DELETE a pet given the id', (done) => {
-      let pet = new Pet({
+      var pet = {
         id: 10,
         name: "Pig",
         tag: "Looking for mud"
-      });
+      };
       chai.request(server)
         .delete('/pets/' + pet.id)
         .end((err, res) => {
           res.should.have.status(204);
           done();
         });
+    });
+    it('it should try to GET the previously deleted pet and get 404', (done) => {
+      chai.request(server)
+      .get('/pets/10')
+      .end((err,res)=>{
+        res.should.have.status(404);
+        res.body.should.be.a('object');
+        res.body.should.have.property('message');
+        res.body.message.should.be.eql("There is no pet with id 10");
+        done();
+      })
     });
     it('Should show an error message when trying to delete an object that does not exist in the DB', (done) => {
       var someId = 666;
@@ -293,6 +516,16 @@ function deleteTests() {
           res.body.should.be.a('object');
           res.body.should.have.property('message');
           res.body.message.should.be.eql("There is no pet with id " + someId + " to be deleted");
+          done();
+        });
+    });
+    it('Should show an error indicating wrong type of parameter id', (done) => {
+      chai.request(server)
+        .delete('/pets/wrongType')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('object');
+          res.body.should.have.property('message');
           done();
         });
     });
@@ -311,7 +544,7 @@ function deleteTests() {
         .delete('/pets')
         .end((err, res) => {
           res.should.have.status(204);
-          chai.request(server).get('/pets?limit=10').end((err,res)=> {
+          chai.request(server).get('/pets?limit=10').end((err, res) => {
             res.should.have.status(200);
             res.body.should.be.a('Array');
             res.body.length.should.be.eql(0);

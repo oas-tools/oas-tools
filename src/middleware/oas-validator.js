@@ -31,7 +31,8 @@ var config = require('../configurations'),
 var deref = require('json-schema-deref');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
-  ignoreUnknownFormats: config.ignoreUnknownFormats
+  ignoreUnknownFormats: config.ignoreUnknownFormats,
+  assumeAdditional: true
 });
 
 /**
@@ -79,6 +80,7 @@ function locationFormat(location) {
 function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
   var paths = oasDoc.paths;
   var keepGoing = true;
+  var msg = "";
   var missingOrWrongParameters = [];
   var missingParameters = [];
   var wrongParameters = [];
@@ -88,13 +90,10 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
 
     if (requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
       if (req.body == undefined || JSON.stringify(req.body) == '{}') {
-        var msg = "Missing object in the request body";
+        msg += "Missing object in the request body";
         if (config.strict == true) {
           logger.error(msg);
           keepGoing = false;
-          res.status(400).send({ //TODO: it must send bad request
-            message: msg
-          });
         } else {
           logger.warning(msg);
         }
@@ -103,25 +102,20 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen
 
         var err = validator.validate(data, validSchema);
-        //validator.validate(data, validSchema, function(err, valid) {
         if (err == false) {
           keepGoing = false;
           if (Array.isArray(err)) {
             err = err[0];
           }
-          var msg = "Wrong data in the body of the request: " + validator.getLastError();;
+          msg += "Wrong data in the body of the request: " + validator.getLastError();;
           if (config.strict == true) {
             logger.error(msg);
-            res.status(400).send({ //TODO: it must send bad request
-              message: msg
-            });
           } else {
             logger.warning(msg);
           }
         } else {
           logger.info("Valid parameter on request");
         }
-        //});
       }
     }
   }
@@ -138,13 +132,10 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
 
         location = locationFormat(location);
         if (req[location][name] == undefined) { //if the request is missing a required parameter acording to the oasDoc: warning
-          var msg = "Missing parameter " + name + " in " + location;
+          msg += "Missing parameter " + name + " in " + location;
           if (config.strict == true) {
             logger.error(msg);
             keepGoing = false;
-            res.status(400).send({ //TODO: it must send bad request
-              message: msg
-            });
           } else {
             logger.warning(msg);
           }
@@ -155,7 +146,6 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
             var value = new String(req[location][name]);
           }
           var err = validator.validate(value, schema);
-          //validator.validate(value, schema, function(err, valid) {
           if (err == false) {
             keepGoing = false;
             if (Array.isArray(err)) {
@@ -166,26 +156,26 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
               logger.info("UNKNOWN_FORMAT error - Registered Formats: ");
               logger.info(registeredFormats);
             }
-            var msg = "Wrong parameter " + name + " in " + location + ": " + validator.getLastError();
+            msg += "Wrong parameter " + name + " in " + location + ": " + validator.getLastError();
             if (config.strict == true) {
               logger.error(msg);
-              res.status(400).send({ //TODO: it must send bad request
-                message: msg
-              });
             } else {
               logger.warning(msg);
             }
           } else {
             logger.info("Valid parameter on request");
           }
-          //});
         }
       }
     }
   }
-  if(keepGoing == true){
+  if (keepGoing == true) {
     res.locals.oasDoc = oasDoc;
     next();
+  } else {
+    res.status(400).send({
+      message: msg
+    })
   }
 }
 

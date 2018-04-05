@@ -24,6 +24,12 @@ var pets = [{
     //id: 11,
     name: "Bat",
     tag: "At night"
+  },
+  {
+    id: 200,
+    name: "AnimalZ",
+    tag: "This is supposed to be a wrong object",
+    extraProperty: "Extra property, wrong!"
   }
 ];
 
@@ -105,10 +111,6 @@ exports.updatePet = function(args, res, next) {
       pets[i] = args.body;
       res.status(200).send({
         message: "Updated pet"
-      });
-      res.status(400).send({
-        code: 400,
-        message: "No pet was sent in the body of the update request"
       });
     }
   }
