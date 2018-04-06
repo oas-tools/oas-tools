@@ -74,7 +74,7 @@ function processErr(err) {
 function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content) {
   var code = res.statusCode;
   var msg = "";
-  data = content[0];
+  var data = content[0];
   logger.debug("Processing at checkResponse:");
   logger.debug("  -code: " + code);
   logger.debug("  -oasDoc: " + oasDoc);
@@ -98,7 +98,7 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
     if (responseCodeSection.hasOwnProperty('content')) { //if there is no content property for the given response then there is nothing to validate.
       var validSchema = responseCodeSection.content['application/json'].schema;
       logger.info("Schema to use for validation: " + JSON.stringify(validSchema));
-      var data = JSON.parse(data); //Without this everything is string so type validation wouldn't happen
+      data = JSON.parse(data); //Without this everything is string so type validation wouldn't happen
       validator.validate(data, validSchema, function(err, valid) {
         if (err) {
           msg = msg + "Wrong data in the response. " + processErr(err)
@@ -110,9 +110,7 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
               message: msg,
               content: data
             });
-            //res.status(400).send(content);
             res.status(400);
-            //res.statusCode = 400;
             oldSend.apply(res, content);
           } else {
             logger.warning(msg);

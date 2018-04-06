@@ -187,7 +187,7 @@ function postTests() {
           res.should.have.status(400);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
-          res.body.message.should.be.eql("Missing object in the request body");
+          res.body.message.should.be.eql("Missing object in the request body. ");
           done();
         });
     });

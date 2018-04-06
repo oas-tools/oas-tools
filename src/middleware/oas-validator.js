@@ -90,13 +90,8 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
 
     if (requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
       if (req.body == undefined || JSON.stringify(req.body) == '{}') {
-        msg += "Missing object in the request body";
-        if (config.strict == true) {
-          logger.error(msg);
-          keepGoing = false;
-        } else {
-          logger.warning(msg);
-        }
+        msg += "Missing object in the request body. ";
+        keepGoing = false;
       } else {
         var validSchema = requestBody.content['application/json'].schema;
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen
@@ -104,15 +99,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
         var err = validator.validate(data, validSchema);
         if (err == false) {
           keepGoing = false;
-          if (Array.isArray(err)) {
-            err = err[0];
-          }
-          msg += "Wrong data in the body of the request: " + validator.getLastError();;
-          if (config.strict == true) {
-            logger.error(msg);
-          } else {
-            logger.warning(msg);
-          }
+          msg += "Wrong data in the body of the request: " + validator.getLastErrors() + ". ";
         } else {
           logger.info("Valid parameter on request");
         }
@@ -132,13 +119,8 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
 
         location = locationFormat(location);
         if (req[location][name] == undefined) { //if the request is missing a required parameter acording to the oasDoc: warning
-          msg += "Missing parameter " + name + " in " + location;
-          if (config.strict == true) {
-            logger.error(msg);
-            keepGoing = false;
-          } else {
-            logger.warning(msg);
-          }
+          msg += "Missing parameter " + name + " in " + location + ". ";
+          keepGoing = false;
         } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
           try {
             var value = JSON.parse(req[location][name]);
@@ -148,20 +130,12 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
           var err = validator.validate(value, schema);
           if (err == false) {
             keepGoing = false;
-            if (Array.isArray(err)) {
-              err = err[0];
-            }
             if (err.code == "UNKNOWN_FORMAT") {
               var registeredFormats = ZSchema.getRegisteredFormats();
               logger.info("UNKNOWN_FORMAT error - Registered Formats: ");
               logger.info(registeredFormats);
             }
-            msg += "Wrong parameter " + name + " in " + location + ": " + validator.getLastError();
-            if (config.strict == true) {
-              logger.error(msg);
-            } else {
-              logger.warning(msg);
-            }
+            msg += "Wrong parameter " + name + " in " + location + ": " + validator.getLastErrors() + ". ";
           } else {
             logger.info("Valid parameter on request");
           }
@@ -169,13 +143,17 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
       }
     }
   }
-  if (keepGoing == true) {
-    res.locals.oasDoc = oasDoc;
-    next();
-  } else {
+  if (keepGoing == false && config.strict == true) {
+    logger.error(msg);
     res.status(400).send({
       message: msg
     })
+  } else {
+    if (msg.length != 0) {
+      logger.warning(msg);
+    }
+    res.locals.oasDoc = oasDoc;
+    next();
   }
 }
 
