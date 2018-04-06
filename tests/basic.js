@@ -3,7 +3,7 @@ let chaiHttp = require('chai-http');
 let server = require('./testServer');
 let should = chai.should();
 chai.use(chaiHttp);
-var auxRequire = require('./testServer/controllers/petsControllers.js');
+var auxRequire = require('./testServer/controllers/petsController.js');
 
 
 function getTests() {

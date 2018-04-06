@@ -84,7 +84,6 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
   validator.validate(oasDoc, schemaV3, function(err, valid) {
     if (err) {
       logger.error("oasDoc is not valid: " + JSON.stringify(err));
-      //throw new Error('oasDoc is not valid: ');
       process.exit();
     } else {
       logger.info("Valid specification file");
@@ -134,7 +133,7 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
               app.put(expressPath, OASRouterMid());
             }
             break;
-          default:
+          case 'delete':
             if (config.validator == true) {
               app.delete(expressPath, OASValidatorMid());
             }

@@ -21,7 +21,6 @@ var pets = [{
     tag: "Looking for mud"
   },
   {
-    //id: 11,
     name: "Bat",
     tag: "At night"
   },
@@ -38,7 +37,7 @@ function setCorrectPets(newPets) {
 }
 
 /**
- *  Creates a pet: Here the controller should not check whether there is a pet in the request body, that must be done by oas-tools!
+ *  Creates a pet
  */
 exports.createPets = function(args, res, next) {
   pets.push(args.body);
@@ -101,7 +100,7 @@ exports.deletePets = function(args, res, next) {
 }
 
 /**
- *  Updates a pet: Here the controller should not check whether there is a pet in the request body, that must be done by oas-tools!
+ *  Updates a pet
  */
 exports.updatePet = function(args, res, next) {
   var present = false;
