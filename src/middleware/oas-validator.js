@@ -161,6 +161,10 @@ exports = module.exports = function(oasDoc, appRoutes) {
 
   return function OASValidator(req, res, next) {
 
+    req.swagger = {
+        params: req.params
+    }
+    
     var method = req.method.toLowerCase();
 
     logger.info("Requested method-url pair: " + method + " - " + req.url);

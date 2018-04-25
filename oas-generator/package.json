@@ -1,0 +1,25 @@
+{
+  "name": "oas-generator",
+  "version": "1.0.0",
+  "description": "OAS code generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ignacio Peluaga - ISAgroup",
+  "license": "ISC",
+  "bin": {
+    "oas-generator": "./index.js"
+  },
+  "dependencies": {
+    "commander": "^2.15.1",
+    "fs": "0.0.1-security",
+    "js-yaml": "^3.11.0",
+    "node-zip": "^1.1.1",
+    "path": "^0.12.7",
+    "shelljs": "^0.8.1",
+    "touch": "^3.1.0",
+    "z-schema": "^3.20.0",
+    "zip-folder": "^1.0.0"
+  }
+}

@@ -6,6 +6,7 @@
   "homepage": "https://github.com/isa-group/project-oas-tools",
   "main": "index.js",
   "dependencies": {
+    "bitbucket-snippet": "0.0.6",
     "bluebird": "^3.4.7",
     "body-parser": "^1.17.1",
     "cors": "^2.8.3",

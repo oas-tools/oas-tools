@@ -60,11 +60,11 @@ function transformToExpress(path) {
 }
 
 /**
- * Function to initialize middlewares.
+ * Function to initialize OAS-tools middlewares.
  *@param {object} options - Parameter containing controllers location, Specification file, and others.
  *@param {function} callback - Function that initializes middlewares one by one in the index.js file.
  */
-var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) {
+var initialize = function initialize(oasDoc, app, callback) {
 
   if (_.isUndefined(oasDoc)) {
     throw new Error('oasDoc is required');
@@ -149,7 +149,50 @@ var initializeMiddleware = function initializeMiddleware(oasDoc, app, callback) 
   });
 };
 
+/**
+ * Function to initialize swagger-tools middlewares.
+ *@param {object} specDoc - Specification file.
+ *@param {function} callback - Function that initializes middlewares one by one in the index.js file.
+ */
+ var initializeMiddleware = function initializeMiddleware(specDoc, callback) {
+    //spec = specDoc;
+
+    if (_.isUndefined(specDoc)) {
+      throw new Error('specDoc is required');
+    } else if (!_.isPlainObject(specDoc)) {
+      throw new TypeError('specDoc must be an object');
+    }
+
+    if (_.isUndefined(callback)) {
+      throw new Error('callback is required');
+    } else if (!_.isFunction(callback)) {
+      throw new TypeError('callback must be a function');
+    }
+
+    var validator = new ZSchema({
+      ignoreUnresolvableReferences: true
+    });
+
+    var schemaV3 = fs.readFileSync(path.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
+    schemaV3 = JSON.parse(schemaV3);
+
+    validator.validate(specDoc, schemaV3, function(err, valid) {
+      if (err) {
+        throw new Error('specDoc is not valid: ');
+        logger.info("Error: " + err);
+      } else {
+        logger.info("Valid specification file");
+      }
+    });
+
+    callback({
+      OASRouter: require('./middleware/oas-router'),
+      OASValidator: require('./middleware/oas-validator')
+    });
+  };
+
 module.exports = {
+  initialize: initialize,
   initializeMiddleware: initializeMiddleware,
   configure: configure,
 };
