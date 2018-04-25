@@ -8,7 +8,7 @@ paths:
   /pets:
     get:
       summary: List all pets
-      operationId: listPets
+      #operationId: listPets
       tags:
         - pets
       parameters:

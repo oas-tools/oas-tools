@@ -66,16 +66,30 @@ function transformToExpress(path) {
 function nameMethod(method) {
   method = method.toString();
   var name;
-  if (method == 'GET') {
+  if (method == 'get') {
     name = "list";
-  } else if (method == 'POST') {
+  } else if (method == 'post') {
     name = "create";
-  } else if (method == 'PUT') {
+  } else if (method == 'put') {
     name = "update";
-  } else {
+  } else if (method == 'delete'){
     name = "delete";
   }
   return name;
+}
+
+/**
+ * Returns the resource name, contained in the requested url/path (as appears on the oasDoc file), without any slashes.
+ * @param {object} requestedSpecPath - Requested path as appears on the oasDoc file.
+ * @param {object} single - Operation is related to single resource, then last 's' must be removed.
+ */
+function resourceName(requestedSpecPath,single) {
+  var resource = requestedSpecPath.toString().split("/")[1];
+  if(single){
+    return resource.charAt(0).toUpperCase() + resource.slice(1,resource.length-2);
+  }else{
+    return resource.charAt(0).toUpperCase() + resource.slice(1);
+  }
 }
 
 /**
@@ -84,14 +98,21 @@ function nameMethod(method) {
  *@param {object} pathName - .
  *@param {object} methodName - .
  *@param {object} methodSection - .
+ *@param {object} single - .
  */
-function checkOperationId(load,pathName,methodName,methodSection){
+function checkOperationId(load,pathName,methodName,methodSection,single){
+  var opId;
   if(methodSection.operationId != undefined && load[methodSection.operationId] == undefined){
     logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName);
     process.exit();
   }else{
-    var opId = nameMethod(methodName) + pathName.split("/")[1];
-    if(load[methodSection.operationId] == undefined){
+    if(load[methodSection.operationId] != undefined){
+      opId = methodSection.operationId;
+    }else{
+        opId = nameMethod(methodName) + resourceName(pathName,single);
+    }
+    console.log(opId)
+    if(load[opId] == undefined){
       logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName);
       process.exit();
     }
@@ -103,12 +124,13 @@ function checkOperationId(load,pathName,methodName,methodSection){
 
 /**
  * Checks if exists controller for a given pair path-method.
- *@param {object} pathName - Path to transform.
- *@param {object} methodName - Path to transform.
- *@param {object} methodSection - Path to transform.
- *@param {object} controllersLocation - Path to transform.
+ *@param {object} pathName - .
+ *@param {object} methodName - .
+ *@param {object} methodSection - .
+ *@param {object} controllersLocation - .
+ *@param {object} single - .
  */
-function checkControllers(pathName,methodName,methodSection,controllersLocation){
+function checkControllers(pathName,methodName,methodSection,controllersLocation,single){
   logger.debug("  "+methodName.toUpperCase() + " - " + pathName);
   var controller;
   var load;
@@ -117,7 +139,7 @@ function checkControllers(pathName,methodName,methodSection,controllersLocation)
     logger.debug("    OAS-doc has x-router-controller property");
     try{
       load = require(pathModule.join(controllersLocation,controller));
-      checkOperationId(load,pathName,methodName,methodSection);
+      checkOperationId(load,pathName,methodName,methodSection,false);
     }catch(err){
       logger.error(err);
       process.exit();
@@ -140,6 +162,19 @@ function checkControllers(pathName,methodName,methodSection,controllersLocation)
       }
     }
   }
+}
+
+/**
+ * Check if the expressPath has parameters. If so, then the request is for a single resource.
+ *@param {object} expressPath - .
+ */
+function checkSingle(expressPath){
+  var single = false;
+  console.log(expressPath.split("/"))
+  if(expressPath.split("/").length>2){
+    single = true;
+  }
+  return single;
 }
 
 /**
@@ -191,8 +226,9 @@ var initialize = function initialize(oasDoc, app, callback) {
     logger.debug("Checking that controllers exist indeed:");
     for (var path in paths) {
       for (var method in paths[path]) {
-        checkControllers(path,method,paths[path][method],config.controllers);
         var expressPath = transformToExpress(path);
+        var single = checkSingle(expressPath);
+        checkControllers(path,method,paths[path][method],config.controllers,single);
         switch (method) {
           case 'get':
             if (config.validator == true) {
@@ -229,6 +265,7 @@ var initialize = function initialize(oasDoc, app, callback) {
         }
       }
     }
+
 
     callback();
   });

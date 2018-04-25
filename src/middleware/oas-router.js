@@ -146,7 +146,8 @@ function existsController(locationOfControllers, controllerName) {
  * @param {object} requestedSpecPath - Requested path as appears on the oasDoc file.
  */
 function resourceName(requestedSpecPath) {
-  return requestedSpecPath.split("/")[1];
+  var resource = requestedSpecPath.toString().split("/")[1];
+  return resource.charAt(0).toUpperCase() + resource.slice(1);
 }
 
 /**
@@ -186,7 +187,7 @@ function generateOpId(oasDoc, requestedSpecPath, method) {
   if (oasDoc.paths[requestedSpecPath][method].hasOwnProperty('operationId')) {
     return oasDoc.paths[requestedSpecPath][method].operationId.toString(); // Use opID specified in the oas doc
   } else {
-    return nameMethod(oasDoc.paths[requestedSpecPath][method]) + resourceName(oasDoc.paths[requestedSpecPath][method]); //if there is no opID in the oasDoc, then generate the identifier
+    return nameMethod(method) + resourceName(requestedSpecPath); //if there is no opID in the oasDoc, then generate the identifier
   }
 }
 

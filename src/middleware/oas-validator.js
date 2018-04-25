@@ -164,7 +164,7 @@ exports = module.exports = function(oasDoc, appRoutes) {
     req.swagger = {
         params: req.params
     }
-    
+
     var method = req.method.toLowerCase();
 
     logger.info("Requested method-url pair: " + method + " - " + req.url);
