@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 var _ = require('lodash-compat');
 var fs = require('fs');
-var path = require('path');
+var pathModule = require('path');
 var jsyaml = require('js-yaml');
 var config = require('./configurations'),
   logger = config.logger;
@@ -60,6 +60,89 @@ function transformToExpress(path) {
 }
 
 /**
+ * Returns a simple, frinedly, intuitive name deppending on the requested method.
+ * @param {object} method - Method name taken directly from the req object.
+ */
+function nameMethod(method) {
+  method = method.toString();
+  var name;
+  if (method == 'GET') {
+    name = "list";
+  } else if (method == 'POST') {
+    name = "create";
+  } else if (method == 'PUT') {
+    name = "update";
+  } else {
+    name = "delete";
+  }
+  return name;
+}
+
+/**
+ * Checks if operationId (or generic) exists for a given pair path-method.
+ *@param {object} load - .
+ *@param {object} pathName - .
+ *@param {object} methodName - .
+ *@param {object} methodSection - .
+ */
+function checkOperationId(load,pathName,methodName,methodSection){
+  if(methodSection.operationId != undefined && load[methodSection.operationId] == undefined){
+    logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName);
+    process.exit();
+  }else{
+    var opId = nameMethod(methodName) + pathName.split("/")[1];
+    if(load[methodSection.operationId] == undefined){
+      logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName);
+      process.exit();
+    }
+    else{
+      logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
+    }
+  }
+}
+
+/**
+ * Checks if exists controller for a given pair path-method.
+ *@param {object} pathName - Path to transform.
+ *@param {object} methodName - Path to transform.
+ *@param {object} methodSection - Path to transform.
+ *@param {object} controllersLocation - Path to transform.
+ */
+function checkControllers(pathName,methodName,methodSection,controllersLocation){
+  logger.debug("  "+methodName.toUpperCase() + " - " + pathName);
+  var controller;
+  var load;
+  if(methodSection['x-router-controller'] != undefined){
+    controller = methodSection['x-router-controller'];
+    logger.debug("    OAS-doc has x-router-controller property");
+    try{
+      load = require(pathModule.join(controllersLocation,controller));
+      checkOperationId(load,pathName,methodName,methodSection);
+    }catch(err){
+      logger.error(err);
+      process.exit();
+    }
+  }else{
+    logger.debug("    OAS-doc doesn't have x-router-controller property -> try generic controller name")
+    controller = pathName.split("/")[1] + "Controller"; //generate name and try to load it
+    try{
+      var load = require(pathModule.join(controllersLocation, controller));
+      checkOperationId(load,pathName,methodName,methodSection);
+    }catch(err){
+      logger.debug("    Controller with generic controller name wasn't found either -> try Default one");
+      try{
+        controller = 'Default'//try to load default one
+        var load = require(pathModule.join(controllersLocation, controller));
+        checkOperationId(load,pathName,methodName,methodSection);
+      }catch(err){
+        logger.error("    There is no controller for " + methodName.toUpperCase() + " - " + pathName);
+        process.exit();
+      }
+    }
+  }
+}
+
+/**
  * Function to initialize OAS-tools middlewares.
  *@param {object} options - Parameter containing controllers location, Specification file, and others.
  *@param {function} callback - Function that initializes middlewares one by one in the index.js file.
@@ -78,7 +161,7 @@ var initialize = function initialize(oasDoc, app, callback) {
     throw new TypeError('callback must be a function');
   }
 
-  var schemaV3 = fs.readFileSync(path.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
+  var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
   schemaV3 = JSON.parse(schemaV3);
 
   validator.validate(oasDoc, schemaV3, function(err, valid) {
@@ -105,8 +188,10 @@ var initialize = function initialize(oasDoc, app, callback) {
     };
 
     var paths = oasDoc.paths;
-    for (path in paths) {
+    logger.debug("Checking that controllers exist indeed:");
+    for (var path in paths) {
       for (var method in paths[path]) {
+        checkControllers(path,method,paths[path][method],config.controllers);
         var expressPath = transformToExpress(path);
         switch (method) {
           case 'get':
@@ -173,7 +258,7 @@ var initialize = function initialize(oasDoc, app, callback) {
       ignoreUnresolvableReferences: true
     });
 
-    var schemaV3 = fs.readFileSync(path.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
+    var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
     schemaV3 = JSON.parse(schemaV3);
 
     validator.validate(specDoc, schemaV3, function(err, valid) {

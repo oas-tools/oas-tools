@@ -38,7 +38,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       #No controller specified here, so the Default one must be used
-      #x-router-controller: "petsController"
+      x-router-controller: "petsController"
     post:
       summary: Create a pet
       operationId: createPets
@@ -77,7 +77,7 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Error'
-        #x-router-controller: "petsController"
+        x-router-controller: "petsController"
   /pets/{petId}:
     get:
       summary: Info for a specific pet
@@ -136,7 +136,7 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Error'
-      #x-router-controller: "petsController"
+      x-router-controller: "petsController"
     delete:
       description: deletes a single pet based on the ID supplied
       operationId: deletePet

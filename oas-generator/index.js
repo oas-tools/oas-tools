@@ -31,38 +31,49 @@ program
         } else {
 
           shell.exec('mkdir nodejs-server-generated');
+          shell.cp('../auxiliary/README.md', './README.md');
           shell.cd('nodejs-server-generated');
 
-          shell.exec('mkdir .oas-codegen && echo 3.0.0 > .oas-codegen/VERSION'); //touch /.swagger-codegen/VERSION
+          shell.exec('mkdir .oas-generator && echo 1.0.0 > .oas-generator/VERSION');
 
           shell.exec('mkdir api');
-          shell.cp('../' + file, './api/swagger.yaml');
+          shell.cp('../' + file, './api/oas-doc.yaml');
+
+          shell.exec('mkdir utils');
+          shell.cp('../auxiliary/writer.js', './utils/writer.js');
+
+          var paths = oasDoc.paths;
+          for (path in paths) {
+            for (var method in paths[path]) {
+              if(method.opetarionId == undefined){
+                //create function with that name
+              }
+              if(method['x-router-controller'] == undefined){
+                //create file with that name and place inside the function created before.
+              }
+            }
+          }
 
           shell.exec('mkdir controllers');
           touch.sync('controllers/Pet.js');
-
           shell.exec('mkdir service');
           touch.sync('service/PetsService.js');
 
-          shell.exec('mkdir utils');
-          touch.sync('utils/writer.js');
-
-          touch.sync('.swagger-codegen-ignore');
+          touch.sync('.oas-generator-ignore');
           touch.sync('index.js');
-          touch.sync('package.json'); //use this or 'npm init'
-          touch.sync('README.md');
+          touch.sync('package.json'); //use this or 'npm init'. README says the app can be run with 'npm start' si that script must be added!
 
           shell.exec('npm install');
 
-          zipFolder('/nodejs-server-generated', '../nodejs-server-generated.zip', function(err) {
+          shell.cd('..');
+          zipFolder('nodejs-server-generated', 'nodejs-server-generated.zip', function(err) {
             if (err) {
               console.log('oh no!', err);
             } else {
               console.log('EXCELLENT');
-              shell.rm('-rf', '../nodejs-server-generated');
+              //shell.rm('-r', 'nodejs-server-generated');
             }
           });
-
         }
       });
     } catch (err) {
