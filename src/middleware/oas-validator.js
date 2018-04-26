@@ -87,7 +87,6 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
 
   if (paths[requestedSpecPath][method].hasOwnProperty('requestBody')) {
     var requestBody = paths[requestedSpecPath][method]['requestBody'];
-
     if (requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
       if (req.body == undefined || JSON.stringify(req.body) == '{}') {
         msg += "Missing object in the request body. ";

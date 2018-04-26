@@ -3,9 +3,8 @@ let chaiHttp = require('chai-http');
 let server = require('./testServer');
 let should = chai.should();
 chai.use(chaiHttp);
-var auxRequire = require('./testServer/controllers/petsController');
+var auxRequire = require('./testServer/controllers/petsController.js');
 
-auxRequire.corruptPets();
 
 function getTests() {
   describe('/GET pets', () => {
@@ -33,7 +32,37 @@ function getTests() {
         });
     });
 
-
+    var newPets = [{
+        id: 1,
+        name: "Wolf",
+        tag: "Barks at the moon"
+      },
+      {
+        id: 2,
+        name: "Cat",
+        tag: "Boring animal"
+      },
+      {
+        id: 3,
+        name: "Rabbit",
+        tag: "Eats carrots"
+      },
+      {
+        id: 4,
+        name: "Bat",
+        tag: "Ozzy's breakfast"
+      },
+      {
+        id: 10,
+        name: "Pig",
+        tag: "Looking for mud"
+      },
+      {
+        id: 200,
+        name: "AnimalZ",
+        tag: "It is not wrong anymore"
+      }
+    ];
 
     it('it shouldn´t GET all the pets but show a message with errors (missing/wrong parameters)', (done) => {
       chai.request(server)
@@ -43,8 +72,7 @@ function getTests() {
           res.body.should.be.a('object');
           res.body.should.have.property('message');
           res.body.message.should.contain("Wrong data in the response");
-          auxRequire.setCorrectPets();
-          logger.debug("---------------------Justo despues de la corrección, cómo está pets: " + JSON.stringify(auxRequire.pets));
+          auxRequire.setCorrectPets(newPets);
           done();
         });
     });
@@ -103,7 +131,6 @@ function getTests() {
           done();
         });
     });
-
     it('it should not GET a pet by an id that does not exist in the DB', (done) => {
       var someId = 666;
       chai.request(server)
@@ -113,8 +140,6 @@ function getTests() {
           res.body.should.be.a('object');
           res.body.should.have.property('message');
           res.body.message.should.be.eql("There is no pet with id " + someId);
-          console.log("---------------------Justo antes de la llamada a los POST, cómo está pets: " + JSON.stringify(auxRequire.pets));
-          postTests();
           done();
         });
     });
@@ -123,7 +148,6 @@ function getTests() {
 
 function postTests() {
   describe('/POST pets', () => {
-    console.log("---------------Comienzo de los POST, cómo está pets: " + JSON.stringify(auxRequire.pets));
     var prePostSize = auxRequire.pets.length;
     it('it should POST a pet ', (done) => {
       var pet = {
@@ -271,7 +295,6 @@ function postTests() {
           res.should.have.status(400);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
-          putTests();
           done();
         });
     });
@@ -533,7 +556,7 @@ function deleteTests() {
 }
 
 describe('Pets', () => {
-  getTests(); //this one calls postTests()
-  //postTests(); //this one calls putTests()
-  //putTests(); //this one calls deletePets()
+  getTests();
+  postTests();
+  putTests(); //this one calls deletePets()
 });

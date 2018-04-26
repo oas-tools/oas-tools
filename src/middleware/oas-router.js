@@ -133,6 +133,7 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
  */
 function existsController(locationOfControllers, controllerName) {
   try {
+    logger.debug("  LOAD CONTROLLERS AT oas-tools.js");
     var load = require(path.join(locationOfControllers, controllerName));
     return true;
   } catch (err) {
@@ -207,7 +208,7 @@ exports = module.exports = function(controllers) {
     }
 
     var opID = generateOpId(oasDoc, requestedSpecPath, method);
-    try { //TODO: this must be done at any point earlier! and not when the user sends a request!
+    try {
       var controller = require(path.join(controllers, controllerName));
     } catch (err) {
       logger.error("Controller not found: " + path.join(controllers, controllerName));

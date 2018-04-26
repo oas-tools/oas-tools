@@ -85,7 +85,6 @@ program
             }
           }
 
-
           touch.sync('.oas-generator-ignore');
           shell.cp('../auxiliary/index.js', './index.js');
 
