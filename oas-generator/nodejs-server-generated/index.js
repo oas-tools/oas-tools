@@ -34,7 +34,7 @@ oasTools.initialize(oasDoc, app, function() { // oas-tools version
 
 app.get('/info', function(req, res) {
   res.send({
-    info: "This API was generated using oas-generator by ISAgroup!"
+    info: "This API was generated using oas-generator!"
   });
 });
 
