@@ -9,9 +9,21 @@ module.exports.showPetById = function showPetById (req, res, next) {
 };
 
 module.exports.listPets = function listPets (req, res, next) {
-  Default.listPets(req.swagger.params, res, next);
+  Default.listPets(req.swagger.query, res, next);
 };
 
 module.exports.createPets = function createPets (req, res, next) {
-  Default.createPets(req.swagger.params, res, next);
+  Default.createPets(req.swagger.body, res, next);
+};
+
+module.exports.updatePet = function updatePet (req, res, next) {
+  Default.updatePet(req.swagger, res, next);
+};
+
+module.exports.deletePet = function deletePet (req, res, next) {
+  Default.deletePet(req.swagger.params, res, next);
+};
+
+module.exports.deletePets = function deletePets (req, res, next) {
+  Default.deletePets(null, res, next);
 };
