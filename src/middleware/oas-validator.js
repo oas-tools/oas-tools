@@ -98,7 +98,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
         var err = validator.validate(data, validSchema);
         if (err == false) {
           keepGoing = false;
-          msg += "Wrong data in the body of the request: " + validator.getLastErrors() + ". ";
+          msg += "Wrong data in the body of the request: " + JSON.stringify(validator.getLastErrors()) + ". ";
         } else {
           logger.info("Valid parameter on request");
         }
@@ -124,7 +124,8 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
           try {
             var value = JSON.parse(req[location][name]);
           } catch (err) {
-            var value = new String(req[location][name]);
+            console.log("   El parámetro es un string")
+            var value = req[location][name] + ""; //new String(req[location][name]);
           }
           var err = validator.validate(value, schema);
           if (err == false) {
@@ -134,7 +135,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
               logger.info("UNKNOWN_FORMAT error - Registered Formats: ");
               logger.info(registeredFormats);
             }
-            msg += "Wrong parameter " + name + " in " + location + ": " + validator.getLastErrors() + ". ";
+            msg += "Wrong parameter " + name + " in " + location + ": " + JSON.stringify(validator.getLastErrors()) + ". ";
           } else {
             logger.info("Valid parameter on request");
           }
@@ -165,7 +166,7 @@ exports = module.exports = function(oasDoc, appRoutes) {
         query: req.query,
         body: req.body
     }
-    
+
     var method = req.method.toLowerCase();
 
     logger.info("Requested method-url pair: " + method + " - " + req.url);

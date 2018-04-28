@@ -113,7 +113,6 @@ function getTests() {
           res.body.should.be.a('object');
           res.body.should.have.property('message');
           res.body.message.should.be.eql("There is no pet with id " + someId);
-          console.log("---------------------Justo antes de la llamada a los POST, cómo está pets: " + JSON.stringify(auxRequire.pets));
           postTests();
           done();
         });
@@ -123,7 +122,6 @@ function getTests() {
 
 function postTests() {
   describe('/POST pets', () => {
-    console.log("---------------Comienzo de los POST, cómo está pets: " + JSON.stringify(auxRequire.pets));
     var prePostSize = auxRequire.pets.length;
     it('it should POST a pet ', (done) => {
       var pet = {

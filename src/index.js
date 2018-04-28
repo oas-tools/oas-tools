@@ -72,7 +72,7 @@ function nameMethod(method) {
     name = "create";
   } else if (method == 'put') {
     name = "update";
-  } else if (method == 'delete'){
+  } else if (method == 'delete') {
     name = "delete";
   }
   return name;
@@ -83,11 +83,11 @@ function nameMethod(method) {
  * @param {object} requestedSpecPath - Requested path as appears on the oasDoc file.
  * @param {object} single - Operation is related to single resource, then last 's' must be removed.
  */
-function resourceName(requestedSpecPath,single) {
+function resourceName(requestedSpecPath, single) {
   var resource = requestedSpecPath.toString().split("/")[1];
-  if(single){
-    return resource.charAt(0).toUpperCase() + resource.slice(1,resource.length-2);
-  }else{
+  if (single) {
+    return resource.charAt(0).toUpperCase() + resource.slice(1, resource.length - 2);
+  } else {
     return resource.charAt(0).toUpperCase() + resource.slice(1);
   }
 }
@@ -100,23 +100,21 @@ function resourceName(requestedSpecPath,single) {
  *@param {object} methodSection - .
  *@param {object} single - .
  */
-function checkOperationId(load,pathName,methodName,methodSection,single){
+function checkOperationId(load, pathName, methodName, methodSection, single) {
   var opId;
-  if(methodSection.operationId != undefined && load[methodSection.operationId] == undefined){
+  if (methodSection.operationId != undefined && load[methodSection.operationId] == undefined) {
     logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName);
     process.exit();
-  }else{
-    if(load[methodSection.operationId] != undefined){
+  } else {
+    if (load[methodSection.operationId] != undefined) {
       opId = methodSection.operationId;
-    }else{
-        opId = nameMethod(methodName) + resourceName(pathName,single);
+    } else {
+      opId = nameMethod(methodName) + resourceName(pathName, single);
     }
-    console.log(opId)
-    if(load[opId] == undefined){
+    if (load[opId] == undefined) {
       logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName);
       process.exit();
-    }
-    else{
+    } else {
       logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
     }
   }
@@ -130,33 +128,33 @@ function checkOperationId(load,pathName,methodName,methodSection,single){
  *@param {object} controllersLocation - .
  *@param {object} single - .
  */
-function checkControllers(pathName,methodName,methodSection,controllersLocation,single){
-  logger.debug("  "+methodName.toUpperCase() + " - " + pathName);
+function checkControllers(pathName, methodName, methodSection, controllersLocation, single) {
+  logger.debug("  " + methodName.toUpperCase() + " - " + pathName);
   var controller;
   var load;
-  if(methodSection['x-router-controller'] != undefined){
+  if (methodSection['x-router-controller'] != undefined) {
     controller = methodSection['x-router-controller'];
     logger.debug("    OAS-doc has x-router-controller property");
-    try{
-      load = require(pathModule.join(controllersLocation,controller));
-      checkOperationId(load,pathName,methodName,methodSection,false);
-    }catch(err){
+    try {
+      load = require(pathModule.join(controllersLocation, controller));
+      checkOperationId(load, pathName, methodName, methodSection, false);
+    } catch (err) {
       logger.error(err);
       process.exit();
     }
-  }else{
+  } else {
     logger.debug("    OAS-doc doesn't have x-router-controller property -> try generic controller name")
     controller = pathName.split("/")[1] + "Controller"; //generate name and try to load it
-    try{
+    try {
       var load = require(pathModule.join(controllersLocation, controller));
-      checkOperationId(load,pathName,methodName,methodSection);
-    }catch(err){
+      checkOperationId(load, pathName, methodName, methodSection);
+    } catch (err) {
       logger.debug("    Controller with generic controller name wasn't found either -> try Default one");
-      try{
-        controller = 'Default'//try to load default one
+      try {
+        controller = 'Default' //try to load default one
         var load = require(pathModule.join(controllersLocation, controller));
-        checkOperationId(load,pathName,methodName,methodSection);
-      }catch(err){
+        checkOperationId(load, pathName, methodName, methodSection);
+      } catch (err) {
         logger.error("    There is no controller for " + methodName.toUpperCase() + " - " + pathName);
         process.exit();
       }
@@ -168,10 +166,9 @@ function checkControllers(pathName,methodName,methodSection,controllersLocation,
  * Check if the expressPath has parameters. If so, then the request is for a single resource.
  *@param {object} expressPath - .
  */
-function checkSingle(expressPath){
+function checkSingle(expressPath) {
   var single = false;
-  console.log(expressPath.split("/"))
-  if(expressPath.split("/").length>2){
+  if (expressPath.split("/").length > 2) {
     single = true;
   }
   return single;
@@ -223,12 +220,14 @@ var initialize = function initialize(oasDoc, app, callback) {
     };
 
     var paths = oasDoc.paths;
-    logger.debug("Checking that controllers exist indeed:");
     for (var path in paths) {
       for (var method in paths[path]) {
         var expressPath = transformToExpress(path);
+        logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
         var single = checkSingle(expressPath);
-        checkControllers(path,method,paths[path][method],config.controllers,single);
+        if (config.rotuer == true) {
+          checkControllers(path, method, paths[path][method], config.controllers, single);
+        }
         switch (method) {
           case 'get':
             if (config.validator == true) {
@@ -265,8 +264,6 @@ var initialize = function initialize(oasDoc, app, callback) {
         }
       }
     }
-
-
     callback();
   });
 };
@@ -276,42 +273,48 @@ var initialize = function initialize(oasDoc, app, callback) {
  *@param {object} specDoc - Specification file.
  *@param {function} callback - Function that initializes middlewares one by one in the index.js file.
  */
- var initializeMiddleware = function initializeMiddleware(specDoc, callback) {
-    //spec = specDoc;
+var initializeMiddleware = function initializeMiddleware(specDoc, callback) {
+  //spec = specDoc;
 
-    if (_.isUndefined(specDoc)) {
-      throw new Error('specDoc is required');
-    } else if (!_.isPlainObject(specDoc)) {
-      throw new TypeError('specDoc must be an object');
+  if (_.isUndefined(specDoc)) {
+    throw new Error('specDoc is required');
+  } else if (!_.isPlainObject(specDoc)) {
+    throw new TypeError('specDoc must be an object');
+  }
+
+  if (_.isUndefined(callback)) {
+    throw new Error('callback is required');
+  } else if (!_.isFunction(callback)) {
+    throw new TypeError('callback must be a function');
+  }
+
+  var validator = new ZSchema({
+    ignoreUnresolvableReferences: true
+  });
+
+  var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
+  schemaV3 = JSON.parse(schemaV3);
+
+  validator.validate(specDoc, schemaV3, function(err, valid) {
+    if (err) {
+      throw new Error('specDoc is not valid: ');
+      logger.info("Error: " + err);
+    } else {
+      logger.info("Valid specification file");
     }
+  });
 
-    if (_.isUndefined(callback)) {
-      throw new Error('callback is required');
-    } else if (!_.isFunction(callback)) {
-      throw new TypeError('callback must be a function');
-    }
-
-    var validator = new ZSchema({
-      ignoreUnresolvableReferences: true
-    });
-
-    var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
-    schemaV3 = JSON.parse(schemaV3);
-
-    validator.validate(specDoc, schemaV3, function(err, valid) {
-      if (err) {
-        throw new Error('specDoc is not valid: ');
-        logger.info("Error: " + err);
-      } else {
-        logger.info("Valid specification file");
-      }
-    });
-
-    callback({
-      OASRouter: require('./middleware/oas-router'),
-      OASValidator: require('./middleware/oas-validator')
-    });
+  var middleware = {
+    swaggerMetadata: require('./middleware/empty_middleware'),
+    swaggerValidator: require('./middleware/empty_middleware'),
+    swaggerRouter: require('./middleware/empty_middleware'),
+    swaggerUi: require('./middleware/empty_middleware'),
+    OASRouter: require('./middleware/oas-router'),
+    OASValidator: require('./middleware/oas-validator')
   };
+
+  callback(middleware);
+};
 
 module.exports = {
   initialize: initialize,

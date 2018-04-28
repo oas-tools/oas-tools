@@ -11,9 +11,11 @@
   "dependencies": {
     "js-yaml": "^3.11.0",
     "jsdoc": "^3.5.5",
+    "json-schema-deref": "^0.4.1",
     "lodash-compat": "^3.10.2",
     "path": "^0.12.7",
     "type-of-is": "^3.5.1",
+    "winston": "^2.4.2",
     "z-schema": "^3.19.1"
   }
 }

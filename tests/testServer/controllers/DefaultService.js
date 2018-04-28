@@ -1,8 +1,5 @@
 'use strict';
 
-console.log("         ");
-console.log("            CONTROLLERS FILE EXECUTED");
-console.log("         ");
 
 var pets = [{
     id: 1,
@@ -192,7 +189,7 @@ exports.updatePet = function(args, res, next) {
   }
   if (present == false) {
     res.status(404).send({
-      message: "There is no pet with id " + args.parms.petId
+      message: "There is no pet with id " + args.params.petId
     });
   }
   exports.pets = pets;
