@@ -32,6 +32,37 @@ var validator = new ZSchema({
 });
 var controllers;
 var customConfigurations = false;
+var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
+schemaV3 = JSON.parse(schemaV3);
+
+/**
+ * Function .
+ *@param {object}  - .
+ *@param {object}  - .
+ *@param {object}  - .
+ */
+function init_checks(specDoc, callback, schemaV3) {
+  if (_.isUndefined(specDoc)) {
+    throw new Error('specDoc is required');
+  } else if (!_.isPlainObject(specDoc)) {
+    throw new TypeError('specDoc must be an object');
+  }
+
+  if (_.isUndefined(callback)) {
+    throw new Error('callback is required');
+  } else if (!_.isFunction(callback)) {
+    throw new TypeError('callback must be a function');
+  }
+
+  validator.validate(specDoc, schemaV3, function(err, valid) {
+    if (err) {
+      throw new Error('specDoc is not valid: ');
+      logger.info("Error: " + err);
+    } else {
+      logger.info("Valid specification file");
+    }
+  });
+}
 
 /**
  * Function to set configurations. Initializes local variables that then will be used in the callback inside initializeMiddleware function.
@@ -181,29 +212,7 @@ function checkSingle(expressPath) {
  */
 var initialize = function initialize(oasDoc, app, callback) {
 
-  if (_.isUndefined(oasDoc)) {
-    throw new Error('oasDoc is required');
-  } else if (!_.isPlainObject(oasDoc)) {
-    throw new TypeError('oasDoc must be an object');
-  }
-
-  if (_.isUndefined(callback)) {
-    throw new Error('callback is required');
-  } else if (!_.isFunction(callback)) {
-    throw new TypeError('callback must be a function');
-  }
-
-  var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
-  schemaV3 = JSON.parse(schemaV3);
-
-  validator.validate(oasDoc, schemaV3, function(err, valid) {
-    if (err) {
-      logger.error("oasDoc is not valid: " + JSON.stringify(err));
-      process.exit();
-    } else {
-      logger.info("Valid specification file");
-    }
-  });
+  init_checks(oasDoc, callback, schemaV3);
 
   deref(oasDoc, function(err, fullSchema) {
     logger.info("Specification file dereferenced");
@@ -265,7 +274,7 @@ var initialize = function initialize(oasDoc, app, callback) {
       }
     }
     callback();
-  });
+  }); //end deref
 };
 
 /**
@@ -273,47 +282,90 @@ var initialize = function initialize(oasDoc, app, callback) {
  *@param {object} specDoc - Specification file.
  *@param {function} callback - Function that initializes middlewares one by one in the index.js file.
  */
-var initializeMiddleware = function initializeMiddleware(specDoc, callback) {
-  //spec = specDoc;
+var initializeMiddleware = function initializeMiddleware(specDoc, app, callback) {
 
-  if (_.isUndefined(specDoc)) {
-    throw new Error('specDoc is required');
-  } else if (!_.isPlainObject(specDoc)) {
-    throw new TypeError('specDoc must be an object');
-  }
+  init_checks(specDoc, callback, schemaV3);
 
-  if (_.isUndefined(callback)) {
-    throw new Error('callback is required');
-  } else if (!_.isFunction(callback)) {
-    throw new TypeError('callback must be a function');
-  }
+  deref(specDoc, function(err, fullSchema) {
+    logger.info("Specification file dereferenced");
+    specDoc = fullSchema;
 
-  var validator = new ZSchema({
-    ignoreUnresolvableReferences: true
-  });
+    var OASRouterMid = function() {
+      var OASRouter = require('./middleware/oas-router');
+      return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
+    };
+    var OASValidatorMid = function() {
+      var OASValidator = require('./middleware/oas-validator');
+      return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
+    };
 
-  var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
-  schemaV3 = JSON.parse(schemaV3);
+    var paths = specDoc.paths;
+    for (var path in paths) {
+      for (var method in paths[path]) {
+        var expressPath = transformToExpress(path);
+        logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
+        var single = checkSingle(expressPath);
+        if (config.rotuer == true) {
+          checkControllers(path, method, paths[path][method], config.controllers, single);
+        }
 
-  validator.validate(specDoc, schemaV3, function(err, valid) {
-    if (err) {
-      throw new Error('specDoc is not valid: ');
-      logger.info("Error: " + err);
-    } else {
-      logger.info("Valid specification file");
+        switch (method) {
+          case 'get':
+            if (config.validator == true) {
+              app.get(expressPath, OASValidatorMid());
+            }
+            if (config.router == true) {
+              app.get(expressPath, OASRouterMid());
+            }
+            break;
+          case 'post':
+            if (config.validator == true) {
+              app.post(expressPath, OASValidatorMid());
+            }
+            if (config.router == true) {
+              app.post(expressPath, OASRouterMid());
+            }
+            break;
+          case 'put':
+            if (config.validator == true) {
+              app.put(expressPath, OASValidatorMid());
+            }
+            if (config.router == true) {
+              app.put(expressPath, OASRouterMid());
+            }
+            break;
+          case 'delete':
+            if (config.validator == true) {
+              app.delete(expressPath, OASValidatorMid());
+            }
+            if (config.router == true) {
+              app.delete(expressPath, OASRouterMid());
+            }
+            break;
+        }
+
+      }
     }
-  });
+    var middleware = {
+      /* swaggerValidator: function() {
+        var OASValidator = require('./middleware/oas-validator');
+        return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
+      },
+      swaggerRouter: function() {
+        var OASRouter = require('./middleware/oas-router');
+        return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
+      }, */
+      swaggerValidator: require('./middleware/empty_middleware'),
+      swaggerRouter: require('./middleware/empty_middleware'),
+      swaggerMetadata: require('./middleware/empty_middleware'),
+      swaggerUi: require('./middleware/empty_middleware'),
+      swaggerSecurity: require('./middleware/empty_middleware')
+    };
 
-  var middleware = {
-    swaggerMetadata: require('./middleware/empty_middleware'),
-    swaggerValidator: require('./middleware/empty_middleware'),
-    swaggerRouter: require('./middleware/empty_middleware'),
-    swaggerUi: require('./middleware/empty_middleware'),
-    OASRouter: require('./middleware/oas-router'),
-    OASValidator: require('./middleware/oas-validator')
-  };
+    callback(middleware);
+  }); //end deref
 
-  callback(middleware);
+
 };
 
 module.exports = {

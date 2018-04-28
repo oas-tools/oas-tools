@@ -48,6 +48,7 @@ function getOASversion(path) {
       oasVersion += '{';
     } else if (path[c] == '/' && hasParameters == true) {
       oasVersion += '}/';
+      hasParameters = false;
     } else {
       oasVersion += path[c];
     }
@@ -55,6 +56,7 @@ function getOASversion(path) {
   if (hasParameters == true) {
     oasVersion += '}';
   }
+  console.log("OUTPUT: " + path + " - " + oasVersion)
   return oasVersion;
 }
 
@@ -157,7 +159,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
   }
 }
 
-exports = module.exports = function(oasDoc, appRoutes) {
+exports = module.exports = function(oasDoc) {
 
   return function OASValidator(req, res, next) {
 
