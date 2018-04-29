@@ -35,6 +35,8 @@ var validator = new ZSchema({
   assumeAdditional: true
 });
 
+
+
 /**
  * Returns the oas-like version of the url requested by the user.
  * @param {string} path - Express version of the requested url: req.route.path.
@@ -56,7 +58,6 @@ function getOASversion(path) {
   if (hasParameters == true) {
     oasVersion += '}';
   }
-  console.log("OUTPUT: " + path + " - " + oasVersion)
   return oasVersion;
 }
 

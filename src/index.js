@@ -35,6 +35,8 @@ var customConfigurations = false;
 var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
 schemaV3 = JSON.parse(schemaV3);
 
+var router_property = 'x-router-controller';
+
 /**
  * Function .
  *@param {object}  - .
@@ -163,9 +165,9 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
   logger.debug("  " + methodName.toUpperCase() + " - " + pathName);
   var controller;
   var load;
-  if (methodSection['x-router-controller'] != undefined) {
-    controller = methodSection['x-router-controller'];
-    logger.debug("    OAS-doc has x-router-controller property");
+  if (methodSection[router_property] != undefined) {
+    controller = methodSection[router_property];
+    logger.debug("    OAS-doc has " + router_property + " property");
     try {
       load = require(pathModule.join(controllersLocation, controller));
       checkOperationId(load, pathName, methodName, methodSection, false);
@@ -174,7 +176,7 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
       process.exit();
     }
   } else {
-    logger.debug("    OAS-doc doesn't have x-router-controller property -> try generic controller name")
+    logger.debug("    OAS-doc doesn't have " + router_property + " + property -> try generic controller name")
     controller = pathName.split("/")[1] + "Controller"; //generate name and try to load it
     try {
       var load = require(pathModule.join(controllersLocation, controller));
@@ -234,7 +236,7 @@ var initialize = function initialize(oasDoc, app, callback) {
         var expressPath = transformToExpress(path);
         logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
         var single = checkSingle(expressPath);
-        if (config.rotuer == true) {
+        if (config.router == true) {
           checkControllers(path, method, paths[path][method], config.controllers, single);
         }
         switch (method) {
@@ -284,6 +286,9 @@ var initialize = function initialize(oasDoc, app, callback) {
  */
 var initializeMiddleware = function initializeMiddleware(specDoc, app, callback) {
 
+  config.swaggerTools = true;
+  router_property = 'x-swagger-router-controller';
+
   init_checks(specDoc, callback, schemaV3);
 
   deref(specDoc, function(err, fullSchema) {
@@ -305,7 +310,7 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
         var expressPath = transformToExpress(path);
         logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
         var single = checkSingle(expressPath);
-        if (config.rotuer == true) {
+        if (config.router == true) {
           checkControllers(path, method, paths[path][method], config.controllers, single);
         }
 
@@ -361,11 +366,8 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
       swaggerUi: require('./middleware/empty_middleware'),
       swaggerSecurity: require('./middleware/empty_middleware')
     };
-
     callback(middleware);
   }); //end deref
-
-
 };
 
 module.exports = {
