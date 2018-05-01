@@ -127,7 +127,6 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
           try {
             var value = JSON.parse(req[location][name]);
           } catch (err) {
-            console.log("   El parámetro es un string")
             var value = req[location][name] + ""; //new String(req[location][name]);
           }
           var err = validator.validate(value, schema);

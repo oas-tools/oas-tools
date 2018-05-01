@@ -12,7 +12,7 @@ var oasTools = require('../../src/index.js'); //This must be updated when on pro
 var jsyaml = require('js-yaml');
 var serverPort = 8080;
 
-var spec = fs.readFileSync(path.join(__dirname, '/api/oas-doc.yaml'), 'utf8'); //this one works
+var spec = fs.readFileSync(path.join(__dirname, '/api/oas-doc.yaml'), 'utf8');
 var oasDoc = jsyaml.safeLoad(spec);
 
 var options_object = {
@@ -25,7 +25,7 @@ var options_object = {
 
 oasTools.configure(options_object);
 
-oasTools.initialize(oasDoc, app, function() { // oas-tools version
+oasTools.initialize(oasDoc, app, function() {
   http.createServer(app).listen(serverPort, function() {
     console.log("App running at http://localhost:" + serverPort);
     console.log("________________________________________________________________");

@@ -38,12 +38,11 @@ schemaV3 = JSON.parse(schemaV3);
 var router_property = 'x-router-controller';
 
 /**
- * Function .
- *@param {object}  - .
- *@param {object}  - .
- *@param {object}  - .
+ * Checks that specDoc and callback exist and validates specDoc.
+ *@param {object} specDoc - Speceficitation file.
+ *@param {object} callback - Callback function passed to the initialization function.
  */
-function init_checks(specDoc, callback, schemaV3) {
+function init_checks(specDoc, callback) {
   if (_.isUndefined(specDoc)) {
     throw new Error('specDoc is required');
   } else if (!_.isPlainObject(specDoc)) {
@@ -114,7 +113,7 @@ function nameMethod(method) {
 /**
  * Returns the resource name, contained in the requested url/path (as appears on the oasDoc file), without any slashes.
  * @param {object} requestedSpecPath - Requested path as appears on the oasDoc file.
- * @param {object} single - Operation is related to single resource, then last 's' must be removed.
+ * @param {object} single - Indicates if operation is related to single resource. If so last 's' will be removed.
  */
 function resourceName(requestedSpecPath, single) {
   var resource = requestedSpecPath.toString().split("/")[1];
@@ -127,11 +126,11 @@ function resourceName(requestedSpecPath, single) {
 
 /**
  * Checks if operationId (or generic) exists for a given pair path-method.
- *@param {object} load - .
- *@param {object} pathName - .
- *@param {object} methodName - .
- *@param {object} methodSection - .
- *@param {object} single - .
+ *@param {object} load - Loaded controller.
+ *@param {object} pathName - Path of the spec file to be used to find controller.
+ *@param {object} methodName - One of CRUD methods.
+ *@param {object} methodSection - Section of the speficication file belonging to methodName.
+ *@param {object} single - Indicates if operation is related to single resource.
  */
 function checkOperationId(load, pathName, methodName, methodSection, single) {
   var opId;
@@ -155,16 +154,17 @@ function checkOperationId(load, pathName, methodName, methodSection, single) {
 
 /**
  * Checks if exists controller for a given pair path-method.
- *@param {object} pathName - .
- *@param {object} methodName - .
- *@param {object} methodSection - .
- *@param {object} controllersLocation - .
- *@param {object} single - .
+ *@param {object} pathName - Path of the spec file to be used to find controller.
+ *@param {object} methodName - One of CRUD methods.
+ *@param {object} methodSection - Section of the speficication file belonging to methodName.
+ *@param {object} controllersLocation - Location of controller files.
+ *@param {object} single - Indicates if operation is related to single resource.
  */
 function checkControllers(pathName, methodName, methodSection, controllersLocation, single) {
   logger.debug("  " + methodName.toUpperCase() + " - " + pathName);
   var controller;
   var load;
+
   if (methodSection[router_property] != undefined) {
     controller = methodSection[router_property];
     logger.debug("    OAS-doc has " + router_property + " property");
@@ -196,8 +196,8 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
 }
 
 /**
- * Check if the expressPath has parameters. If so, then the request is for a single resource.
- *@param {object} expressPath - .
+ * Checks if the expressPath has parameters. If so, then the request is for a single resource.
+ *@param {object} expressPath - Path in express format.
  */
 function checkSingle(expressPath) {
   var single = false;
@@ -209,12 +209,13 @@ function checkSingle(expressPath) {
 
 /**
  * Function to initialize OAS-tools middlewares.
- *@param {object} options - Parameter containing controllers location, Specification file, and others.
- *@param {function} callback - Function that initializes middlewares one by one in the index.js file.
+ *@param {object} oasDoc - Specification file.
+ *@param {object} app - Express server used for the application. Needed to register the paths.
+ *@param {function} callback - Function in which the app is started.
  */
 var initialize = function initialize(oasDoc, app, callback) {
 
-  init_checks(oasDoc, callback, schemaV3);
+  init_checks(oasDoc, callback);
 
   deref(oasDoc, function(err, fullSchema) {
     logger.info("Specification file dereferenced");
@@ -282,14 +283,15 @@ var initialize = function initialize(oasDoc, app, callback) {
 /**
  * Function to initialize swagger-tools middlewares.
  *@param {object} specDoc - Specification file.
- *@param {function} callback - Function that initializes middlewares one by one in the index.js file.
+ *@param {function} app - //TODO IN CASE EXPRESS CAN BE USED INSTEAD OF CONNECT, USER MUST PASS THIS TO initializeMiddleware TO REGISTER ROUTES.
+ *@param {function} callback - Function that initializes middlewares one by one.
  */
 var initializeMiddleware = function initializeMiddleware(specDoc, app, callback) {
 
   config.swaggerTools = true;
   router_property = 'x-swagger-router-controller';
 
-  init_checks(specDoc, callback, schemaV3);
+  init_checks(specDoc, callback);
 
   deref(specDoc, function(err, fullSchema) {
     logger.info("Specification file dereferenced");
@@ -348,7 +350,6 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
             }
             break;
         }
-
       }
     }
     var middleware = {
