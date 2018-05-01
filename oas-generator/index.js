@@ -174,8 +174,6 @@ program
 
           fs.appendFileSync(__dirname + '/nodejs-server-generated/' + 'package.json', JSON.stringify(package_raw));
 
-          shell.exec('npm install');
-
           shell.cd('..');
 
           zipdir('./nodejs-server-generated', {

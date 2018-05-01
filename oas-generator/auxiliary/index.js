@@ -8,7 +8,7 @@ var express = require("express");
 var bodyParser = require('body-parser')
 var app = express();
 app.use(bodyParser.json());
-var oasTools = require('../../src/index.js'); //This must be updated when on production! oas-tools will be inside node_modules
+var oasTools = require('C:/Users/ipelu/OneDrive/Documentos/GitHub/project-oas-tools/src/index.js'); //This must be updated when on production! oas-tools will be inside node_modules
 var jsyaml = require('js-yaml');
 var serverPort = 8080;
 
