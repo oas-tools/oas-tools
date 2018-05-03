@@ -176,7 +176,7 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
       process.exit();
     }
   } else {
-    logger.debug("    OAS-doc doesn't have " + router_property + " + property -> try generic controller name")
+    logger.debug("    OAS-doc doesn't have " + router_property + " property -> try generic controller name")
     controller = pathName.split("/")[1] + "Controller"; //generate name and try to load it
     try {
       var load = require(pathModule.join(controllersLocation, controller));

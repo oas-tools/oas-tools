@@ -1,0 +1,87 @@
+openapi: 3.0.0
+servers:
+  - url: /api/v1
+info:
+  description: API for managing votes on talks
+  version: 1.0.0
+  title: TalkVote API
+  contact:
+    email: pafmon@gmail.com
+paths:
+  /info:
+    get:
+      summary: A testing path
+      operationId: apiInfo
+      responses:
+        '200':
+          description: successful operation
+      x-router-controller: General
+  '/{talkId}/votes':
+    post:
+      summary: Register a new vote for a talk
+      operationId: registerVote
+      parameters:
+        - name: talkId
+          in: path
+          description: Talk Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid vote
+      x-router-controller: General
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: number
+              minimum: 1
+              maximum: 10
+        description: Vote to be registered
+        required: true
+    delete:
+      summary: Delete all votes of a talk
+      operationId: deleteVotes
+      parameters:
+        - name: talkId
+          in: path
+          description: Talk Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+      x-router-controller: General
+  '/{talkId}/votes/results':
+    get:
+      summary: Obtain a the results of a talk vote
+      operationId: getResults
+      parameters:
+        - name: talkId
+          in: path
+          description: Talk Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+      x-router-controller: General
+components:
+  schemas:
+    inline_response_200:
+      properties:
+        count:
+          type: number
+          example: 15
+          description: Total count of votes
+        average:
+          type: number
+          example: 8
+          description: Average vote
