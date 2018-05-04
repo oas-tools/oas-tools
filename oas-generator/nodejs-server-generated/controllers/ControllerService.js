@@ -1,7 +1,7 @@
 'use strict'
 
-module.exports.undefined = function undefined(req, res, next) {
+module.exports.listDataSets = function listDataSets(req, res, next) {
   res.send({
-    message: 'This is the raw controller for undefined'
+    message: 'This is the raw controller for listDataSets'
   });
 };

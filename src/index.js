@@ -125,6 +125,24 @@ function resourceName(requestedSpecPath, single) {
 }
 
 /**
+ * OperationId can have values which are not accepted as function names. This function generates a valid name
+ * @param {object} operationId - OpreationId of a given path-method pair.
+ */
+function normalize(operationId){
+  var validOpId = "";
+  for(var i = 0; i<operationId.length;i++){
+    if(operationId[i]=='-'){
+      validOpId = validOpId + "";
+      validOpId = validOpId + operationId[i+1].toUpperCase();
+      i = i+1;
+    }else{
+      validOpId = validOpId + operationId[i];
+    }
+  }
+  return validOpId;
+}
+
+/**
  * Checks if operationId (or generic) exists for a given pair path-method.
  *@param {object} load - Loaded controller.
  *@param {object} pathName - Path of the spec file to be used to find controller.
@@ -134,22 +152,51 @@ function resourceName(requestedSpecPath, single) {
  */
 function checkOperationId(load, pathName, methodName, methodSection, single) {
   var opId;
-  if (methodSection.operationId != undefined && load[methodSection.operationId] == undefined) {
-    logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName);
+
+  if (normalize(methodSection.operationId) != undefined && load[normalize(methodSection.operationId)] == undefined) {
+    logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + methodSection.operationId +")");
     process.exit();
   } else {
-    if (load[methodSection.operationId] != undefined) {
-      opId = methodSection.operationId;
+    if (load[normalize(methodSection.operationId)] != undefined) {
+      opId = normalize(methodSection.operationId);
     } else {
       opId = nameMethod(methodName) + resourceName(pathName, single);
     }
     if (load[opId] == undefined) {
-      logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName);
+      logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + methodSection.operationId +")");
       process.exit();
     } else {
       logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
     }
   }
+}
+
+/**
+ * Removes parameters from the requested path and returns the base path.
+ * TODO: with first character converted to upper case as it will be used for a controller name.?
+ * @param {string} reqRoutePath - Value or req.route.path (express version).
+ */
+function getBasePath(reqRoutePath) {
+  var basePath = "";
+  var first = true;
+  var path_array = reqRoutePath.split('/');
+  for (var i = 0; i < path_array.length; i++) {
+    if (path_array[i].charAt(0) !== ':' && first == true && path_array[i].charAt(0) !== '') {
+      basePath = basePath + path_array[i];
+      first = false;
+    } else if (path_array[i].charAt(0) !== ':') {
+      basePath = basePath + path_array[i].charAt(0).toUpperCase() + path_array[i].slice(1, path_array[i].length);
+    }
+  }
+  return basePath; //basePath.charAt(0).toUpperCase() + basePath.slice(1, basePath.length);
+}
+
+/**
+ * Converts a oas-doc type path into an epxress one.
+ * @param {string} oasPath - Path as shown in the oas-doc.
+ */
+function getExpressVersion(oasPath) {
+  return oasPath.replace(/{/g,':').replace(/}/g,'');
 }
 
 /**
@@ -161,6 +208,7 @@ function checkOperationId(load, pathName, methodName, methodSection, single) {
  *@param {object} single - Indicates if operation is related to single resource.
  */
 function checkControllers(pathName, methodName, methodSection, controllersLocation, single) {
+  console.log("   What is this: " + pathName);
   logger.debug("  " + methodName.toUpperCase() + " - " + pathName);
   var controller;
   var load;
@@ -176,8 +224,10 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
       process.exit();
     }
   } else {
-    logger.debug("    OAS-doc doesn't have " + router_property + " property -> try generic controller name")
-    controller = pathName.split("/")[1] + "Controller"; //generate name and try to load it
+    controller = getBasePath(getExpressVersion(pathName)) + "Controller";
+    //controller = pathName.split("/")[1] + "Controller"; //generate name and try to load it
+    //controller = controller.replace(/[}{]/g,'');
+    logger.debug("    OAS-doc doesn't have " + router_property + " property -> try generic controller name: " + controller)
     try {
       var load = require(pathModule.join(controllersLocation, controller));
       checkOperationId(load, pathName, methodName, methodSection);

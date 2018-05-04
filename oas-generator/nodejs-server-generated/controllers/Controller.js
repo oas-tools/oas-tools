@@ -2,6 +2,6 @@
 
 var Controller = require('./ControllerService');
 
-module.exports.undefined = function undefined(req, res, next) {
-  Controller.undefined(req.swagger.params, res, next);
+module.exports.listDataSets = function listDataSets(req, res, next) {
+  Controller.listDataSets(req.swagger.params, res, next);
 };
