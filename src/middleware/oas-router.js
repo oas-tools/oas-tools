@@ -47,6 +47,9 @@ function executeFunctionByName(functionName, context, req, res, next) {
   for (var i = 0; i < namespaces.length; i++) {
     context = context[namespaces[i]];
   }
+  console.log("   -functionName: " + functionName);
+  console.log("   -context: "+ JSON.stringify(context));
+  console.log("   -context[func]: " + context[func])
   return context[func].apply(context, [req, res, next]);
 }
 
@@ -164,12 +167,19 @@ function existsController(locationOfControllers, controllerName) {
 
 /**
  * Returns the resource name, contained in the requested url/path (as appears on the oasDoc file), without any slashes.
- * @param {object} url - Url requested by the user.
+ * @param {object} reqRoutePath - Value of req.route.path.
+ * @param {object} single - Indicates if operation is related to single resource. If so last 's' will be removed.
  */
-function resourceName(reqRoutePath) {
-  console.log("Esto es lo que recibe resourceName: " + reqRoutePath)
-  var resource = getBasePath(reqRoutePath)
-  return resource.charAt(0).toUpperCase() + resource.slice(1);
+function resourceName(reqRoutePath,single) {
+  var name;
+  var resource = getBasePath(reqRoutePath);
+  if (single) {
+    name = resource.charAt(0).toUpperCase() + resource.slice(1, resource.length - 1);
+  } else {
+    name = resource.charAt(0).toUpperCase() + resource.slice(1);
+  }
+  logger.debug("  ---function resourceName. input: " + reqRoutePath + " output: " + name);
+  return name;
 }
 
 /**
@@ -185,7 +195,7 @@ function generateControllerName(reqRoutePath) {
  * @param {object} method - Method name taken directly from the req object.
  */
 function nameMethod(method) {
-  method = method.toString();
+  method = method.toString().toUpperCase();
   var name;
   if (method == 'GET') {
     name = "list";
@@ -193,7 +203,7 @@ function nameMethod(method) {
     name = "create";
   } else if (method == 'PUT') {
     name = "update";
-  } else {
+  } else if (method == 'DELETE'){
     name = "delete";
   }
   return name;
@@ -204,12 +214,13 @@ function nameMethod(method) {
  * @param {object} oasDoc - Specification file.
  * @param {object} requestedSpecPath - Requested path as shown in the specification file.
  * @param {object} method - Requested method.
+ * @param {object} single - Indicates whether the request is related to single resource.
  */
-function generateOpId(oasDoc, requestedSpecPath, method) {
+function getOpId(oasDoc, requestedSpecPath, method, single) {
   if (oasDoc.paths[requestedSpecPath][method].hasOwnProperty('operationId')) {
     return oasDoc.paths[requestedSpecPath][method].operationId.toString(); // Use opID specified in the oas doc
   } else {
-    return nameMethod(method) + resourceName(requestedSpecPath); //if there is no opID in the oasDoc, then generate the identifier
+    return nameMethod(method) + resourceName(requestedSpecPath, single); //if there is no opID in the oasDoc, then generate the identifier
   }
 }
 
@@ -232,14 +243,18 @@ exports = module.exports = function(controllers) {
       var controllerName = "Default";
     }
 
-    var opID = generateOpId(oasDoc, requestedSpecPath, method);
+    var single = false;
+    if (oasDoc.paths[requestedSpecPath][method].parameters != undefined) {
+      single = true;
+    }
+    var opID = getOpId(oasDoc, requestedSpecPath, method, single);
     try {
       var controller = require(path.join(controllers, controllerName));
+      logger.debug("Loaded controller: " + JSON.stringify(controller));
     } catch (err) {
       logger.error("Controller not found: " + path.join(controllers, controllerName));
       process.exit();
     }
-
 
     var oldSend = res.send;
     res.send = function(data) { //intercept the response from the controller to check and validate it
