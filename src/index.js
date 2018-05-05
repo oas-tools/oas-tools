@@ -333,7 +333,7 @@ var initialize = function initialize(oasDoc, app, callback) {
             break;
         }
       }
-    }
+    } 
     callback();
   }); //end deref
 };

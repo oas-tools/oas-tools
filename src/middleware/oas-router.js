@@ -47,9 +47,9 @@ function executeFunctionByName(functionName, context, req, res, next) {
   for (var i = 0; i < namespaces.length; i++) {
     context = context[namespaces[i]];
   }
-  console.log("   -functionName: " + functionName);
-  console.log("   -context: " + JSON.stringify(context));
-  console.log("   -context[func]: " + func)
+  logger.debug("Processing at executeFunctionByName:");
+  logger.debug("   -functionName: " + functionName);
+  logger.debug("   -context[func]: " + func)
   return context[func].apply(context, [req, res, next]);
 }
 
@@ -165,24 +165,15 @@ function existsController(locationOfControllers, controllerName) {
 }
 
 /**
- * Returns the resource name, contained in the requested url/path (as appears on the oasDoc file), without any slashes.
- * @param {object} reqRoutePath - Value of req.route.path.
- */
-function resourceName(reqRoutePath) {
-  var name;
-  var resource = getBasePath(reqRoutePath);
-  name = resource.charAt(0).toUpperCase() + resource.slice(1);
-
-  logger.debug("  ---function resourceName -> input: " + reqRoutePath + " output: " + name);
-  return name;
-}
-
-/**
  * Removes '/' from the requested url and generates the standard name for controller: nameOfResource + "Controller".
  * @param {object} url - Url requested by the user, without parameters.
  */
 function generateControllerName(reqRoutePath) {
-  return resourceName(reqRoutePath) + "Controller";
+  var name;
+  var resource = getBasePath(reqRoutePath);
+  name = resource.charAt(0).toUpperCase() + resource.slice(1) + "Controller";
+  logger.debug("  ---function generateControllerName -> input: " + reqRoutePath + " output: " + name);
+  return name;
 }
 
 /**
@@ -234,6 +225,24 @@ function getOpId(oasDoc, requestedSpecPath, method) {
   }
 }
 
+/**
+ * OperationId can have values which are not accepted as function names. This function generates a valid name
+ * @param {object} operationId - OpreationId of a given path-method pair.
+ */
+function normalize(operationId) {
+  var validOpId = "";
+  for (var i = 0; i < operationId.length; i++) {
+    if (operationId[i] == '-') {
+      validOpId = validOpId + "";
+      validOpId = validOpId + operationId[i + 1].toUpperCase();
+      i = i + 1;
+    } else {
+      validOpId = validOpId + operationId[i];
+    }
+  }
+  return validOpId;
+}
+
 
 exports = module.exports = function(controllers) {
   return function OASRouter(req, res, next) {
@@ -254,7 +263,8 @@ exports = module.exports = function(controllers) {
       var controllerName = "Default";
     }
 
-    var opID = getOpId(oasDoc, requestedSpecPath, method);
+    var opID = normalize(getOpId(oasDoc, requestedSpecPath, method));
+
     try {
       var controller = require(path.join(controllers, controllerName));
       logger.debug("Loaded controller: " + JSON.stringify(controller));
