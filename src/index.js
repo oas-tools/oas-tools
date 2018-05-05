@@ -110,20 +110,20 @@ function nameMethod(method) {
   return name;
 }
 
-/**
- * Returns the resource name, contained in the requested url/path (as appears on the oasDoc file), without any slashes.
- * @param {object} requestedSpecPath - Requested path as appears on the oasDoc file.
- * @param {object} single - Indicates if operation is related to single resource. If so last 's' will be removed.
- */
- function resourceName(requestedSpecPath, single) {
-   var name;
-   var resource = requestedSpecPath.toString().split("/")[1];
-   if (single) {
-     name = resource.charAt(0).toUpperCase() + resource.slice(1, resource.length - 1);
-   } else {
-     name = resource.charAt(0).toUpperCase() + resource.slice(1);
+ /** TODO: for paths like /2.0/votos/{talkId}/ swagger creates 2_0votosTalkId que no es válido! qué debe hacer oas-tools?
+  * Generates an operationId according to the method and path requested the same way swagger-codegen does it.
+  * @param {string} method - Requested method.
+  * @param {string} path - Requested path as shown in the oas doc.
+  */
+ function generateOperationId(method, path) {
+   var output = "";
+   var path = path.split('/');
+   for (var i = 1; i < path.length; i++) {
+     var chunck = path[i].replace(/[{}]/g, '');
+     output = output + chunck.charAt(0).toUpperCase() + chunck.slice(1, chunck.length);
    }
-   return name;
+   output = output + method.toUpperCase();
+   return output.charAt(0).toLowerCase() + output.slice(1, output.length);
  }
 
 /**
@@ -166,7 +166,7 @@ function checkOperationId(load, pathName, methodName, methodSection, single) {
     if (load[normalize(methodSection.operationId)] != undefined) {
       opId = normalize(methodSection.operationId);
     } else {
-      opId = nameMethod(methodName) + resourceName(pathName, single);
+      opId = generateOperationId(methodName,pathName);
       logger.debug("      There is no operationId for " + methodName.toUpperCase() + " - " + pathName + " -> generated: " + opId);
     }
     if (load[opId] == undefined) {
@@ -235,8 +235,6 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
     }
   } else {
     controller = getBasePath(getExpressVersion(pathName)) + "Controller";
-    //controller = pathName.split("/")[1] + "Controller"; //generate name and try to load it
-    //controller = controller.replace(/[}{]/g,'');
     logger.debug("    OAS-doc doesn't have " + router_property + " property -> try generic controller name: " + controller)
     try {
       var load = require(pathModule.join(controllersLocation, controller));

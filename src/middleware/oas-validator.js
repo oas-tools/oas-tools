@@ -90,7 +90,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
 
   if (paths[requestedSpecPath][method].hasOwnProperty('requestBody')) {
     var requestBody = paths[requestedSpecPath][method]['requestBody'];
-    if (requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
+    if (requestBody.required != undefined && requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
       if (req.body == undefined || JSON.stringify(req.body) == '{}') {
         msg += "Missing object in the request body. ";
         keepGoing = false;
@@ -110,11 +110,14 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
   }
 
   if (paths[requestedSpecPath][method].hasOwnProperty('parameters')) {
+
     var params = paths[requestedSpecPath][method]['parameters'];
 
     for (var i = 0; i < params.length; i++) {
 
-      if (params[i].required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
+      //TODO: 'required' property is not required, some parameters may not have it (those in query for example)
+
+      if (params[i].required != undefined && params[i].required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
         var name = params[i].name;
         var location = params[i].in;
         var schema = params[i].schema;

@@ -48,8 +48,8 @@ function executeFunctionByName(functionName, context, req, res, next) {
     context = context[namespaces[i]];
   }
   console.log("   -functionName: " + functionName);
-  console.log("   -context: "+ JSON.stringify(context));
-  console.log("   -context[func]: " + context[func])
+  console.log("   -context: " + JSON.stringify(context));
+  console.log("   -context[func]: " + func)
   return context[func].apply(context, [req, res, next]);
 }
 
@@ -57,15 +57,15 @@ function executeFunctionByName(functionName, context, req, res, next) {
  * Removes parameters from the requested path and returns the base path.
  * @param {string} reqRoutePath - Value or req.route.path (express version).
  */
-function getBasePath(reqRoutePath){
-  var basePath="";
-  var first=true;
+function getBasePath(reqRoutePath) {
+  var basePath = "";
+  var first = true;
   var path_array = reqRoutePath.split('/');
-  for(var i = 0;i<path_array.length;i++){
-    if(path_array[i].charAt(0)!==':' && first == true && path_array[i].charAt(0)!==''){
+  for (var i = 0; i < path_array.length; i++) {
+    if (path_array[i].charAt(0) !== ':' && first == true && path_array[i].charAt(0) !== '') {
       basePath = basePath + path_array[i];
       first = false;
-    }else if(path_array[i].charAt(0)!==':'){
+    } else if (path_array[i].charAt(0) !== ':') {
       basePath = basePath + path_array[i].charAt(0).toUpperCase() + path_array[i].slice(1, path_array[i].length);
     }
   }
@@ -156,7 +156,6 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
  */
 function existsController(locationOfControllers, controllerName) {
   try {
-    logger.debug("  LOAD CONTROLLERS AT oas-tools.js");
     var load = require(path.join(locationOfControllers, controllerName));
     return true;
   } catch (err) {
@@ -168,17 +167,13 @@ function existsController(locationOfControllers, controllerName) {
 /**
  * Returns the resource name, contained in the requested url/path (as appears on the oasDoc file), without any slashes.
  * @param {object} reqRoutePath - Value of req.route.path.
- * @param {object} single - Indicates if operation is related to single resource. If so last 's' will be removed.
  */
-function resourceName(reqRoutePath,single) {
+function resourceName(reqRoutePath) {
   var name;
   var resource = getBasePath(reqRoutePath);
-  if (single) {
-    name = resource.charAt(0).toUpperCase() + resource.slice(1, resource.length - 1);
-  } else {
-    name = resource.charAt(0).toUpperCase() + resource.slice(1);
-  }
-  logger.debug("  ---function resourceName. input: " + reqRoutePath + " output: " + name);
+  name = resource.charAt(0).toUpperCase() + resource.slice(1);
+
+  logger.debug("  ---function resourceName -> input: " + reqRoutePath + " output: " + name);
   return name;
 }
 
@@ -203,10 +198,26 @@ function nameMethod(method) {
     name = "create";
   } else if (method == 'PUT') {
     name = "update";
-  } else if (method == 'DELETE'){
+  } else if (method == 'DELETE') {
     name = "delete";
   }
   return name;
+}
+
+/** TODO: for paths like /2.0/votos/{talkId}/ swagger creates 2_0votosTalkId que no es válido! qué debe hacer oas-tools?
+ * Generates an operationId according to the method and path requested the same way swagger-codegen does it.
+ * @param {string} method - Requested method.
+ * @param {string} path - Requested path as shown in the oas doc.
+ */
+function generateOperationId(method, path) {
+  var output = "";
+  var path = path.split('/');
+  for (var i = 1; i < path.length; i++) {
+    var chunck = path[i].replace(/[{}]/g, '');
+    output = output + chunck.charAt(0).toUpperCase() + chunck.slice(1, chunck.length);
+  }
+  output = output + method.toUpperCase();
+  return output.charAt(0).toLowerCase() + output.slice(1, output.length);
 }
 
 /**
@@ -214,20 +225,20 @@ function nameMethod(method) {
  * @param {object} oasDoc - Specification file.
  * @param {object} requestedSpecPath - Requested path as shown in the specification file.
  * @param {object} method - Requested method.
- * @param {object} single - Indicates whether the request is related to single resource.
  */
-function getOpId(oasDoc, requestedSpecPath, method, single) {
+function getOpId(oasDoc, requestedSpecPath, method) {
   if (oasDoc.paths[requestedSpecPath][method].hasOwnProperty('operationId')) {
     return oasDoc.paths[requestedSpecPath][method].operationId.toString(); // Use opID specified in the oas doc
   } else {
-    return nameMethod(method) + resourceName(requestedSpecPath, single); //if there is no opID in the oasDoc, then generate the identifier
+    return generateOperationId(method, requestedSpecPath);
   }
 }
+
 
 exports = module.exports = function(controllers) {
   return function OASRouter(req, res, next) {
 
-    if(config.swaggerTools == true){
+    if (config.swaggerTools == true) {
       router_property = 'x-swagger-router-controller';
     }
 
@@ -238,16 +249,12 @@ exports = module.exports = function(controllers) {
     if (oasDoc.paths[requestedSpecPath][method].hasOwnProperty(router_property)) { //oasDoc file has router_property: use the controller specified there
       var controllerName = oasDoc.paths[requestedSpecPath][method][router_property];
     } else if (existsController(controllers, generateControllerName(req.route.path))) { //oasDoc file doesn't have router_property: use the standard controller name (autogenerated) if found
-      var controllerName = generateControllerName(requestedSpecPath);
+      var controllerName = generateControllerName(req.route.path);
     } else { //oasDoc file doesn't have router_property and standard controller (autogenerated name) doesn't exist: use the default controller
       var controllerName = "Default";
     }
 
-    var single = false;
-    if (oasDoc.paths[requestedSpecPath][method].parameters != undefined) {
-      single = true;
-    }
-    var opID = getOpId(oasDoc, requestedSpecPath, method, single);
+    var opID = getOpId(oasDoc, requestedSpecPath, method);
     try {
       var controller = require(path.join(controllers, controllerName));
       logger.debug("Loaded controller: " + JSON.stringify(controller));
