@@ -176,7 +176,7 @@ exports = module.exports = function(oasDoc) {
 
     logger.info("Requested method-url pair: " + method + " - " + req.url);
 
-    var requestedSpecPath = getOASversion(req.route.path);
+    var requestedSpecPath = config.pathsDict[req.route.path]; // getOASversion(req.route.path);
 
     res.locals.requestedSpecPath = requestedSpecPath;
     checkRequestData(oasDoc, requestedSpecPath, method, res, req, next);
