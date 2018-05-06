@@ -26,7 +26,7 @@ var jsyaml = require('js-yaml');
 var config = require('./configurations'),
   logger = config.logger;
 var ZSchema = require("z-schema");
-var deref = require('json-schema-deref');
+var deref = require('json-schema-deref-sync');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true
 });
@@ -35,7 +35,6 @@ var customConfigurations = false;
 var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
 schemaV3 = JSON.parse(schemaV3);
 
-var router_property = 'x-router-controller';
 
 /**
  * Checks that specDoc and callback exist and validates specDoc.
@@ -55,14 +54,13 @@ function init_checks(specDoc, callback) {
     throw new TypeError('callback must be a function');
   }
 
-  validator.validate(specDoc, schemaV3, function(err, valid) {
-    if (err) {
-      throw new Error('specDoc is not valid: ');
-      logger.info("Error: " + err);
-    } else {
-      logger.info("Valid specification file");
-    }
-  });
+  var err = validator.validate(specDoc, schemaV3);
+  if (err == false) {
+    logger.error('Specification file is not valid: ' + JSON.stringify(validator.getLastErrors()));
+    process.exit();
+  } else {
+    logger.info("Valid specification file");
+  }
 }
 
 /**
@@ -110,40 +108,40 @@ function nameMethod(method) {
   return name;
 }
 
- /** TODO: for paths like /2.0/votos/{talkId}/ swagger creates 2_0votosTalkId que no es válido! qué debe hacer oas-tools?
-  * Generates an operationId according to the method and path requested the same way swagger-codegen does it.
-  * @param {string} method - Requested method.
-  * @param {string} path - Requested path as shown in the oas doc.
-  */
- function generateOperationId(method, path) {
-   var output = "";
-   var path = path.split('/');
-   for (var i = 1; i < path.length; i++) {
-     var chunck = path[i].replace(/[{}]/g, '');
-     output = output + chunck.charAt(0).toUpperCase() + chunck.slice(1, chunck.length);
-   }
-   output = output + method.toUpperCase();
-   return output.charAt(0).toLowerCase() + output.slice(1, output.length);
- }
+/** TODO: for paths like /2.0/votos/{talkId}/ swagger creates 2_0votosTalkId que no es válido! qué debe hacer oas-tools?
+ * Generates an operationId according to the method and path requested the same way swagger-codegen does it.
+ * @param {string} method - Requested method.
+ * @param {string} path - Requested path as shown in the oas doc.
+ */
+function generateOperationId(method, path) {
+  var output = "";
+  var path = path.split('/');
+  for (var i = 1; i < path.length; i++) {
+    var chunck = path[i].replace(/[{}]/g, '');
+    output = output + chunck.charAt(0).toUpperCase() + chunck.slice(1, chunck.length);
+  }
+  output = output + method.toUpperCase();
+  return output.charAt(0).toLowerCase() + output.slice(1, output.length);
+}
 
 /**
  * OperationId can have values which are not accepted as function names. This function generates a valid name
  * @param {object} operationId - OpreationId of a given path-method pair.
  */
-function normalize(operationId){
-  if(operationId != undefined){
+function normalize(operationId) {
+  if (operationId != undefined) {
     var validOpId = "";
-    for(var i = 0; i<operationId.length;i++){
-      if(operationId[i]=='-'){
+    for (var i = 0; i < operationId.length; i++) {
+      if (operationId[i] == '-') {
         validOpId = validOpId + "";
-        validOpId = validOpId + operationId[i+1].toUpperCase();
-        i = i+1;
-      }else{
+        validOpId = validOpId + operationId[i + 1].toUpperCase();
+        i = i + 1;
+      } else {
         validOpId = validOpId + operationId[i];
       }
     }
     return validOpId;
-  }else{
+  } else {
     return undefined;
   }
 }
@@ -154,23 +152,22 @@ function normalize(operationId){
  *@param {object} pathName - Path of the spec file to be used to find controller.
  *@param {object} methodName - One of CRUD methods.
  *@param {object} methodSection - Section of the speficication file belonging to methodName.
- *@param {object} single - Indicates if operation is related to single resource.
  */
-function checkOperationId(load, pathName, methodName, methodSection, single) {
+function checkOperationId(load, pathName, methodName, methodSection) {
   var opId;
 
   if (normalize(methodSection.operationId) != undefined && load[normalize(methodSection.operationId)] == undefined) {
-    logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + methodSection.operationId +")");
+    logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + methodSection.operationId + ")");
     process.exit();
   } else {
     if (load[normalize(methodSection.operationId)] != undefined) {
       opId = normalize(methodSection.operationId);
     } else {
-      opId = generateOperationId(methodName,pathName);
+      opId = generateOperationId(methodName, pathName);
       logger.debug("      There is no operationId for " + methodName.toUpperCase() + " - " + pathName + " -> generated: " + opId);
     }
     if (load[opId] == undefined) {
-      logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + opId +")");
+      logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + opId + ")");
       process.exit();
     } else {
       logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
@@ -203,7 +200,7 @@ function getBasePath(reqRoutePath) {
  * @param {string} oasPath - Path as shown in the oas-doc.
  */
 function getExpressVersion(oasPath) {
-  return oasPath.replace(/{/g,':').replace(/}/g,'');
+  return oasPath.replace(/{/g, ':').replace(/}/g, '');
 }
 
 /**
@@ -212,15 +209,19 @@ function getExpressVersion(oasPath) {
  *@param {object} methodName - One of CRUD methods.
  *@param {object} methodSection - Section of the speficication file belonging to methodName.
  *@param {object} controllersLocation - Location of controller files.
- *@param {object} single - Indicates if operation is related to single resource.
  */
-function checkControllers(pathName, methodName, methodSection, controllersLocation, single) {
+function checkControllers(pathName, methodName, methodSection, controllersLocation) {
   logger.debug("  " + methodName.toUpperCase() + " - " + pathName);
   var controller;
   var load;
-  var single = false;
-  if (methodSection.parameters != undefined) {
-    single = true;
+  var router_property;
+
+  if (methodSection['x-router-controller'] != undefined) {
+    router_property = 'x-router-controller';
+  } else if (methodSection['x-swagger-router-controller'] != undefined) {
+    router_property = 'x-swagger-router-controller';
+  } else {
+    router_property = undefined;
   }
 
   if (methodSection[router_property] != undefined) {
@@ -228,41 +229,29 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
     logger.debug("    OAS-doc has " + router_property + " property");
     try {
       load = require(pathModule.join(controllersLocation, controller));
-      checkOperationId(load, pathName, methodName, methodSection, single);
+      checkOperationId(load, pathName, methodName, methodSection);
     } catch (err) {
       logger.error(err);
       process.exit();
     }
   } else {
-    controller = getBasePath(getExpressVersion(pathName)) + "Controller";
-    logger.debug("    OAS-doc doesn't have " + router_property + " property -> try generic controller name: " + controller)
+    controller = getBasePath(getExpressVersion(pathName)) + "Controller"; //TODO: update this! the way swagger does it: path+params+method.toUpperCase();
+    logger.debug("    Spec-file does not have router property -> try generic controller name: " + controller)
     try {
       var load = require(pathModule.join(controllersLocation, controller));
-      checkOperationId(load, pathName, methodName, methodSection,single);
+      checkOperationId(load, pathName, methodName, methodSection);
     } catch (err) {
       logger.debug("    Controller with generic controller name wasn't found either -> try Default one");
       try {
         controller = 'Default' //try to load default one
         var load = require(pathModule.join(controllersLocation, controller));
-        checkOperationId(load, pathName, methodName, methodSection,single);
+        checkOperationId(load, pathName, methodName, methodSection);
       } catch (err) {
         logger.error("    There is no controller for " + methodName.toUpperCase() + " - " + pathName);
         process.exit();
       }
     }
   }
-}
-
-/**
- * Checks if the expressPath has parameters. If so, then the request is for a single resource.
- *@param {object} expressPath - Path in express format.
- */
-function checkSingle(expressPath) {
-  var single = false;
-  if (expressPath.split("/").length > 2) {
-    single = true;
-  }
-  return single;
 }
 
 /**
@@ -275,67 +264,64 @@ var initialize = function initialize(oasDoc, app, callback) {
 
   init_checks(oasDoc, callback);
 
-  deref(oasDoc, function(err, fullSchema) {
-    logger.info("Specification file dereferenced");
-    oasDoc = fullSchema;
+  var fullSchema = deref(oasDoc);
+  logger.info("Specification file dereferenced");
+  oasDoc = fullSchema;
 
-    //THE FOLLOWING THREE SECTIONS ARE INSIDE THE deref CALL BECAUSE OTHERWISE oasDoc WOULDN'T HAVE THE RIGHT VALUE of 'fullSchema'
-    var OASRouterMid = function() {
-      var OASRouter = require('./middleware/oas-router');
-      return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
-    };
-    var OASValidatorMid = function() {
-      var OASValidator = require('./middleware/oas-validator');
-      return OASValidator.call(undefined, oasDoc, app._router.stack); // VALIDATOR NEEDS JUST SPEC-FILE
-    };
+  var OASRouterMid = function() {
+    var OASRouter = require('./middleware/oas-router');
+    return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
+  };
+  var OASValidatorMid = function() {
+    var OASValidator = require('./middleware/oas-validator');
+    return OASValidator.call(undefined, oasDoc, app._router.stack); // VALIDATOR NEEDS JUST SPEC-FILE
+  };
 
-    var paths = oasDoc.paths;
-    for (var path in paths) {
-      for (var method in paths[path]) {
-        var expressPath = transformToExpress(path);
-        logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
-        var single = checkSingle(expressPath);
-        if (config.router == true) {
-          checkControllers(path, method, paths[path][method], config.controllers, single);
-        }
-        switch (method) {
-          case 'get':
-            if (config.validator == true) {
-              app.get(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.get(expressPath, OASRouterMid());
-            }
-            break;
-          case 'post':
-            if (config.validator == true) {
-              app.post(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.post(expressPath, OASRouterMid());
-            }
-            break;
-          case 'put':
-            if (config.validator == true) {
-              app.put(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.put(expressPath, OASRouterMid());
-            }
-            break;
-          case 'delete':
-            if (config.validator == true) {
-              app.delete(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.delete(expressPath, OASRouterMid());
-            }
-            break;
-        }
+  var paths = oasDoc.paths;
+  for (var path in paths) {
+    for (var method in paths[path]) {
+      var expressPath = transformToExpress(path);
+      logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
+      if (config.router == true) {
+        checkControllers(path, method, paths[path][method], config.controllers);
       }
-    } 
-    callback();
-  }); //end deref
+      switch (method) {
+        case 'get':
+          if (config.validator == true) {
+            app.get(expressPath, OASValidatorMid());
+          }
+          if (config.router == true) {
+            app.get(expressPath, OASRouterMid());
+          }
+          break;
+        case 'post':
+          if (config.validator == true) {
+            app.post(expressPath, OASValidatorMid());
+          }
+          if (config.router == true) {
+            app.post(expressPath, OASRouterMid());
+          }
+          break;
+        case 'put':
+          if (config.validator == true) {
+            app.put(expressPath, OASValidatorMid());
+          }
+          if (config.router == true) {
+            app.put(expressPath, OASRouterMid());
+          }
+          break;
+        case 'delete':
+          if (config.validator == true) {
+            app.delete(expressPath, OASValidatorMid());
+          }
+          if (config.router == true) {
+            app.delete(expressPath, OASRouterMid());
+          }
+          break;
+      }
+    }
+  }
+  callback();
 };
 
 /**
@@ -346,87 +332,81 @@ var initialize = function initialize(oasDoc, app, callback) {
  */
 var initializeMiddleware = function initializeMiddleware(specDoc, app, callback) {
 
-  config.swaggerTools = true;
-  router_property = 'x-swagger-router-controller';
-
   init_checks(specDoc, callback);
 
-  deref(specDoc, function(err, fullSchema) {
-    logger.info("Specification file dereferenced");
-    specDoc = fullSchema;
+  var fullSchema = deref(specDoc);
+  logger.info("Specification file dereferenced");
+  specDoc = fullSchema;
 
-    var OASRouterMid = function() {
-      var OASRouter = require('./middleware/oas-router');
-      return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
-    };
-    var OASValidatorMid = function() {
-      var OASValidator = require('./middleware/oas-validator');
-      return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
-    };
+  var OASRouterMid = function() {
+    var OASRouter = require('./middleware/oas-router');
+    return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
+  };
+  var OASValidatorMid = function() {
+    var OASValidator = require('./middleware/oas-validator');
+    return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
+  };
 
-    var paths = specDoc.paths;
-    for (var path in paths) {
-      for (var method in paths[path]) {
-        var expressPath = transformToExpress(path);
-        logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
-        var single = checkSingle(expressPath);
-        if (config.router == true) {
-          checkControllers(path, method, paths[path][method], config.controllers, single);
-        }
-
-        switch (method) {
-          case 'get':
-            if (config.validator == true) {
-              app.get(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.get(expressPath, OASRouterMid());
-            }
-            break;
-          case 'post':
-            if (config.validator == true) {
-              app.post(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.post(expressPath, OASRouterMid());
-            }
-            break;
-          case 'put':
-            if (config.validator == true) {
-              app.put(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.put(expressPath, OASRouterMid());
-            }
-            break;
-          case 'delete':
-            if (config.validator == true) {
-              app.delete(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.delete(expressPath, OASRouterMid());
-            }
-            break;
-        }
+  var paths = specDoc.paths;
+  for (var path in paths) {
+    for (var method in paths[path]) {
+      var expressPath = transformToExpress(path);
+      logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
+      if (config.router == true) {
+        checkControllers(path, method, paths[path][method], config.controllers);
+      }
+      switch (method) {
+        case 'get':
+          if (config.validator == true) {
+            app.get(expressPath, OASValidatorMid());
+          }
+          if (config.router == true) {
+            app.get(expressPath, OASRouterMid());
+          }
+          break;
+        case 'post':
+          if (config.validator == true) {
+            app.post(expressPath, OASValidatorMid());
+          }
+          if (config.router == true) {
+            app.post(expressPath, OASRouterMid());
+          }
+          break;
+        case 'put':
+          if (config.validator == true) {
+            app.put(expressPath, OASValidatorMid());
+          }
+          if (config.router == true) {
+            app.put(expressPath, OASRouterMid());
+          }
+          break;
+        case 'delete':
+          if (config.validator == true) {
+            app.delete(expressPath, OASValidatorMid());
+          }
+          if (config.router == true) {
+            app.delete(expressPath, OASRouterMid());
+          }
+          break;
       }
     }
-    var middleware = {
-      /* swaggerValidator: function() {
-        var OASValidator = require('./middleware/oas-validator');
-        return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
-      },
-      swaggerRouter: function() {
-        var OASRouter = require('./middleware/oas-router');
-        return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
-      }, */
-      swaggerValidator: require('./middleware/empty_middleware'),
-      swaggerRouter: require('./middleware/empty_middleware'),
-      swaggerMetadata: require('./middleware/empty_middleware'),
-      swaggerUi: require('./middleware/empty_middleware'),
-      swaggerSecurity: require('./middleware/empty_middleware')
-    };
-    callback(middleware);
-  }); //end deref
+  }
+  var middleware = {
+    /* swaggerValidator: function() {
+      var OASValidator = require('./middleware/oas-validator');
+      return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
+    },
+    swaggerRouter: function() {
+      var OASRouter = require('./middleware/oas-router');
+      return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
+    }, */
+    swaggerValidator: require('./middleware/empty_middleware'),
+    swaggerRouter: require('./middleware/empty_middleware'),
+    swaggerMetadata: require('./middleware/empty_middleware'),
+    swaggerUi: require('./middleware/empty_middleware'),
+    swaggerSecurity: require('./middleware/empty_middleware')
+  };
+  callback(middleware);
 };
 
 module.exports = {
