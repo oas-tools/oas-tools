@@ -27,8 +27,9 @@ var config = require('../configurations'),
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
-  assumeAdditional: true
+  breakOnFirstError: false
 });
+var utils = require("../lib/utils.js");
 var controllers;
 
 /**
@@ -50,25 +51,6 @@ function executeFunctionByName(functionName, context, req, res, next) {
   logger.debug("   -functionName: " + functionName);
   logger.debug("   -context[func]: " + func)
   return context[func].apply(context, [req, res, next]);
-}
-
-/**
- * Removes parameters from the requested path and returns the base path.
- * @param {string} reqRoutePath - Value or req.route.path (express version).
- */
-function getBasePath(reqRoutePath) {
-  var basePath = "";
-  var first = true;
-  var path_array = reqRoutePath.split('/');
-  for (var i = 0; i < path_array.length; i++) {
-    if (path_array[i].charAt(0) !== ':' && first == true && path_array[i].charAt(0) !== '') {
-      basePath = basePath + path_array[i];
-      first = false;
-    } else if (path_array[i].charAt(0) !== ':') {
-      basePath = basePath + path_array[i].charAt(0).toUpperCase() + path_array[i].slice(1, path_array[i].length);
-    }
-  }
-  return basePath;
 }
 
 /**
@@ -109,23 +91,28 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
       var validSchema = responseCodeSection.content['application/json'].schema;
       logger.debug("Schema to use for validation: " + validSchema);
       data = JSON.parse(data); //Without this everything is string so type validation wouldn't happen
-
+      try{
+        validSchema.items.additionalProperties = false; // result is an array: has items
+      }catch(err){
+        validSchema.additionalProperties = false; // single result
+      }
       //validator.validate(data, validSchema, function(err, valid) {
       var err = validator.validate(data, validSchema);
       if (err == false) {
-        msg = msg + "Wrong data in the response. " + JSON.stringify(validator.getLastErrors());
+        msg = msg + "Wrong data in the response. ";
       }
       if (msg.length > 0) {
         if (config.strict == true) {
-          logger.error(msg);
           content[0] = JSON.stringify({
             message: msg,
+            error: validator.getLastErrors(),
             content: data
           });
+          logger.error(content[0]);
           res.status(400);
           oldSend.apply(res, content);
         } else {
-          logger.warning(msg);
+          logger.warning(msg + JSON.stringify(validator.getLastErrors()));
           oldSend.apply(res, content);
         }
       } else {
@@ -159,45 +146,10 @@ function existsController(locationOfControllers, controllerName) {
  */
 function generateControllerName(reqRoutePath) {
   var name;
-  var resource = getBasePath(reqRoutePath);
+  var resource = utils.getBasePath(reqRoutePath);
   name = resource.charAt(0).toUpperCase() + resource.slice(1) + "Controller";
   logger.debug("  ---function generateControllerName -> input: " + reqRoutePath + " output: " + name);
   return name;
-}
-
-/**
- * Returns a simple, frinedly, intuitive name deppending on the requested method.
- * @param {object} method - Method name taken directly from the req object.
- */
-function nameMethod(method) {
-  method = method.toString().toUpperCase();
-  var name;
-  if (method == 'GET') {
-    name = "list";
-  } else if (method == 'POST') {
-    name = "create";
-  } else if (method == 'PUT') {
-    name = "update";
-  } else if (method == 'DELETE') {
-    name = "delete";
-  }
-  return name;
-}
-
-/** TODO: for paths like /2.0/votos/{talkId}/ swagger creates 2_0votosTalkId que no es válido! qué debe hacer oas-tools?
- * Generates an operationId according to the method and path requested the same way swagger-codegen does it.
- * @param {string} method - Requested method.
- * @param {string} path - Requested path as shown in the oas doc.
- */
-function generateOperationId(method, path) {
-  var output = "";
-  var path = path.split('/');
-  for (var i = 1; i < path.length; i++) {
-    var chunck = path[i].replace(/[{}]/g, '');
-    output = output + chunck.charAt(0).toUpperCase() + chunck.slice(1, chunck.length);
-  }
-  output = output + method.toUpperCase();
-  return output.charAt(0).toLowerCase() + output.slice(1, output.length);
 }
 
 /**
@@ -210,36 +162,8 @@ function getOpId(oasDoc, requestedSpecPath, method) {
   if (oasDoc.paths[requestedSpecPath][method].hasOwnProperty('operationId')) {
     return oasDoc.paths[requestedSpecPath][method].operationId.toString(); // Use opID specified in the oas doc
   } else {
-    return generateOperationId(method, requestedSpecPath);
+    return utils.generateOperationId(method, requestedSpecPath);
   }
-}
-
-/**
- * OperationId can have values which are not accepted as function names. This function generates a valid name
- * @param {object} operationId - OpreationId of a given path-method pair.
- */
-function normalize(operationId) {
-  var validOpId = "";
-  for (var i = 0; i < operationId.length; i++) {
-    if (operationId[i] == '-' || operationId[i] == ' '|| operationId[i] == '.') {
-      validOpId = validOpId + "";
-      validOpId = validOpId + operationId[i + 1].toUpperCase();
-      i = i + 1;
-    } else {
-      validOpId = validOpId + operationId[i];
-    }
-  }
-  return validOpId;
-}
-
-/**
- * The generated controller name is done using the path or the router property and these can have characters which are
- * allowed for variable names. As services must be required in controller files these names must be normalized.
- * @param {string} controllerName - Name of controller, either autogenerated or specified using router property.
- */
-function normalize_controllerName(controllerName) {
-  var normalized = controllerName.replace(/^[^a-zA-Z]*/, '').replace(/[^a-zA-Z0-9]*/g, '');
-  return normalized;
 }
 
 
@@ -256,15 +180,15 @@ exports = module.exports = function(controllers) {
     else if (oasDoc.paths[requestedSpecPath][method].hasOwnProperty('x-router-controller')) { //oasDoc file has router_property: use the controller specified there
       var controllerName = oasDoc.paths[requestedSpecPath][method]['x-router-controller'];
     }
-    else if (existsController(controllers, generateControllerName(normalize_controllerName(getBasePath(req.route.path))))) { //oasDoc file doesn't have router_property: use the standard controller name (autogenerated) if found
+    else if (existsController(controllers, generateControllerName(utils.normalize_controllerName(utils.getBasePath(req.route.path))))) { //oasDoc file doesn't have router_property: use the standard controller name (autogenerated) if found
       var controllerName = generateControllerName(req.route.path);
     }
     else { //oasDoc file doesn't have router_property and standard controller (autogenerated name) doesn't exist: use the default controller
       var controllerName = "Default";
     }
 
-    var opID = normalize(getOpId(oasDoc, requestedSpecPath, method));
-    controllerName = normalize_controllerName(controllerName);
+    var opID = utils.normalize(getOpId(oasDoc, requestedSpecPath, method));
+    controllerName = utils.normalize_controllerName(controllerName);
 
     try {
       var controller = require(path.join(controllers, controllerName));

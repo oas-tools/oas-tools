@@ -32,43 +32,29 @@ var deref = require('json-schema-deref');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
-  assumeAdditional: true
+  breakOnFirstError: false
 });
 
-
-
-/**
- * Returns the oas-like version of the url requested by the user.
- * @param {string} path - Express version of the requested url: req.route.path.
- */
-function getOASversion(path) {
-  var oasVersion = "";
-  var hasParameters = false;
-  for (var c in path) {
-    if (path[c] == ':') {
-      hasParameters = true;
-      oasVersion += '{';
-    } else if (path[c] == '/' && hasParameters == true) {
-      oasVersion += '}/';
-      hasParameters = false;
-    } else {
-      oasVersion += path[c];
-    }
-  }
-  if (hasParameters == true) {
-    oasVersion += '}';
-  }
-  return oasVersion;
-}
 
 /**
  * Returns the Express version of the OAS name for location.
  * @param {string} location - Location of a parameter. 'in' of the oasDoc file for that parameter.
  */
-function locationFormat(location) {
-  var expressLocation = location;
-  if (location == "path") {
-    expressLocation = "params";
+function locationFormat(location) { //TODO: Possible 'in' values: path, query, header, cookie.
+  var expressLocation;
+  switch (location) {
+    case "path":
+      expressLocation = "params";
+      break;
+    case "query":
+      expressLocation = "query";
+      break;
+    case "header":
+      expressLocation = "header";
+      break;
+    case "cookie":
+      expressLocation = "cookie";
+      break;
   }
   return expressLocation;
 }
@@ -97,7 +83,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
       } else {
         var validSchema = requestBody.content['application/json'].schema;
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen
-
+        validSchema.items.additionalProperties = false;
         var err = validator.validate(data, validSchema);
         if (err == false) {
           keepGoing = false;
@@ -137,8 +123,8 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
             keepGoing = false;
             if (err.code == "UNKNOWN_FORMAT") {
               var registeredFormats = ZSchema.getRegisteredFormats();
-              logger.info("UNKNOWN_FORMAT error - Registered Formats: ");
-              logger.info(registeredFormats);
+              logger.error("UNKNOWN_FORMAT error - Registered Formats: ");
+              logger.error(registeredFormats);
             }
             msg += "Wrong parameter " + name + " in " + location + ": " + JSON.stringify(validator.getLastErrors()) + ". ";
           } else {
@@ -167,16 +153,16 @@ exports = module.exports = function(oasDoc) {
   return function OASValidator(req, res, next) {
 
     req.swagger = {
-        params: req.params,
-        query: req.query,
-        body: req.body
+      params: req.params,
+      query: req.query,
+      body: req.body
     }
 
     var method = req.method.toLowerCase();
 
     logger.info("Requested method-url pair: " + method + " - " + req.url);
 
-    var requestedSpecPath = config.pathsDict[req.route.path]; // getOASversion(req.route.path);
+    var requestedSpecPath = config.pathsDict[req.route.path];
 
     res.locals.requestedSpecPath = requestedSpecPath;
     checkRequestData(oasDoc, requestedSpecPath, method, res, req, next);

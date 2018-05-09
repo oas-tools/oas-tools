@@ -28,8 +28,10 @@ var config = require('./configurations'),
 var ZSchema = require("z-schema");
 var deref = require('json-schema-deref-sync');
 var validator = new ZSchema({
-  ignoreUnresolvableReferences: true
+  ignoreUnresolvableReferences: true,
+  breakOnFirstError: false
 });
+var utils = require("./lib/utils.js");
 var controllers;
 var customConfigurations = false;
 var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
@@ -72,81 +74,6 @@ var configure = function configure(options) {
 };
 
 /**
- * Transforms yaml's spec path format to Express format.
- *@param {object} path - Path to transform.
- */
-function transformToExpress(path) {
-  var res = "";
-  for (var c in path) {
-    if (path[c] == '{') {
-      res = res + ':';
-    } else if (path[c] == '}') {
-      res = res + '';
-    } else {
-      res = res + path[c];
-    }
-  }
-  return res;
-}
-
-/**
- * Returns a simple, frinedly, intuitive name deppending on the requested method.
- * @param {object} method - Method name taken directly from the req object.
- */
-function nameMethod(method) {
-  method = method.toString();
-  var name;
-  if (method == 'get') {
-    name = "list";
-  } else if (method == 'post') {
-    name = "create";
-  } else if (method == 'put') {
-    name = "update";
-  } else if (method == 'delete') {
-    name = "delete";
-  }
-  return name;
-}
-
-/** TODO: for paths like /2.0/votos/{talkId}/ swagger creates 2_0votosTalkId que no es válido! qué debe hacer oas-tools?
- * Generates an operationId according to the method and path requested the same way swagger-codegen does it.
- * @param {string} method - Requested method.
- * @param {string} path - Requested path as shown in the oas doc.
- */
-function generateOperationId(method, path) {
-  var output = "";
-  var path = path.split('/');
-  for (var i = 1; i < path.length; i++) {
-    var chunck = path[i].replace(/[{}]/g, '');
-    output = output + chunck.charAt(0).toUpperCase() + chunck.slice(1, chunck.length);
-  }
-  output = output + method.toUpperCase();
-  return output.charAt(0).toLowerCase() + output.slice(1, output.length);
-}
-
-/**
- * OperationId can have values which are not accepted as function names. This function generates a valid name
- * @param {object} operationId - OpreationId of a given path-method pair.
- */
-function normalize(operationId) {
-  if (operationId != undefined) {
-    var validOpId = "";
-    for (var i = 0; i < operationId.length; i++) {
-      if (operationId[i] == '-' || operationId[i] == ' '|| operationId[i] == '.') {
-        validOpId = validOpId + "";
-        validOpId = validOpId + operationId[i + 1].toUpperCase();
-        i = i + 1;
-      } else {
-        validOpId = validOpId + operationId[i];
-      }
-    }
-    return validOpId;
-  } else {
-    return undefined;
-  }
-}
-
-/**
  * Checks if operationId (or generic) exists for a given pair path-method.
  *@param {object} load - Loaded controller.
  *@param {object} pathName - Path of the spec file to be used to find controller.
@@ -155,14 +82,14 @@ function normalize(operationId) {
  */
 function checkOperationId(load, pathName, methodName, methodSection) {
   var opId;
-  if (normalize(methodSection.operationId) != undefined && load[normalize(methodSection.operationId)] == undefined) {
+  if (utils.normalize(methodSection.operationId) != undefined && load[utils.normalize(methodSection.operationId)] == undefined) {
     logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + methodSection.operationId + ")");
     process.exit();
   } else {
-    if (load[normalize(methodSection.operationId)] != undefined) {
-      opId = normalize(methodSection.operationId);
+    if (load[utils.normalize(methodSection.operationId)] != undefined) {
+      opId = utils.normalize(methodSection.operationId);
     } else {
-      opId = normalize(generateOperationId(methodName, pathName));
+      opId = utils.normalize(utils.generateOperationId(methodName, pathName));
       logger.debug("      There is no operationId for " + methodName.toUpperCase() + " - " + pathName + " -> generated: " + opId);
     }
     if (load[opId] == undefined) {
@@ -172,44 +99,6 @@ function checkOperationId(load, pathName, methodName, methodSection) {
       logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
     }
   }
-}
-
-/**
- * Removes parameters from the requested path and returns the base path.
- * TODO: with first character converted to upper case as it will be used for a controller name.?
- * @param {string} reqRoutePath - Value or req.route.path (express version).
- */
-function getBasePath(reqRoutePath) {
-  var basePath = "";
-  var first = true;
-  var path_array = reqRoutePath.split('/');
-  for (var i = 0; i < path_array.length; i++) {
-    if (path_array[i].charAt(0) !== ':' && first == true && path_array[i].charAt(0) !== '') {
-      basePath = basePath + path_array[i];
-      first = false;
-    } else if (path_array[i].charAt(0) !== ':') {
-      basePath = basePath + path_array[i].charAt(0).toUpperCase() + path_array[i].slice(1, path_array[i].length);
-    }
-  }
-  return basePath; //basePath.charAt(0).toUpperCase() + basePath.slice(1, basePath.length);
-}
-
-/**
- * Converts a oas-doc type path into an epxress one.
- * @param {string} oasPath - Path as shown in the oas-doc.
- */
-function getExpressVersion(oasPath) {
-  return oasPath.replace(/{/g, ':').replace(/}/g, '');
-}
-
-/**
- * The generated controller name is done using the path or the router property and these can have characters which are
- * allowed for variable names. As services must be required in controller files these names must be normalized.
- * @param {string} controllerName - Name of controller, either autogenerated or specified using router property.
- */
-function normalize_controllerName(controllerName) {
-  var normalized = controllerName.replace(/^[^a-zA-Z]*/, '').replace(/[^a-zA-Z0-9]*/g, '');
-  return normalized;
 }
 
 /**
@@ -244,8 +133,8 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
       process.exit();
     }
   } else {
-    controller = getBasePath(getExpressVersion(pathName)) + "Controller"; //TODO: update this! the way swagger does it: path+params+method.toUpperCase();
-    controller = normalize_controllerName(controller);
+    controller = utils.getBasePath(utils.getExpressVersion(pathName)) + "Controller";
+    controller = utils.normalize_controllerName(controller);
     logger.debug("    Spec-file does not have router property -> try generic controller name: " + controller)
     try {
       var load = require(pathModule.join(controllersLocation, controller));
@@ -292,7 +181,7 @@ var initialize = function initialize(oasDoc, app, callback) {
   var paths = oasDoc.paths;
   for (var path in paths) {
     for (var method in paths[path]) {
-      var expressPath = transformToExpress(path);
+      var expressPath = utils.getExpressVersion(path);
       dictionary[expressPath.toString()] = path;
       logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
       if (config.router == true) {
@@ -364,7 +253,7 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
   var paths = specDoc.paths;
   for (var path in paths) {
     for (var method in paths[path]) {
-      var expressPath = transformToExpress(path);
+      var expressPath = utils.getExpressVersion(path);
       logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
       if (config.router == true) {
         checkControllers(path, method, paths[path][method], config.controllers);

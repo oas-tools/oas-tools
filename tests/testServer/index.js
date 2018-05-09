@@ -20,12 +20,12 @@ var options_string = path.join(__dirname, './configurations/customConfig.yaml');
 var options_object = {
   controllers: path.join(__dirname, './controllers'),
   loglevel: 13,
-  strict: false,
+  strict: true,
   router: true,
   validator: true
 };
 
-//oasTools.configure(options_object);
+oasTools.configure(options_object);
 
 oasTools.initialize(oasDoc, app, function() { // oas-tools version
   http.createServer(app).listen(serverPort, function() {

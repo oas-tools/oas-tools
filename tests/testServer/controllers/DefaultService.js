@@ -29,7 +29,7 @@ var pets = [{
   {
     id: 200,
     name: "AnimalZ",
-    tag: "This is an object"
+    tag: "This is an object",
   }
 ];
 
@@ -68,7 +68,7 @@ function corruptPets() {
   exports.pets = pets;
 }
 
-function setCorrectPets(){
+function setCorrectPets() {
   pets = [{
       id: 1,
       name: "Wolf",
