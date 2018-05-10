@@ -83,7 +83,11 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
       } else {
         var validSchema = requestBody.content['application/json'].schema;
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen
-        validSchema.items.additionalProperties = false;
+        try{
+          validSchema.items.additionalProperties = false; // result is an array: has items
+        }catch(err){
+          validSchema.additionalProperties = false; // single result
+        }
         var err = validator.validate(data, validSchema);
         if (err == false) {
           keepGoing = false;
