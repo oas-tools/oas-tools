@@ -236,8 +236,6 @@ var initialize = function initialize(oasDoc, app, callback) {
   callback();
 };
 
-
-
 /**
  * Function to initialize swagger-tools middlewares.
  *@param {object} specDoc - Specification file.
@@ -250,11 +248,9 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
 
   var fullSchema = deref(specDoc);
   logger.info("Specification file dereferenced");
-  
-  registerPaths(fullSchema, app);
 
   var middleware = {
-    /* swaggerValidator: function() {
+    /* swaggerValidator: function() { //TODO: this would be needed if 'app' object is not passed, but then how would paths be registered?
       var OASValidator = require('./middleware/oas-validator');
       return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
     },
@@ -269,6 +265,7 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
     swaggerSecurity: require('./middleware/empty_middleware')
   };
   callback(middleware);
+  registerPaths(fullSchema, app);
 };
 
 module.exports = {

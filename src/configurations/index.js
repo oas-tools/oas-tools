@@ -39,8 +39,8 @@ var config = {
 
 module.exports = config;
 
-module.exports.setProperty = function (propertyName, newValue) {
-    this[propertyName] = newValue;
+module.exports.setProperty = function(propertyName, newValue) {
+  this[propertyName] = newValue;
 };
 
 
@@ -51,19 +51,19 @@ function _setConfigurations(options, encoding) {
 
   if (!options) {
     throw new Error("Configurations parameter is required");
-  }else if(typeof options == 'string') {
-    try{
+  } else if (typeof options == 'string') {
+    try {
       var configString = fs.readFileSync(options, encoding);
       var newConfigurations = jsyaml.safeLoad(configString)[process.env.NODE_ENV ? process.env.NODE_ENV : 'development'];
-    }catch(err){
+    } catch (err) {
       console.log("The specified configuration file wasn't found at " + options + ".  Default configurations will be set");
       config.setConfigurations(path.join(__dirname, 'configs.yaml'), 'utf8');
     }
-  }else{
+  } else {
     newConfigurations = options;
   }
 
-  if(newConfigurations.controllers == undefined){ //TODO: Fix this!
+  if (newConfigurations.controllers == undefined) { //TODO: Fix this!
     //newConfigurations.controllers = path.join(process.cwd(), './testServer/controllers'); // for testing and development
     newConfigurations.controllers = path.join(process.cwd(), './controllers'); // for production (document that if no controller is specified then 'node' must be done wher /controllers is)
   }
@@ -100,7 +100,7 @@ var customLevels = {
 
 winston.emitErrs = true;
 
-function consoleLogger(){
+function consoleLogger() {
   module.exports.logger = new winston.Logger({
     levels: customLevels.levels,
     colors: customLevels.colors,
@@ -117,29 +117,29 @@ function consoleLogger(){
   });
 }
 
-if(config.logfile != undefined){
-    module.exports.logger = new winston.Logger({
-      levels: customLevels.levels,
-      colors: customLevels.colors,
-      transports: [
-        new winston.transports.File({
-          level: config.loglevel,
-          filename: config.logfile,
-          handleExceptions: true,
-          json: false,
-          maxsize: 5242880, //5MB
-          colorize: false
-        }),
-        new winston.transports.Console({
-          level: config.loglevel,
-          handleExceptions: true,
-          json: false,
-          colorize: true,
-          timestamp: true
-        })
-      ],
-      exitOnError: false
-    });
-}else{
+if (config.logfile != undefined) {
+  module.exports.logger = new winston.Logger({
+    levels: customLevels.levels,
+    colors: customLevels.colors,
+    transports: [
+      new winston.transports.File({
+        level: config.loglevel,
+        filename: config.logfile,
+        handleExceptions: true,
+        json: false,
+        maxsize: 5242880, //5MB
+        colorize: false
+      }),
+      new winston.transports.Console({
+        level: config.loglevel,
+        handleExceptions: true,
+        json: false,
+        colorize: true,
+        timestamp: true
+      })
+    ],
+    exitOnError: false
+  });
+} else {
   consoleLogger();
 }

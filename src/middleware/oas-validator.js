@@ -38,25 +38,17 @@ var validator = new ZSchema({
 
 /**
  * Returns the Express version of the OAS name for location.
- * @param {string} location - Location of a parameter. 'in' of the oasDoc file for that parameter.
+ * @param {string} inProperty - Location of a parameter, value of 'in' property of the oasDoc file for that parameter.
  */
-function locationFormat(location) { //TODO: Possible 'in' values: path, query, header, cookie.
-  var expressLocation;
-  switch (location) {
-    case "path":
-      expressLocation = "params";
-      break;
-    case "query":
-      expressLocation = "query";
-      break;
-    case "header":
-      expressLocation = "header";
-      break;
-    case "cookie":
-      expressLocation = "cookie";
-      break;
-  }
-  return expressLocation;
+function locationFormat(inProperty) { //TODO: Possible 'in' values: path, query, header, cookie.
+  var dict = {
+    path: "params",
+    query: "query",
+    header: "header",
+    cookie: "cookie"
+  };
+  return dict[inProperty];
+  //return (inProperty == "path" ? "params" : inProperty); //TODO: if only 'path' changes then this is the solution!
 }
 
 /**
@@ -83,9 +75,9 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
       } else {
         var validSchema = requestBody.content['application/json'].schema;
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen
-        try{
+        try {
           validSchema.items.additionalProperties = false; // result is an array: has items
-        }catch(err){
+        } catch (err) {
           validSchema.additionalProperties = false; // single result
         }
         var err = validator.validate(data, validSchema);

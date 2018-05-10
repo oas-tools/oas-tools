@@ -10,7 +10,7 @@ var getBasePath = function(reqRoutePath) {
   var path_array = reqRoutePath.split('/');
   for (var i = 0; i < path_array.length; i++) {
     //if (path_array[i].charAt(0) !== ':' && first == true && path_array[i].charAt(0) !== '') { // TODO: compare to '' or ' '?
-    if (path_array[i].charAt(0) !== ':' && first == true && path_array[i].charAt(0) !== '') {
+    if (path_array[i].charAt(0) !== ':' && first == true && path_array[i].charAt(0) !== ' ') {
       basePath += path_array[i];
       first = false;
     } else if (path_array[i].charAt(0) !== ':') {
@@ -20,7 +20,7 @@ var getBasePath = function(reqRoutePath) {
   return basePath;
 }
 
-/** TODO: for paths like /2.0/votos/{talkId}/ swagger creates 2_0votosTalkId que no es válido! qué debe hacer oas-tools?
+/** TODO: para paths como /2.0/votos/{talkId}/ swagger crea 2_0votosTalkId que no es válido! qué debe hacer oas-tools?
  * Generates an operationId according to the method and path requested the same way swagger-codegen does it.
  * @param {string} method - Requested method.
  * @param {string} path - Requested path as shown in the oas doc.
