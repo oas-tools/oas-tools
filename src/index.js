@@ -154,31 +154,23 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
 }
 
 /**
- * Function to initialize OAS-tools middlewares.
- *@param {object} oasDoc - Specification file.
- *@param {object} app - Express server used for the application. Needed to register the paths.
- *@param {function} callback - Function in which the app is started.
+ * Function to initialize swagger-tools middlewares.
+ *@param {object} specDoc - Specification file.
+ *@param {function} app - Express application object.
  */
-var initialize = function initialize(oasDoc, app, callback) {
-
-  init_checks(oasDoc, callback);
-
-  var fullSchema = deref(oasDoc);
-  logger.info("Specification file dereferenced");
-  oasDoc = fullSchema;
-
+function registerPaths(specDoc, app) {
   var OASRouterMid = function() {
     var OASRouter = require('./middleware/oas-router');
     return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
   };
   var OASValidatorMid = function() {
     var OASValidator = require('./middleware/oas-validator');
-    return OASValidator.call(undefined, oasDoc, app._router.stack); // VALIDATOR NEEDS JUST SPEC-FILE
+    return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
   };
 
   var dictionary = {};
 
-  var paths = oasDoc.paths;
+  var paths = specDoc.paths;
   for (var path in paths) {
     for (var method in paths[path]) {
       var expressPath = utils.getExpressVersion(path);
@@ -224,8 +216,27 @@ var initialize = function initialize(oasDoc, app, callback) {
     }
   }
   config.pathsDict = dictionary;
+}
+
+/**
+ * Function to initialize OAS-tools middlewares.
+ *@param {object} oasDoc - Specification file.
+ *@param {object} app - Express server used for the application. Needed to register the paths.
+ *@param {function} callback - Function in which the app is started.
+ */
+var initialize = function initialize(oasDoc, app, callback) {
+
+  init_checks(oasDoc, callback);
+
+  var fullSchema = deref(oasDoc);
+  logger.info("Specification file dereferenced");
+
+  registerPaths(fullSchema, app);
+
   callback();
 };
+
+
 
 /**
  * Function to initialize swagger-tools middlewares.
@@ -239,61 +250,9 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
 
   var fullSchema = deref(specDoc);
   logger.info("Specification file dereferenced");
-  specDoc = fullSchema;
+  
+  registerPaths(fullSchema, app);
 
-  var OASRouterMid = function() {
-    var OASRouter = require('./middleware/oas-router');
-    return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
-  };
-  var OASValidatorMid = function() {
-    var OASValidator = require('./middleware/oas-validator');
-    return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
-  };
-
-  var paths = specDoc.paths;
-  for (var path in paths) {
-    for (var method in paths[path]) {
-      var expressPath = utils.getExpressVersion(path);
-      logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
-      if (config.router == true) {
-        checkControllers(path, method, paths[path][method], config.controllers);
-      }
-      switch (method) {
-        case 'get':
-          if (config.validator == true) {
-            app.get(expressPath, OASValidatorMid());
-          }
-          if (config.router == true) {
-            app.get(expressPath, OASRouterMid());
-          }
-          break;
-        case 'post':
-          if (config.validator == true) {
-            app.post(expressPath, OASValidatorMid());
-          }
-          if (config.router == true) {
-            app.post(expressPath, OASRouterMid());
-          }
-          break;
-        case 'put':
-          if (config.validator == true) {
-            app.put(expressPath, OASValidatorMid());
-          }
-          if (config.router == true) {
-            app.put(expressPath, OASRouterMid());
-          }
-          break;
-        case 'delete':
-          if (config.validator == true) {
-            app.delete(expressPath, OASValidatorMid());
-          }
-          if (config.router == true) {
-            app.delete(expressPath, OASRouterMid());
-          }
-          break;
-      }
-    }
-  }
   var middleware = {
     /* swaggerValidator: function() {
       var OASValidator = require('./middleware/oas-validator');

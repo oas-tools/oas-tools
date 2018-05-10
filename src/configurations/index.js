@@ -64,8 +64,8 @@ function _setConfigurations(options, encoding) {
   }
 
   if(newConfigurations.controllers == undefined){ //TODO: Fix this!
-    newConfigurations.controllers = path.join(process.cwd(), './testServer/controllers'); // for testing and development
-    //newConfigurations.controllers = path.join(process.cwd(), './controllers'); // for production (document that if no controller is specified then 'node' must be done wher /controllers is)
+    //newConfigurations.controllers = path.join(process.cwd(), './testServer/controllers'); // for testing and development
+    newConfigurations.controllers = path.join(process.cwd(), './controllers'); // for production (document that if no controller is specified then 'node' must be done wher /controllers is)
   }
   //If newConfigurations does indeed contain 'controllers', it will be initialized inside the following lop:
   for (var c in newConfigurations) {
