@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "archiver": "^2.1.1",
+    "co-prompt": "^1.0.0",
     "commander": "^2.15.1",
     "fs": "0.0.1-security",
     "js-beautify": "^1.7.5",

@@ -34,35 +34,11 @@ oasTools.initialize(oasDoc, app, function() { // oas-tools version
   });
 });
 
-/*
-var options = {controllers : path.join(__dirname, './controllers')}; //options_swagger
-
-oasTools.initializeMiddleware(oasDoc, function (middleware) { //swagger-tools version
-  // Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
-  //app.use(middleware.swaggerMetadata());
-
-  // Validate Swagger requests
-  app.use(middleware.OASValidator());
-
-  // Route validated requests to appropriate controller
-  app.use(middleware.OASRouter(options));
-
-  // Serve the Swagger documents and Swagger UI
-  //app.use(middleware.swaggerUi());
-
-  // Start the server
-  http.createServer(app).listen(serverPort, function () {
-    console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
-    console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
-  });
-});
-*/
-
 app.get('/info', function(req, res) {
   res.send({
-    infoDE: "Diese ist eine sehr einfach API die benutzt unsere oas-tools module!",
-    infoEN: "This is a very simple API that uses the oas-tools Module!"
+    infoEN: "This is a very simple API that uses the oas-tools Module!",
+    infoDE: "Diese ist eine sehr einfach API die benutzt unsere oas-tools module!"
   });
 });
 
-module.exports = app;
+//module.exports = app; TODO: verify this
