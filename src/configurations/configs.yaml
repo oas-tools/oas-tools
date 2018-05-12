@@ -15,8 +15,3 @@ development:
   router: true
   validator: true
   ignoreUnknownFormats: true
-
-
-# loglevel: info -> prints all but debug logs
-# loglevel: debug -> prints all logs
-# loglevel: error -> prints only error logs

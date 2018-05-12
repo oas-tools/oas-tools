@@ -19,6 +19,7 @@
     "helmet": "^3.5.0",
     "js-yaml": "^3.8.1",
     "json-schema-deref": "^0.4.1",
+    "lodash-compat": "^3.10.2",
     "mocha": "^5.0.1",
     "moment": "^2.17.1",
     "request": "^2.79.0",

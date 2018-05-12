@@ -108,7 +108,7 @@ function setCorrectPets() {
  *  Creates a pet
  */
 exports.createPets = function(args, res, next) {
-  pets.push(args);
+  pets.push(args['Pet'].value);
   exports.pets = pets;
   res.status(201).send(pets);
 }
@@ -118,7 +118,7 @@ exports.createPets = function(args, res, next) {
  */
 exports.listPets = function(args, res, next) {
   exports.pets = pets;
-  res.status(200).send(pets.slice(0, args.limit));
+  res.status(200).send(pets.slice(0, args['limit'].value));
 }
 
 /**
@@ -128,14 +128,14 @@ exports.showPetById = function(args, res, next) {
   exports.pets = pets;
   var res_pet;
   for (var i = 0; i < pets.length; i++) {
-    if (pets[i].id == args.petId) {
+    if (pets[i].id == args['petId'].value) {
       res_pet = pets[i];
       break;
     }
   }
   if (res_pet == undefined) {
     res.status(404).send({
-      message: "There is no pet with id " + args.petId
+      message: "There is no pet with id " + args['petId'].value
     });
   } else {
     res.status(200).send(res_pet);
@@ -148,13 +148,13 @@ exports.showPetById = function(args, res, next) {
 exports.deletePet = function(args, res, next) {
   var index = -1;
   for (var i = 0; i < pets.length; i++) {
-    if (pets[i].id == args.petId) {
+    if (pets[i].id == args['petId'].value) {
       index = i;
     }
   }
   if (index == -1) {
     res.status(404).send({
-      message: "There is no pet with id " + args.petId + " to be deleted"
+      message: "There is no pet with id " + args['petId'].value + " to be deleted"
     });
   } else {
     pets.splice(index, 1);
@@ -179,9 +179,9 @@ exports.deletePets = function(args, res, next) {
 exports.updatePet = function(args, res, next) {
   var present = false;
   for (var i = 0; i < pets.length; i++) {
-    if (pets[i].id == args.params.petId) {
+    if (pets[i].id == args['petId'].value) {
       present = true;
-      pets[i] = args.body;
+      pets[i] = args['Pet'].value;
       res.status(200).send({
         message: "Updated pet"
       });
@@ -189,7 +189,7 @@ exports.updatePet = function(args, res, next) {
   }
   if (present == false) {
     res.status(404).send({
-      message: "There is no pet with id " + args.params.petId
+      message: "There is no pet with id " + args['petId'].value
     });
   }
   exports.pets = pets;

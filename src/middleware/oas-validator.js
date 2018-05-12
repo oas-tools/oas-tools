@@ -34,6 +34,7 @@ var validator = new ZSchema({
   ignoreUnknownFormats: config.ignoreUnknownFormats,
   breakOnFirstError: false
 });
+var _ = require('lodash-compat');
 
 
 /**
@@ -144,21 +145,266 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
   }
 }
 
+/**
+ * .
+ * @param {string}  - .
+ */
+function getParameterType(schema) {
+  var type = schema.type;
+  if (!type && schema.schema) {
+    type = getParameterType(schema.schema);
+  }
+  if (!type) {
+    type = 'object';
+  }
+  return type;
+};
+
+/**
+ * .
+ * @param {string}  - .
+
+function getParameterValue(req, parameter){ //TODO handle: body, form, formData, header, path, query... what about body?
+  var parameterName = parameter.name;
+  return req.params[parameterName];
+}
+*/
+function getParameterValue(req, parameter) {
+  var defaultVal = parameter.default;
+  var paramLocation = parameter.in;
+  var paramType = getParameterType(parameter);
+  var val;
+
+  // Get the value to validate based on the operation parameter type
+  switch (paramLocation) {
+    case 'body':
+      val = req.body;
+
+      break;
+    case 'form':
+    case 'formData':
+      if (paramType.toLowerCase() === 'file') {
+        if (_.isArray(req.files)) {
+          val = _.find(req.files, function(file) {
+            return file.fieldname === parameter.name;
+          });
+        } else if (!_.isUndefined(req.files)) {
+          val = req.files[parameter.name] ? req.files[parameter.name] : undefined;
+        }
+
+        // Swagger does not allow an array of files
+        if (_.isArray(val)) {
+          val = val[0];
+        }
+      } else if (isModelParameter(version, parameter)) {
+        val = req.body;
+      } else {
+        val = req.body[parameter.name];
+      }
+
+      break;
+    case 'header':
+      val = req.headers[parameter.name.toLowerCase()];
+
+      break;
+    case 'path':
+      val = req.params[parameter.name]; // TODO: how many parameters can be in the path?
+
+      break;
+    case 'query':
+      val = _.get(req.query, parameter.name);
+
+      break;
+  }
+  // Use the default value when necessary
+  if (_.isUndefined(val) && !_.isUndefined(defaultVal)) {
+    val = defaultVal;
+  }
+
+  return val;
+};
+
+/**
+ * .
+ * @param {string}  - .
+ */
+function convertValue(value, schema, type) {
+  var original = value;
+
+  // Default to {}
+  if (_.isUndefined(schema)) {
+    schema = {};
+  }
+
+  // Try to find the type or default to 'object'
+  if (_.isUndefined(type)) {
+    type = getParameterType(schema);
+  }
+
+  // If there is no value, do not convert it
+  if (_.isUndefined(value)) {
+    return value;
+  }
+
+  // If there is an empty value and allowEmptyValue is true, return it
+  if (schema.allowEmptyValue && value === '') {
+    return value;
+  }
+
+  switch (type) {
+    case 'array':
+      if (_.isString(value)) {
+        switch (schema.collectionFormat) {
+          case 'csv':
+          case undefined:
+            try {
+              value = JSON.parse(value);
+            } catch (err) {
+              value = original;
+            }
+
+            if (_.isString(value)) {
+              value = value.split(',');
+            }
+            break;
+          case 'multi':
+            value = [value];
+            break;
+          case 'pipes':
+            value = value.split('|');
+            break;
+          case 'ssv':
+            value = value.split(' ');
+            break;
+          case 'tsv':
+            value = value.split('\t');
+            break;
+        }
+      }
+
+      // Handle situation where the expected type is array but only one value was provided
+      if (!_.isArray(value)) {
+        value = [value];
+      }
+
+      value = _.map(value, function(item, index) {
+        var iSchema = _.isArray(schema.items) ? schema.items[index] : schema.items;
+
+        return convertValue(item, iSchema, iSchema ? iSchema.type : undefined);
+      });
+
+      break;
+
+    case 'boolean':
+      if (!_.isBoolean(value)) {
+        if (['false', 'true'].indexOf(value) === -1) {
+          value = original;
+        } else {
+          value = value === 'true' || value === true ? true : false;
+        }
+      }
+
+      break;
+
+    case 'integer':
+      if (!_.isNumber(value)) {
+        if (_.isString(value) && _.trim(value).length === 0) {
+          value = NaN;
+        }
+
+        value = Number(value);
+
+        if (isNaN(value)) {
+          value = original;
+        }
+      }
+
+      break;
+
+    case 'number':
+      if (!_.isNumber(value)) {
+        if (_.isString(value) && _.trim(value).length === 0) {
+          value = NaN;
+        }
+
+        value = Number(value);
+
+        if (isNaN(value)) {
+          value = original;
+        }
+      }
+
+      break;
+
+    case 'object':
+      if (_.isString(value)) {
+        try {
+          value = JSON.parse(value);
+        } catch (err) {
+          value = original;
+        }
+      }
+
+      break;
+
+    case 'string':
+      if (['date', 'date-time'].indexOf(schema.format) > -1 && !_.isDate(value)) {
+        value = new Date(value);
+
+        if (!_.isDate(value) || value.toString() === 'Invalid Date') {
+          value = original;
+        }
+      }
+
+      break;
+
+  }
+
+  return value;
+};
+
+
 exports = module.exports = function(oasDoc) {
 
   return function OASValidator(req, res, next) {
 
-    req.swagger = {
-      params: req.params,
-      query: req.query,
-      body: req.body
-    }
+    console.log(req.body)
 
     var method = req.method.toLowerCase();
 
     logger.info("Requested method-url pair: " + method + " - " + req.url);
 
     var requestedSpecPath = config.pathsDict[req.route.path];
+
+    req.swagger = {
+      params: {}
+    }
+
+    var parameters = oasDoc.paths[requestedSpecPath][method]['parameters'];
+    if(parameters != undefined){
+      parameters.forEach(function(parameter) { // TODO: para POST y PUT el objeto se define en 'requestBody' y no en 'parameters'
+        var pType = getParameterType(parameter);
+        var oVal = getParameterValue(req, parameter);
+        var value = convertValue(oVal, parameter.schema == undefined ? parameter : parameter.schema, pType);
+
+        req.swagger.params[parameter.name] = {
+          path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
+          schema: parameter,
+          originalValue: oVal,
+          value: value
+        };
+      });
+    }
+
+    var requestBody = oasDoc.paths[requestedSpecPath][method]['requestBody'];
+    if(requestBody != undefined){
+        req.swagger.params[requestBody.description.split(" ")[0]] = {
+          path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
+          schema: requestBody.content['application/json'].schema,
+          originalValue: req.body,
+          value: req.body
+        };
+    }
 
     res.locals.requestedSpecPath = requestedSpecPath;
     checkRequestData(oasDoc, requestedSpecPath, method, res, req, next);

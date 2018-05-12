@@ -8,14 +8,12 @@ var express = require("express");
 var bodyParser = require('body-parser')
 var app = express();
 app.use(bodyParser.json());
-var oasTools = require('../../src/index.js');
+var oasTools = require('C:/Users/ipelu/OneDrive/Documentos/GitHub/oas-tools/src/index.js'); //This must be updated when on production! oas-tools will be inside node_modules
 var jsyaml = require('js-yaml');
-var serverPort = 8383;
+var serverPort = 8080;
 
-var spec = fs.readFileSync(path.join(__dirname, 'oai-spec.yaml'), 'utf8'); //this one works
+var spec = fs.readFileSync(path.join(__dirname, '/api/oas-doc.yaml'), 'utf8');
 var oasDoc = jsyaml.safeLoad(spec);
-
-var options_string = path.join(__dirname, './configurations/customConfig.yaml');
 
 var options_object = {
   controllers: path.join(__dirname, './controllers'),
@@ -27,7 +25,7 @@ var options_object = {
 
 oasTools.configure(options_object);
 
-oasTools.initialize(oasDoc, app, function() { // oas-tools version
+oasTools.initialize(oasDoc, app, function() {
   http.createServer(app).listen(serverPort, function() {
     console.log("App running at http://localhost:" + serverPort);
     console.log("________________________________________________________________");
@@ -36,9 +34,9 @@ oasTools.initialize(oasDoc, app, function() { // oas-tools version
 
 app.get('/info', function(req, res) {
   res.send({
-    infoEN: "This is a very simple API that uses the oas-tools Module!",
-    infoDE: "Diese ist eine sehr einfach API die benutzt unsere oas-tools module!"
+    info: "This API was generated using oas-generator!",
+    name: oasDoc.info.title
   });
 });
 
-module.exports = app; //export for chai tests
+module.exports = app;
