@@ -16,7 +16,6 @@ var zipdir = require('zip-dir');
 var touch = require("touch");
 var beautify = require('js-beautify').js;
 const semver = require('semver')
-var jsonToYaml = require('json2yaml');
 
 var schemaV3 = fs.readFileSync(path.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
 schemaV3 = JSON.parse(schemaV3);
@@ -53,8 +52,7 @@ program
   .action(function(file) {
     try {
       try {
-        //var spec = fs.readFileSync(path.join(process.cwd(), file), 'utf8');
-        var spec = fs.readFileSync(path.join('', file), 'utf8');
+        var spec = fs.readFileSync(path.join('', file), 'utf8'); //TODO: valid fix?
         var oasDoc = jsyaml.safeLoad(spec);
         logger.info('Input oas-doc %s: %s', file, oasDoc);
       } catch (err) {
@@ -67,7 +65,7 @@ program
         process.exit();
       }
       var proyectName = "nodejs-server-generated";
-      if (program.proyectName) { // TODO: doesn't work!!! why does delete work and not proyectName?
+      if (program.proyectName) { // TODO: fix issues with program parameters
         proyectName = program.proyectName;
         if (!/^[a-zA-Z0-9-_]+$/.test(proyectName)) {
           logger.error("Provided name ( + " + proyectName + ") must not have spaces, slashes or : * ? < > | ");
@@ -85,7 +83,10 @@ program
 
       shell.exec('mkdir api');
 
-      fs.writeFileSync('./api/oas-doc.yaml', jsonToYaml.stringify(oasDoc));
+      fs.writeFileSync('./api/oas-doc.yaml', beautify(JSON.stringify(oasDoc), {
+        indent_size: 2,
+        space_in_empty_paren: true
+      }));
 
       shell.exec('mkdir utils');
       shell.cp(__dirname + '/auxiliary/writer.js', './utils/writer.js');
@@ -174,7 +175,7 @@ program
           logger.error('Compressor error: ', err);
         } else {
           logger.debug('---< NodeJS project ZIP generated! >---');
-          if (program.delete) { //option -z used means delete generated folder after compression
+          if (program.delete) { //option -z used: delete generated folder after zip generation
             shell.rm('-r', proyectName);
           }
         }

@@ -173,13 +173,13 @@ function registerPaths(specDoc, app) {
   var paths = specDoc.paths;
   for (var path in paths) {
     for (var method in paths[path]) {
-      var expressPath = utils.getExpressVersion(path);
+      var expressPath = utils.getExpressVersion(path); // TODO: take in account basePath/servers property of the spec doc.
       dictionary[expressPath.toString()] = path;
       logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
       if (config.router == true) {
         checkControllers(path, method, paths[path][method], config.controllers);
       }
-      switch (method) {
+      switch (method) { //TODO: paths must be registered for each url in servers property of the spec doc.
         case 'get':
           if (config.validator == true) {
             app.get(expressPath, OASValidatorMid());
