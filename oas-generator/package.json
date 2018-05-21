@@ -18,6 +18,7 @@
     "fs": "0.0.1-security",
     "js-beautify": "^1.7.5",
     "js-yaml": "^3.11.0",
+    "json2yaml": "^1.1.0",
     "node-zip": "^1.1.1",
     "path": "^0.12.7",
     "semver": "^5.5.0",

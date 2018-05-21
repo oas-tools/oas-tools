@@ -28,7 +28,6 @@ var http = require('http');
 var urlModule = require('url');
 var config = require('../configurations'),
   logger = config.logger;
-var deref = require('json-schema-deref');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,

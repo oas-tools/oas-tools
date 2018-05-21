@@ -16,6 +16,7 @@ var zipdir = require('zip-dir');
 var touch = require("touch");
 var beautify = require('js-beautify').js;
 const semver = require('semver')
+var jsonToYaml = require('json2yaml');
 
 var schemaV3 = fs.readFileSync(path.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
 schemaV3 = JSON.parse(schemaV3);
@@ -52,7 +53,8 @@ program
   .action(function(file) {
     try {
       try {
-        var spec = fs.readFileSync(path.join(process.cwd(), file), 'utf8');
+        //var spec = fs.readFileSync(path.join(process.cwd(), file), 'utf8');
+        var spec = fs.readFileSync(path.join('', file), 'utf8');
         var oasDoc = jsyaml.safeLoad(spec);
         logger.info('Input oas-doc %s: %s', file, oasDoc);
       } catch (err) {
@@ -82,7 +84,8 @@ program
       shell.exec('mkdir .oas-generator && echo 1.0.0 > .oas-generator/VERSION');
 
       shell.exec('mkdir api');
-      shell.cp('../' + file, './api/oas-doc.yaml');
+
+      fs.writeFileSync('./api/oas-doc.yaml', jsonToYaml.stringify(oasDoc));
 
       shell.exec('mkdir utils');
       shell.cp(__dirname + '/auxiliary/writer.js', './utils/writer.js');
