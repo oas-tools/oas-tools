@@ -1,6 +1,6 @@
 # oas-tools
 
-Middlewares to use on NodeJS applications working with OpenAPI Specification (v3) and.
+Middlewares to use on NodeJS applications working with OpenAPI Specification (v3).
 
 The folder oas-tools inside /src contains the project as a npm module, ready to be placed inside node_modules and used.
 
@@ -34,9 +34,9 @@ It is also possible to set configuration variables, these are them:
 
 | Name	| Type	| Explanation / Values |
 | ------------- | ------------- | ------------- |
-|logLevel | Integer | Values for config file are: Debug, info, error. For hardcoded object these values must be converted to numbers_ Debug = , info = , error = . Default is info |
-|logFile | String | Path to logs file |
-|controllers | String | Path to location of controllers |
+|logLevel | Integer | Values for config file are: Debug, info, error. For hardcoded object these values must be converted to numbers_ Debug = 13, info = 12, error = 7. Default is info |
+|logFile | String | Logs file path |
+|controllers | String | Controllers location path |
 |strict	| Boolean | Indicates whether validation must stop the request process if errors were found when validating according to specification file. True by default |
 |router	| Boolean | Indicates whether router middleware should be used. True by default |
 |valdator | Boolean | Indicates whether validator middleware should be used. True by default |
@@ -86,25 +86,38 @@ npm install express -g
 
 Then change the require on your app’s index file, get rid of connect!
 
+```javascript
+var express = require('express');
+var app = express();
+```
 
 __2.Require oas-tools instead of swagger-tools:__
 
-Then you have to change from swagger to the great oas-tool by just modifying the require:
+Change from swagger-tools to oas-tools by just modifying the require:
 
-
-
+```javascript
+var oasTools = require('oas-tools');
+```
 
  __3.	Convert your specification file from version 2 to version 3:__
 
 As you may know oas-tools works only with the version 3 of the specification, therefore you should update you specification file.
-Use the tool provided at https://mermade.org.uk/openapi-converter to do so. Once you get the translation simply copy-past it to you former specification file.
+Use [this tool](https://mermade.org.uk/openapi-converter) to do so. Once you get the translation simply copy-past it to you former specification file.
 
 
  __4.	Pass express server object to initialize method:__
 
 Finally you must do is to give the server object to oas-tools. It needs it to manage routes the right way. Just place it as a second parameter for the initializeMiddleware function.
 
+```javascript
+swaggerTools.initializeMiddleware(swaggerDoc, app, function(middleware) {
+  // Configuration of usage of swagger middlewares with app.use()
+  ...
 
+  // Start the server
+  ...
+});
+```
 
 Once you have done all this, leave the rest the way it is and just run your appliaction with ‘node index.js’ or any other command you have specified at your package.json for running the application.
 
