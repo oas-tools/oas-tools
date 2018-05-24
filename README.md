@@ -9,7 +9,7 @@ The folder oas-tools inside /src contains the project as a npm module, ready to 
 npm install oas-tools -g
 ```
 
-## 1. Use oas-tools
+## 2. Use oas-tools
 
 Require the installed module in your app index file, just like:
 
