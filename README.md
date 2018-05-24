@@ -95,7 +95,11 @@ var app = express();
 
 __2.Require oas-tools instead of swagger-tools:__
 
-Change from swagger-tools to oas-tools by just modifying the require:
+Change from swagger-tools to oas-tools by just installing it and modifying the require:
+
+```bash
+npm install oas-tools -g
+```
 
 ```javascript
 var swaggerTools = require('oas-tools');
