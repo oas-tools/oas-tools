@@ -73,7 +73,7 @@ oasTools.initialize(oasDoc, app, function() {
 
 ### 1.1. Migrate from swagger-tools to oas-tools
 
-Oas-tools works with express while swagger-tools works with Connect, therefore in order to use your swagger-codegen generated NodeJS server with oas-tools you have to leave connect behind and use express and an openapi version 3 file. This can be easily achievable by following just 4 simple steps:
+Oas-tools works with Express while swagger-tools works with Connect, therefore in order to use your swagger-codegen generated NodeJS server with oas-tools you have to leave connect behind and use express and an openapi version 3 file. This can be easily achievable by following just 4 simple steps:
 
 
 __1.Change from connect to express:__
@@ -98,7 +98,7 @@ __2.Require oas-tools instead of swagger-tools:__
 Change from swagger-tools to oas-tools by just modifying the require:
 
 ```javascript
-var oasTools = require('oas-tools');
+var swaggerTools = require('oas-tools');
 ```
 
 
@@ -111,7 +111,7 @@ Use [this tool](https://mermade.org.uk/openapi-converter) to do so. Once you get
 
  __4.	Pass express server object to initialize method:__
 
-Finally you must do is to give the server object to oas-tools. It needs it to manage routes the right way. Just place it as a second parameter for the initializeMiddleware function.
+Finally give the server object to oas-tools. It needs it to manage routes the right way. Just place it as a second parameter for the initializeMiddleware function.
 
 ```javascript
 swaggerTools.initializeMiddleware(swaggerDoc, app, function(middleware) {
