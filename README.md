@@ -32,15 +32,15 @@ var oasDoc = jsyaml.safeLoad(spec);
 
 It is also possible to set configuration variables, these are them:
 
-Name	Type	Explanation / Values
-logLevel	-	Values for config file are: Debug, info, error. For hardcoded object these values must be converted to numbers_ Debug = , info = , error = . Default is info.
-logFile	String	Path to logs file.
-controllers	String	Path to location of controllers.
-strict	Boolean	Indicates whether validation must stop the request process if errors were found when validating according to specification file. True by default.
-router	Boolean	Indicates whether router middleware should be used. True by default.
-valdator	Boolean	Indicates whether validator middleware should be used. True by default.
-ignoreUnknownFormats	Boolean	Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default.
-
+| Name	| Type	| Explanation / Values |
+| ------------- | ------------- | ------------- |
+|logLevel | Integer | Values for config file are: Debug, info, error. For hardcoded object these values must be converted to numbers_ Debug = , info = , error = . Default is info |
+|logFile | String | Path to logs file |
+|controllers | String | Path to location of controllers |
+|strict	| Boolean | Indicates whether validation must stop the request process if errors were found when validating according to specification file. True by default |
+|router	| Boolean | Indicates whether router middleware should be used. True by default |
+|valdator | Boolean | Indicates whether validator middleware should be used. True by default |
+|ignoreUnknownFormats | Boolean	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default |
 
 For setting these variables you can use the function configure and pass to it either a JavaScript object or a yaml/json file containing such object.
 
@@ -80,7 +80,9 @@ __1.Change from connect to express:__
 Oas-tools needs express module to work, connect doesn’t have the needed features.
 Therefore you must install express:
 
-$ npm install express -g
+```bash
+npm install express -g
+```
 
 Then change the require on your app’s index file, get rid of connect!
 
