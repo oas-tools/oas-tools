@@ -367,8 +367,6 @@ exports = module.exports = function(oasDoc) {
 
   return function OASValidator(req, res, next) {
 
-    console.log(req.body)
-
     var method = req.method.toLowerCase();
 
     logger.info("Requested method-url pair: " + method + " - " + req.url);
