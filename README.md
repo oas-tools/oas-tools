@@ -75,6 +75,7 @@ oasTools.initialize(oasDoc, app, function() {
 
 Oas-tools works with express while swagger-tools works with Connect, therefore in order to use your swagger-codegen generated NodeJS server with oas-tools you have to leave connect behind and use express and an openapi version 3 file. This can be easily achievable by following just 4 simple steps:
 
+
 __1.Change from connect to express:__
 
 Oas-tools needs express module to work, connect doesn’t have the needed features.
@@ -91,6 +92,7 @@ var express = require('express');
 var app = express();
 ```
 
+
 __2.Require oas-tools instead of swagger-tools:__
 
 Change from swagger-tools to oas-tools by just modifying the require:
@@ -99,10 +101,12 @@ Change from swagger-tools to oas-tools by just modifying the require:
 var oasTools = require('oas-tools');
 ```
 
+
  __3.	Convert your specification file from version 2 to version 3:__
 
 As you may know oas-tools works only with the version 3 of the specification, therefore you should update you specification file.
 Use [this tool](https://mermade.org.uk/openapi-converter) to do so. Once you get the translation simply copy-past it to you former specification file.
+
 
 
  __4.	Pass express server object to initialize method:__
