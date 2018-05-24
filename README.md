@@ -63,12 +63,19 @@ oasTools.configure(options_object);
 
 Finally for initializing the middlewares right before your app is up and running, the function ‘initialize’ must be used. It receives the specification file, the express server object and a callback function where you must start your server:
 
+```javascript
+oasTools.initialize(oasDoc, app, function() {
+  http.createServer(app).listen(8080, function() {
+    console.log("App up and running!");
+  });
+});
+```
 
 ### 1.1. Migrate from swagger-tools to oas-tools
 
 Oas-tools works with express while swagger-tools works with Connect, therefore in order to use your swagger-codegen generated NodeJS server with oas-tools you have to leave connect behind and use express and an openapi version 3 file. This can be easily achievable by following just 4 simple steps:
 
-1.	Change from connect to express:
+**1.	Change from connect to express: **
 
 Oas-tools needs express module to work, connect doesn’t have the needed features.
 Therefore you must install express:
@@ -80,20 +87,20 @@ Then change the require on your app’s index file, get rid of connect!
 
 
 
-2.	Require oas-tools instead of swagger-tools:
+ **2.	Require oas-tools instead of swagger-tools: **
 
 Then you have to change from swagger to the great oas-tool by just modifying the require:
 
 
 
 
-3.	Convert your specification file from version 2 to version 3:
+ **3.	Convert your specification file from version 2 to version 3: **
 
 As you may know oas-tools works only with the version 3 of the specification, therefore you should update you specification file.
 Use the tool provided at https://mermade.org.uk/openapi-converter to do so. Once you get the translation simply copy-past it to you former specification file.
 
 
-4.	Pass express server object to initialize method:
+ **4.	Pass express server object to initialize method: **
 
 Finally you must do is to give the server object to oas-tools. It needs it to manage routes the right way. Just place it as a second parameter for the initializeMiddleware function.
 
