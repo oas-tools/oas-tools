@@ -30,7 +30,7 @@ var oasDoc = jsyaml.safeLoad(spec);
 [Note: you might want to use the module ‘path’ for loading the specification file, that way your app will work on any OS]
 
 
-It is also possible to set configuration variables, these are them:
+__It is also possible to set configuration variables, these are them:__
 
 | Name	| Type	| Explanation / Values |
 | ------------- | ------------- | ------------- |
