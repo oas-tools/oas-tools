@@ -91,11 +91,6 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
       var validSchema = responseCodeSection.content['application/json'].schema;
       logger.debug("Schema to use for validation: " + validSchema);
       data = JSON.parse(data); //Without this everything is string so type validation wouldn't happen
-      try {
-        validSchema.items.additionalProperties = false; // result is an array: has items
-      } catch (err) {
-        validSchema.additionalProperties = false; // single result
-      }
       var err = validator.validate(data, validSchema);
       if (err == false) {
         msg = msg + "Wrong data in the response. ";
