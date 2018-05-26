@@ -8,7 +8,7 @@ var express = require("express");
 var bodyParser = require('body-parser')
 var app = express();
 app.use(bodyParser.json());
-var oasTools = require('../../src/index.js');
+var oasTools = require('../../index.js');
 var jsyaml = require('js-yaml');
 var serverPort = 8383;
 
