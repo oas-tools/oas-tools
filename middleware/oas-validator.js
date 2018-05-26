@@ -390,7 +390,7 @@ exports = module.exports = function(oasDoc) {
 
     var requestBody = oasDoc.paths[requestedSpecPath][method]['requestBody'];
     if(requestBody != undefined){
-        req.swagger.params[requestBody.description.split(" ")[0]] = {
+        req.swagger.params[requestBody['x-name']] = {
           path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
           schema: requestBody.content['application/json'].schema,
           originalValue: req.body,

@@ -1905,10 +1905,14 @@
         "RequestBody": {
             "type": "object",
             "required": [
-                "content"
+                "content",
+                "x-name"
             ],
             "properties": {
                 "description": {
+                    "type": "string"
+                },
+                "x-name": {
                     "type": "string"
                 },
                 "content": {

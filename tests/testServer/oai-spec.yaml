@@ -46,6 +46,7 @@ paths:
         - pets
       requestBody:
         description: Pet to add to the store
+        x-name: pet
         required: true
         content:
           application/json:
@@ -123,6 +124,7 @@ paths:
               format: int64
       requestBody:
         description: Pet to update
+        x-name: pet
         required: true
         content:
           application/json:

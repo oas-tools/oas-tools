@@ -62,7 +62,6 @@ function corruptPets() {
       id: 200,
       name: "AnimalZ",
       tag: "This is supposed to be a wrong object",
-      extraProperty: "Extra property, wrong!"
     }
   ];
   exports.pets = pets;
@@ -108,7 +107,7 @@ function setCorrectPets() {
  *  Creates a pet
  */
 exports.createPets = function(args, res, next) {
-  pets.push(args['Pet'].value);
+  pets.push(args['pet'].value);
   exports.pets = pets;
   res.status(201).send(pets);
 }
@@ -181,7 +180,7 @@ exports.updatePet = function(args, res, next) {
   for (var i = 0; i < pets.length; i++) {
     if (pets[i].id == args['petId'].value) {
       present = true;
-      pets[i] = args['Pet'].value;
+      pets[i] = args['pet'].value;
       res.status(200).send({
         message: "Updated pet"
       });

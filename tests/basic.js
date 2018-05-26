@@ -224,23 +224,6 @@ function postTests() {
           done();
         });
     });
-    it('it should not POST a pet which has more properties than the ones defined in the oas-doc', (done) => {
-      var pet = {
-        id: 46,
-        name: "Horse",
-        tag: "Another animal",
-        extraProperty: "Extra content"
-      }
-      chai.request(server)
-        .post('/pets')
-        .send(pet)
-        .end((err, res) => {
-          res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
-          done();
-        });
-    });
     it('it should not POST a pet which does not have name', (done) => {
       var pet = {
         id: 23,
@@ -330,23 +313,6 @@ function putTests() {
       var pet = {
         id: 23,
         tag: "Pet updated by the mocha+chai test"
-      };
-      chai.request(server)
-        .put('/pets/' + 2)
-        .send(pet)
-        .end((err, res) => {
-          res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
-          done();
-        });
-    });
-    it('it should not UPDATE a pet with more properties than the ones defined in the oas-doc', (done) => {
-      var pet = {
-        id: 23,
-        name: "AnimalX",
-        tag: "Pet with extra property",
-        extraProperty: "Extra property"
       };
       chai.request(server)
         .put('/pets/' + 2)
