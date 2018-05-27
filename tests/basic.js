@@ -1,3 +1,15 @@
+/*
+
+Más test: (un exitoso y uno correcto por cada tipo)
+
+integer (entero)
+number (flotante)
+string
+boolean
+
+*/
+
+
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('./testServer');
@@ -15,36 +27,151 @@ function getTests() {
         .get('/pets')
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
-          res.body.message.should.contain("Missing parameter limit in query");
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Missing parameter limit in query");
           done();
         });
     });
-    it('it should get and error informing the required parameter limit was not of the right type', (done) => {
+    it('it should get an error informing the required parameter limit was not of the right type', (done) => {
       chai.request(server)
         .get('/pets?limit=pepe')
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
-          res.body.message.should.contain("Wrong parameter limit in query");
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter limit in query");
           done();
         });
     });
 
+    /* testing of parameters in query */
+    it('it should get an error informing of missing required parameters in query', (done) => {
+      chai.request(server)
+        .get('/paramTestsQuery')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Missing parameter integerParam in query");
+          JSON.stringify(res.body).should.contain("Missing parameter booleanParam in query");
+          JSON.stringify(res.body).should.contain("Missing parameter stringParam in query");
+          JSON.stringify(res.body).should.contain("Missing parameter doubleParam in query");
+          done();
+        });
+    });
+    it('it should get an error informing the required parameter integerParam was not of the right type', (done) => {
+      chai.request(server)
+        .get('/paramTestsQuery?integerParam=wrong&booleanParam=true&stringParam=okay&doubleParam=1.9')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter integerParam in query");
+          done();
+        });
+    });
+    it('it should get an error informing the required parameter booleanParam was not of the right type', (done) => {
+      chai.request(server)
+        .get('/paramTestsQuery?integerParam=9&booleanParam=wrong90&stringParam=okay&doubleParam=1.9')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter booleanParam in query");
+          done();
+        });
+    });
+    it('it should get an error informing the required parameter stringParam was not of the right type', (done) => {
+      chai.request(server)
+        .get('/paramTestsQuery?integerParam=9&booleanParam=false&stringParam=89&doubleParam=1.9')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter stringParam in query");
+          done();
+        });
+    });
+    it('it should get an error informing the required parameter doubleParam was not of the right type', (done) => {
+      chai.request(server)
+        .get('/paramTestsQuery?integerParam=9&booleanParam=false&stringParam=okay&doubleParam=wrong')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter doubleParam in query");
+          done();
+        });
+    });
+    /* end of query parameters test */
 
+    /* testing of parameters in path */
+    it('it should get an error informing the required parameter integerParam was not of the right type', (done) => {
+      chai.request(server)
+        .get('/paramTestsPath/wrong/true/okay/1.9')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter integerParam in params");
+          done();
+        });
+    });
+    it('it should get an error informing the required parameter booleanParam was not of the right type', (done) => {
+      chai.request(server)
+        .get('/paramTestsPath/21/wrong/okay/1.9')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter booleanParam in params");
+          done();
+        });
+    });
+    it('it should get an error informing the required parameter stringParam was not of the right type', (done) => {
+      chai.request(server)
+        .get('/paramTestsPath/21/false/90/1.9')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter stringParam in params");
+          done();
+        });
+    });
+    it('it should get an error informing the required parameter doubleParam was not of the right type', (done) => {
+      chai.request(server)
+        .get('/paramTestsPath/21/false/okay/wrong')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter doubleParam in params");
+          done();
+        });
+    });
+    /* end of path parameters test */
+
+    /* test of properties type of request body */
+    it('it should get an error informing of wrong data in the response: types do not match', (done) => {
+      chai.request(server)
+        .get('/responseBodyTest')
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong data in the response");
+          JSON.stringify(res.body).should.contain("Expected type boolean but found type integer");
+          JSON.stringify(res.body).should.contain("Expected type integer but found type string");
+          JSON.stringify(res.body).should.contain("Expected type number but found type boolean");
+          JSON.stringify(res.body).should.contain("Expected type string but found type number");
+
+          //res.body.message.should.contain("Expected type boolean but found type integer");
+          //res.body.message.should.contain("Expected type integer but found type string");
+          //res.body.message.should.contain("Expected type double but found type boolean");
+          //res.body.message.should.contain("Expected type string but found type number");
+          done();
+        });
+    });
+    /* test of properties type of request body end*/
 
     it('it shouldn´t GET all the pets but show a message with errors (missing/wrong parameters)', (done) => {
       chai.request(server)
         .get('/pets?limit=10')
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
-          res.body.message.should.contain("Wrong data in the response");
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong data in the response");
           auxRequire.setCorrectPets();
-          logger.debug("---------------------Justo despues de la corrección, cómo está pets: " + JSON.stringify(auxRequire.pets));
           done();
         });
     });
@@ -97,9 +224,8 @@ function getTests() {
         .get('/pets/badId')
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
-          res.body.message.should.contain("Wrong parameter petId in params");
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter petId in params");
           done();
         });
     });
@@ -159,9 +285,8 @@ function postTests() {
         .post('/pets')
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
-          res.body.message.should.be.eql("Missing object in the request body. ");
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Missing object in the request body. ");
           done();
         });
     });
@@ -176,8 +301,8 @@ function postTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("INVALID_TYPE")
           done();
         });
     });
@@ -188,8 +313,8 @@ function postTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Missing object in the request body. ")
           done();
         });
     });
@@ -204,8 +329,8 @@ function postTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("INVALID_TYPE")
           done();
         });
     });
@@ -219,8 +344,8 @@ function postTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("OBJECT_MISSING_REQUIRED_PROPERTY")
           done();
         });
     });
@@ -234,8 +359,8 @@ function postTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("OBJECT_MISSING_REQUIRED_PROPERTY")
           done();
         });
     });
@@ -250,8 +375,8 @@ function postTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("INVALID_TYPE")
           putTests();
           done();
         });
@@ -304,8 +429,8 @@ function putTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("OBJECT_MISSING_REQUIRED_PROPERTY")
           done();
         });
     });
@@ -319,8 +444,8 @@ function putTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("OBJECT_MISSING_REQUIRED_PROPERTY")
           done();
         });
     });
@@ -335,8 +460,8 @@ function putTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("INVALID_TYPE")
           done();
         });
     });
@@ -351,8 +476,8 @@ function putTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("INVALID_TYPE")
           done();
         });
     });
@@ -367,8 +492,8 @@ function putTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("INVALID_TYPE")
           done();
         });
     });
@@ -397,8 +522,8 @@ function putTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Missing object in the request body. ")
           done();
         });
     });
@@ -413,8 +538,8 @@ function putTests() {
         .send(pet)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("INVALID_TYPE")
           deleteTests();
           done();
         });
@@ -465,8 +590,7 @@ function deleteTests() {
         .delete('/pets/wrongType')
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.a('object');
-          res.body.should.have.property('message');
+          JSON.stringify(res.body).should.contain("INVALID_TYPE")
           done();
         });
     });

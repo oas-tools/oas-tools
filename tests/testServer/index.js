@@ -12,7 +12,7 @@ var oasTools = require('../../index.js');
 var jsyaml = require('js-yaml');
 var serverPort = 8383;
 
-var spec = fs.readFileSync(path.join(__dirname, 'oai-spec.yaml'), 'utf8'); //this one works
+var spec = fs.readFileSync(path.join(__dirname, 'api/oai-spec.yaml'), 'utf8'); //this one works
 var oasDoc = jsyaml.safeLoad(spec);
 
 var options_string = path.join(__dirname, './configurations/customConfig.yaml');

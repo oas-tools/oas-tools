@@ -65,7 +65,7 @@ function executeFunctionByName(functionName, context, req, res, next) {
  */
 function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content) {
   var code = res.statusCode;
-  var msg = "";
+  var msg = [];
   var data = content[0];
   logger.debug("Processing at checkResponse:");
   logger.debug("  -code: " + code);
@@ -75,12 +75,13 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
   logger.debug("  -data: " + data);
   var responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses[code]; //Section of the oasDoc file starting at a response code
   if (responseCodeSection == undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
-    msg = msg + "Wrong response code: " + code;
+    var newErr = {
+      message: "Wrong response code: " + code
+    }
+    msg.push(newErr);
     if (config.strict == true) {
       logger.error(msg);
-      content[0] = JSON.stringify({
-        message: msg
-      });
+      content[0] = JSON.stringify(msg);
       oldSend.apply(res, content);
     } else {
       logger.warning(msg);
@@ -93,15 +94,14 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
       data = JSON.parse(data); //Without this everything is string so type validation wouldn't happen
       var err = validator.validate(data, validSchema);
       if (err == false) {
-        msg = msg + "Wrong data in the response. ";
-      }
-      if (msg.length > 0) {
+        var newErr = {
+          message: "Wrong data in the response. ",
+          error: validator.getLastErrors(),
+          content: data
+        };
+        msg.push(newErr);
         if (config.strict == true) {
-          content[0] = JSON.stringify({
-            message: msg,
-            error: validator.getLastErrors(),
-            content: data
-          });
+          content[0] = JSON.stringify(msg);
           logger.error(content[0]);
           res.status(400);
           oldSend.apply(res, content);
@@ -109,7 +109,7 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
           logger.warning(msg + JSON.stringify(validator.getLastErrors()));
           oldSend.apply(res, content);
         }
-      } else {
+      }else {
         oldSend.apply(res, content);
       }
     } else {

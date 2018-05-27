@@ -5,6 +5,124 @@ info:
   license:
     name: MIT
 paths:
+  /paramTestsQuery:
+    get:
+      summary: This path is only for tests
+      operationId: paramTestsQuery
+      tags:
+        - pets
+      parameters:
+        - name: integerParam
+          in: query
+          description: Integer parameter to test validation
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: booleanParam
+          in: query
+          description: Boolean parameter to test validation
+          required: true
+          schema:
+            type: boolean
+        - name: stringParam
+          in: query
+          description: string parameter to test validation
+          required: true
+          schema:
+            type: string
+        - name: doubleParam
+          in: query
+          description: string parameter to test validation
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: An paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pets"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      x-router-controller: "petsController"
+      #x-router-controller: "Default"
+  /paramTestsPath/{integerParam}/{booleanParam}/{stringParam}/{doubleParam}:
+    get:
+      summary: This path is only for tests
+      operationId: paramTestsPath
+      tags:
+        - pets
+      parameters:
+        - name: integerParam
+          in: path
+          description: Integer parameter to test validation
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: booleanParam
+          in: path
+          description: Boolean parameter to test validation
+          required: true
+          schema:
+            type: boolean
+        - name: stringParam
+          in: path
+          description: string parameter to test validation
+          required: true
+          schema:
+            type: string
+        - name: doubleParam
+          in: path
+          description: string parameter to test validation
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: An paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pets"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      x-router-controller: "petsController"
+      #x-router-controller: "Default"
+  /responseBodyTest:
+    get:
+      summary: should return an object with both right and wrong properties
+      operationId: responseBodyTest
+      tags:
+        - pets
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseTest"
+      x-router-controller: "petsController"
   /pets:
     get:
       summary: List all pets
@@ -168,6 +286,25 @@ paths:
       #x-router-controller: "Default"
 components:
   schemas:
+    ResponseTest:
+      type: array
+      items:
+        $ref: "#/components/schemas/TestObject"
+    TestObject:
+      required:
+        - integerProperty
+        - booleanProperty
+        - stringProperty
+        - doubleProperty
+      properties:
+        integerProperty:
+          type: integer
+        booleanProperty:
+          type: boolean
+        stringProperty:
+          type: string
+        doubleProperty:
+          type: number
     Pet:
       required:
         - id

@@ -1,9 +1,5 @@
 'use strict';
 
-console.log("         ");
-console.log("            CONTROLLERS FILE EXECUTED");
-console.log("         ");
-
 var pets = [{
     id: 1,
     name: "Wolf",
@@ -71,7 +67,7 @@ function corruptPets() {
   exports.pets = pets;
 }
 
-function setCorrectPets(){
+function setCorrectPets() {
   pets = [{
       id: 1,
       name: "Wolf",
@@ -106,13 +102,51 @@ function setCorrectPets(){
 }
 
 /**
+ *  Path for testing path parameters
+ */
+exports.paramTestsPath = function(req, res, next) {
+  res.send({
+    message: 'Path for path parameters tests was requested, this it its controller response'
+  });
+};
+
+/**
+ *  Path for testing query parameters
+ */
+exports.paramTestsQuery = function(req, res, next) {
+  res.send({
+    message: 'Path for query parameters tests was requested, this it its controller response'
+  });
+};
+
+/**
+ *  Path for testing properties type on responses
+ */
+exports.responseBodyTest = function(req, res, next) {
+  var arrayRes = [];
+  var okay = {
+    integerProperty: 2,
+    booleanProperty: true,
+    stringProperty: "okay",
+    doubleProperty: 2.8
+  }
+  var wrong = {
+    integerProperty: "wrong",
+    booleanProperty: 23,
+    stringProperty: 6.8,
+    doubleProperty: false
+  }
+  arrayRes.push(okay);
+  arrayRes.push(wrong);
+  res.send(arrayRes);
+};
+
+/**
  *  Creates a pet
  */
 exports.createPets = function(args, res, next) {
-  console.log("antes: " + pets.length);
   pets.push(args.body);
   exports.pets = pets;
-  console.log("========Esto es lo que se va a devolver en createPets: " + JSON.stringify(pets));
   res.status(201).send(pets);
 }
 
@@ -121,7 +155,6 @@ exports.createPets = function(args, res, next) {
  */
 exports.listPets = function(args, res, next) {
   exports.pets = pets;
-  console.log("En listPets: " + pets.length);
   res.status(200).send(pets.slice(0, args.query.limit));
 }
 

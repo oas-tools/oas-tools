@@ -61,7 +61,8 @@ function locationFormat(inProperty) { //TODO: Possible 'in' values: path, query,
 function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
   var paths = oasDoc.paths;
   var keepGoing = true;
-  var msg = "";
+  //var msg = "";
+  var msg = [];
   var missingOrWrongParameters = [];
   var missingParameters = [];
   var wrongParameters = [];
@@ -69,16 +70,25 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
   if (paths[requestedSpecPath][method].hasOwnProperty('requestBody')) {
     var requestBody = paths[requestedSpecPath][method]['requestBody'];
     if (requestBody.required != undefined && requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
+      console.log("   VALIDATE THIS: " + JSON.stringify(req.body))
       if (req.body == undefined || JSON.stringify(req.body) == '{}') {
-        msg += "Missing object in the request body. ";
+        var newErr = {
+          message: "Missing object in the request body. "
+        };
+        msg.push(newErr);
         keepGoing = false;
       } else {
         var validSchema = requestBody.content['application/json'].schema;
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen
         var err = validator.validate(data, validSchema);
         if (err == false) {
+          var newErr = {
+            message: "Wrong data in the body of the request. ",
+            error: validator.getLastErrors(),
+            content: data
+          };
+          msg.push(newErr);
           keepGoing = false;
-          msg += "Wrong data in the body of the request: " + JSON.stringify(validator.getLastErrors()) + ". ";
         } else {
           logger.info("Valid parameter on request");
         }
@@ -101,7 +111,10 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
 
         location = locationFormat(location);
         if (req[location][name] == undefined) { //if the request is missing a required parameter acording to the oasDoc: warning
-          msg += "Missing parameter " + name + " in " + location + ". ";
+          var newErr = {
+            message: "Missing parameter " + name + " in " + location + ". "
+          };
+          msg.push(newErr);
           keepGoing = false;
         } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
           try {
@@ -117,7 +130,11 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
               logger.error("UNKNOWN_FORMAT error - Registered Formats: ");
               logger.error(registeredFormats);
             }
-            msg += "Wrong parameter " + name + " in " + location + ": " + JSON.stringify(validator.getLastErrors()) + ". ";
+            var newErr = {
+              message: "Wrong parameter " + name + " in " + location + ". ",
+              error: validator.getLastErrors()
+            };
+            msg.push(newErr);
           } else {
             logger.info("Valid parameter on request");
           }
@@ -127,9 +144,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
   }
   if (keepGoing == false && config.strict == true) {
     logger.error(msg);
-    res.status(400).send({
-      message: msg
-    })
+    res.status(400).send(msg)
   } else {
     if (msg.length != 0) {
       logger.warning(msg);
@@ -373,7 +388,7 @@ exports = module.exports = function(oasDoc) {
     }
 
     var parameters = oasDoc.paths[requestedSpecPath][method]['parameters'];
-    if(parameters != undefined){
+    if (parameters != undefined) {
       parameters.forEach(function(parameter) { // TODO: para POST y PUT el objeto se define en 'requestBody' y no en 'parameters'
         var pType = getParameterType(parameter);
         var oVal = getParameterValue(req, parameter);
@@ -389,13 +404,13 @@ exports = module.exports = function(oasDoc) {
     }
 
     var requestBody = oasDoc.paths[requestedSpecPath][method]['requestBody'];
-    if(requestBody != undefined){
-        req.swagger.params[requestBody['x-name']] = {
-          path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
-          schema: requestBody.content['application/json'].schema,
-          originalValue: req.body,
-          value: req.body
-        };
+    if (requestBody != undefined) {
+      req.swagger.params[requestBody['x-name']] = {
+        path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
+        schema: requestBody.content['application/json'].schema,
+        originalValue: req.body,
+        value: req.body
+      };
     }
 
     res.locals.requestedSpecPath = requestedSpecPath;
