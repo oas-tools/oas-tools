@@ -38,7 +38,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       #x-router-controller: "petsController"
-      x-router-controller: "Default"
+      #x-router-controller: "Default"
     post:
       summary: Create a pet
       operationId: createPets
@@ -66,7 +66,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       #x-router-controller: "petsController"
-      x-router-controller: "Default"
+      #x-router-controller: "Default"
     delete:
         description: deletes all the pets
         operationId: deletePets
@@ -80,7 +80,7 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Error'
         #x-router-controller: "petsController"
-        x-router-controller: "Default"
+        #x-router-controller: "Default"
   /pets/{petId}:
     get:
       summary: Info for a specific pet
@@ -110,7 +110,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
       #x-router-controller: "petsController"
-      x-router-controller: "Default"
+      #x-router-controller: "Default"
     put:
       description: updates a pet based on its petId
       operationId: updatePet
@@ -142,7 +142,7 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Error'
       #x-router-controller: "petsController"
-      x-router-controller: "Default"
+      #x-router-controller: "Default"
     delete:
       description: deletes a single pet based on the ID supplied
       operationId: deletePet
@@ -165,7 +165,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
       #x-router-controller: "petsController"
-      x-router-controller: "Default"
+      #x-router-controller: "Default"
 components:
   schemas:
     Pet:

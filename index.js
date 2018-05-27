@@ -74,32 +74,33 @@ var configure = function configure(options) {
 };
 
 /**
- * Checks if operationId (or generic) exists for a given pair path-method.
+ * Checks if operationId (or generic) and function for it exists on controller for a given pair path-method.
  *@param {object} load - Loaded controller.
  *@param {object} pathName - Path of the spec file to be used to find controller.
  *@param {object} methodName - One of CRUD methods.
  *@param {object} methodSection - Section of the speficication file belonging to methodName.
  */
-function checkOperationId(load, pathName, methodName, methodSection) {
-  var opId;
-  if (utils.normalize(methodSection.operationId) != undefined && load[utils.normalize(methodSection.operationId)] == undefined) {
-    logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + methodSection.operationId + ")");
-    process.exit();
-  } else {
-    if (load[utils.normalize(methodSection.operationId)] != undefined) {
-      opId = utils.normalize(methodSection.operationId);
-    } else {
-      opId = utils.normalize(utils.generateOperationId(methodName, pathName));
-      logger.debug("      There is no operationId for " + methodName.toUpperCase() + " - " + pathName + " -> generated: " + opId);
-    }
-    if (load[opId] == undefined) {
-      logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + opId + ")");
-      process.exit();
-    } else {
-      logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
-    }
-  }
-}
+ function checkOperationId(load, pathName, methodName, methodSection) {
+   var opId = undefined;
+   var rawOpId = undefined;
+
+   if (_.has(methodSection, 'operationId')) {
+     rawOpId = methodSection.operationId;
+     opId = utils.generateName(rawOpId, undefined); //there is opId: just normalize
+   }
+
+   if (opId == undefined) {
+     opId = utils.generateName(pathName, "function") + methodName.toUpperCase(); //there is no opId: normalize and add "func" at the beggining
+     logger.debug("      There is no operationId for " + methodName.toUpperCase() + " - " + pathName + " -> generated: " + opId);
+   }
+
+   if (load[opId] == undefined) {
+     logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + opId + ")");
+     process.exit();
+   } else {
+     logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
+   }
+ }
 
 /**
  * Checks if exists controller for a given pair path-method.
@@ -133,8 +134,7 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
       process.exit();
     }
   } else {
-    controller = utils.getBasePath(utils.getExpressVersion(pathName)) + "Controller";
-    controller = utils.normalize_controllerName(controller);
+    controller = utils.generateName(pathName, "controller");
     logger.debug("    Spec-file does not have router property -> try generic controller name: " + controller)
     try {
       var load = require(pathModule.join(controllersLocation, controller));
@@ -151,6 +151,14 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
       }
     }
   }
+}
+
+/**
+ * Converts a oas-doc type path into an epxress one.
+ * @param {string} oasPath - Path as shown in the oas-doc.
+ */
+var getExpressVersion = function(oasPath) {
+  return oasPath.replace(/{/g, ':').replace(/}/g, '');
 }
 
 /**
@@ -173,7 +181,7 @@ function registerPaths(specDoc, app) {
   var paths = specDoc.paths;
   for (var path in paths) {
     for (var method in paths[path]) {
-      var expressPath = utils.getExpressVersion(path); // TODO: take in account basePath/servers property of the spec doc.
+      var expressPath = getExpressVersion(path); // TODO: take in account basePath/servers property of the spec doc.
       dictionary[expressPath.toString()] = path;
       logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
       if (config.router == true) {
@@ -250,14 +258,6 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
   logger.info("Specification file dereferenced");
 
   var middleware = {
-    /* swaggerValidator: function() { //TODO: this would be needed if 'app' object is not passed, but then how would paths be registered?
-      var OASValidator = require('./middleware/oas-validator');
-      return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
-    },
-    swaggerRouter: function() {
-      var OASRouter = require('./middleware/oas-router');
-      return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
-    }, */
     swaggerValidator: require('./middleware/empty_middleware'),
     swaggerRouter: require('./middleware/empty_middleware'),
     swaggerMetadata: require('./middleware/empty_middleware'),
