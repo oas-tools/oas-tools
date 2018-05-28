@@ -154,11 +154,6 @@ function getTests() {
           JSON.stringify(res.body).should.contain("Expected type integer but found type string");
           JSON.stringify(res.body).should.contain("Expected type number but found type boolean");
           JSON.stringify(res.body).should.contain("Expected type string but found type number");
-
-          //res.body.message.should.contain("Expected type boolean but found type integer");
-          //res.body.message.should.contain("Expected type integer but found type string");
-          //res.body.message.should.contain("Expected type double but found type boolean");
-          //res.body.message.should.contain("Expected type string but found type number");
           done();
         });
     });
