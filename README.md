@@ -1,6 +1,6 @@
 # oas-tools
 
-Middlewares to use on NodeJS applications working with OpenAPI Specification (v3).
+Middlewares to be used on NodeJS applications working with OpenAPI Specification (v3).
 
 The folder oas-tools inside /src contains the project as a npm module, ready to be placed inside node_modules and used.
 
