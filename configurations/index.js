@@ -70,6 +70,9 @@ function _setConfigurations(options, encoding) {
   //If newConfigurations does indeed contain 'controllers', it will be initialized inside the following lop:
   for (var c in newConfigurations) {
     this.setProperty(c, newConfigurations[c]);
+    if(c == 'loglevel'){ //loglevel changes, then new logger is needed
+      createLogger();
+    }
   }
 }
 
@@ -78,29 +81,9 @@ function _setConfigurations(options, encoding) {
  */
 config.setConfigurations(path.join(__dirname, 'configs.yaml'), 'utf8');
 
-/**
- * Configure here your custom levels.
- */
-var customLevels = {
-  levels: {
-    error: 7,
-    warning: 8,
-    custom: 9,
-    info: 12,
-    debug: 13
-  },
-  colors: {
-    error: 'red',
-    warning: 'yellow',
-    custom: 'magenta',
-    info: 'white',
-    debug: 'blue'
-  }
-};
-
 winston.emitErrs = true;
 
-function consoleLogger() {
+function consoleLogger(customLevels) {
   module.exports.logger = new winston.Logger({
     levels: customLevels.levels,
     colors: customLevels.colors,
@@ -117,29 +100,54 @@ function consoleLogger() {
   });
 }
 
-if (config.logfile != undefined) {
-  module.exports.logger = new winston.Logger({
-    levels: customLevels.levels,
-    colors: customLevels.colors,
-    transports: [
-      new winston.transports.File({
-        level: config.loglevel,
-        filename: config.logfile,
-        handleExceptions: true,
-        json: false,
-        maxsize: 5242880, //5MB
-        colorize: false
-      }),
-      new winston.transports.Console({
-        level: config.loglevel,
-        handleExceptions: true,
-        json: false,
-        colorize: true,
-        timestamp: true
-      })
-    ],
-    exitOnError: false
-  });
-} else {
-  consoleLogger();
+function createLogger(){
+
+  /**
+   * Configure here your custom levels.
+   */
+  var customLevels = {
+    levels: {
+      error: 7,
+      warning: 8,
+      custom: 9,
+      info: 10,
+      debug: 11
+    },
+    colors: {
+      error: 'red',
+      warning: 'yellow',
+      custom: 'magenta',
+      info: 'white',
+      debug: 'blue'
+    }
+  };
+
+  if (config.logfile != undefined) {
+    module.exports.logger = new winston.Logger({
+      levels: customLevels.levels,
+      colors: customLevels.colors,
+      transports: [
+        new winston.transports.File({
+          level: config.loglevel,
+          filename: config.logfile,
+          handleExceptions: true,
+          json: false,
+          maxsize: 5242880, //5MB
+          colorize: false
+        }),
+        new winston.transports.Console({
+          level: config.loglevel,
+          handleExceptions: true,
+          json: false,
+          colorize: true,
+          timestamp: true
+        })
+      ],
+      exitOnError: false
+    });
+  } else {
+    consoleLogger(customLevels);
+  }
 }
+
+createLogger();
