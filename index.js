@@ -29,13 +29,15 @@ var ZSchema = require("z-schema");
 var deref = require('json-schema-deref-sync');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
+  ignoreUnknownFormats: config.ignoreUnknownFormats,
   breakOnFirstError: false
 });
 var utils = require("./lib/utils.js");
 var controllers;
 var customConfigurations = false;
-var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.json'), 'utf8');
-schemaV3 = JSON.parse(schemaV3);
+
+var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.yaml'), 'utf8');
+schemaV3 = jsyaml.safeLoad(schemaV3);
 
 
 /**

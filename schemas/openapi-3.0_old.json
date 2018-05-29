@@ -1906,7 +1906,6 @@
             "type": "object",
             "required": [
                 "content",
-                "x-name"
             ],
             "properties": {
                 "description": {

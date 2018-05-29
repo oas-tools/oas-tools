@@ -9,7 +9,7 @@ production:
   ignoreUnknownFormats: true
 
 development:
-  loglevel: debug
+  loglevel: info
   #logfile: './dev-logs.log' #if dir is specified before file: EXCEPTION
   strict: true
   router: true
