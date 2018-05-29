@@ -2,8 +2,6 @@
 
 Middlewares to be used on NodeJS applications working with OpenAPI Specification (v3).
 
-The folder oas-tools inside /src contains the project as a npm module, ready to be placed inside node_modules and used.
-
 ## 1. Install oas-tools
 ```bash
 npm install oas-tools -g
@@ -11,7 +9,7 @@ npm install oas-tools -g
 
 ## 2. Use oas-tools
 
-Require the installed module in your app index file, just like:
+Require the installed module in your app's index file, just like:
 
 ```javascript
 var oasTools = require('oas-tools');
@@ -34,10 +32,10 @@ __It is also possible to set configuration variables, these are them:__
 
 | Name	| Type	| Explanation / Values |
 | ------------- | ------------- | ------------- |
-|logLevel | Integer | Values for config file are: Debug, info, error. For hardcoded object these values must be converted to numbers_ Debug = 13, info = 12, error = 7. Default is info |
+|logLevel | String | Possible values from less to more level of verbosity are: error, warning, custom, info and debug. Default is info |
 |logFile | String | Logs file path |
 |controllers | String | Controllers location path |
-|strict	| Boolean | Indicates whether validation must stop the request process if errors were found when validating according to specification file. True by default |
+|strict	| Boolean | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default |
 |router	| Boolean | Indicates whether router middleware should be used. True by default |
 |valdator | Boolean | Indicates whether validator middleware should be used. True by default |
 |ignoreUnknownFormats | Boolean	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default |
@@ -47,9 +45,9 @@ For setting these variables you can use the function configure and pass to it ei
 ```javascript
 var options_object = {
   controllers: '/path/to/controllers',
-  loglevel: 13,
+  loglevel: 'info',
   logfile: '/path/to/logs/file',
-  strict: true,
+  strict: false,
   router: true,
   validator: true,
   ignoreUnknownFormats: true
@@ -125,6 +123,26 @@ swaggerTools.initializeMiddleware(swaggerDoc, app, function(middleware) {
   // Start the server
   ...
 });
+```
+
+__5.	Add name property to request bodies:__
+
+OpenAPI Specification version 3 defines request's body in a different way, it is not a parameter as it is in Swagger version 2. Now requests bodies are defined in a section 'requestBody' which doesn't have name property, therefore it needs this property to work with your swagger-codegen generated controllers. Simply add to each requestBody secction the property 'x-name:' and the name of the resource. Check out this example:
+
+```yaml
+post:
+  summary: Create a pet
+  operationId: createPets
+  tags:
+    - pets
+  requestBody:
+    description: Pet to add to the store
+    x-name: pet
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Pet'
 ```
 
 Once you have done all this, leave the rest the way it is and just run your appliaction with ‘node index.js’ or any other command you have specified at your package.json for running the application.
