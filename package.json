@@ -15,6 +15,7 @@
     "json-schema-deref": "^0.4.1",
     "json-schema-deref-sync": "^0.4.0",
     "lodash-compat": "^3.10.2",
+    "mocha": "^5.2.0",
     "path": "^0.12.7",
     "type-of-is": "^3.5.1",
     "winston": "^2.4.2",

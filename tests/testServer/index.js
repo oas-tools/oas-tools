@@ -10,7 +10,7 @@ var app = express();
 app.use(bodyParser.json());
 var oasTools = require('../../index.js');
 var jsyaml = require('js-yaml');
-var serverPort = 8383;
+var serverPort = 8080;
 
 var spec = fs.readFileSync(path.join(__dirname, 'api/oai-spec.yaml'), 'utf8'); //this one works
 var oasDoc = jsyaml.safeLoad(spec);
@@ -19,7 +19,7 @@ var options_string = path.join(__dirname, './configurations/customConfig.yaml');
 
 var options_object = {
   controllers: path.join(__dirname, './controllers'),
-  loglevel: 13,
+  loglevel: 'debug',
   strict: true,
   router: true,
   validator: true,

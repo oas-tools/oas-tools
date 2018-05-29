@@ -73,7 +73,7 @@ function init_checks(specDoc, callback) {
  */
 var configure = function configure(options) {
   config.setConfigurations(options);
-  if(options.loglevel != undefined){
+  if (options.loglevel != undefined) {
     logger = config.logger; //loglevel changes, then new logger is needed
   }
 };
@@ -85,27 +85,27 @@ var configure = function configure(options) {
  *@param {object} methodName - One of CRUD methods.
  *@param {object} methodSection - Section of the speficication file belonging to methodName.
  */
- function checkOperationId(load, pathName, methodName, methodSection) {
-   var opId = undefined;
-   var rawOpId = undefined;
+function checkOperationId(load, pathName, methodName, methodSection) {
+  var opId = undefined;
+  var rawOpId = undefined;
 
-   if (_.has(methodSection, 'operationId')) {
-     rawOpId = methodSection.operationId;
-     opId = utils.generateName(rawOpId, undefined); //there is opId: just normalize
-   }
+  if (_.has(methodSection, 'operationId')) {
+    rawOpId = methodSection.operationId;
+    opId = utils.generateName(rawOpId, undefined); //there is opId: just normalize
+  }
 
-   if (opId == undefined) {
-     opId = utils.generateName(pathName, "function") + methodName.toUpperCase(); //there is no opId: normalize and add "func" at the beggining
-     logger.debug("      There is no operationId for " + methodName.toUpperCase() + " - " + pathName + " -> generated: " + opId);
-   }
+  if (opId == undefined) {
+    opId = utils.generateName(pathName, "function") + methodName.toUpperCase(); //there is no opId: normalize and add "func" at the beggining
+    logger.debug("      There is no operationId for " + methodName.toUpperCase() + " - " + pathName + " -> generated: " + opId);
+  }
 
-   if (load[opId] == undefined) {
-     logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + opId + ")");
-     process.exit();
-   } else {
-     logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
-   }
- }
+  if (load[opId] == undefined) {
+    logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + opId + ")");
+    process.exit();
+  } else {
+    logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
+  }
+}
 
 /**
  * Checks if exists controller for a given pair path-method.
@@ -167,6 +167,32 @@ var getExpressVersion = function(oasPath) {
 }
 
 /**
+ * In case the spec doc has servers.url properties this function appends the base path to the path before registration
+ * @param {string} specDoc - Specification file.
+ * @param {string} expressPath - Express type path.
+ */
+function appendBasePath(specDoc, expressPath) {
+  var res;
+  if (specDoc.servers != undefined) {
+    var url = specDoc.servers[0].url.split('/');
+
+    var basePath = "/";
+
+    for (var i = 0; i < url.length; i++) {
+      if (i >= 3) {
+        basePath += url[i] + "/";
+      }
+    }
+    basePath = basePath.slice(0, basePath.length - 1);
+    config.basePath = basePath;
+    res = basePath + expressPath;
+  } else {
+    res = expressPath;
+  }
+  return res;
+}
+
+/**
  * Function to initialize swagger-tools middlewares.
  *@param {object} specDoc - Specification file.
  *@param {function} app - Express application object.
@@ -192,6 +218,7 @@ function registerPaths(specDoc, app) {
       if (config.router == true) {
         checkControllers(path, method, paths[path][method], config.controllers);
       }
+      expressPath = appendBasePath(specDoc, expressPath);
       switch (method) { //TODO: paths must be registered for each url in servers property of the spec doc.
         case 'get':
           if (config.validator == true) {

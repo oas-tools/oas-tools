@@ -70,7 +70,6 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
   if (paths[requestedSpecPath][method].hasOwnProperty('requestBody')) {
     var requestBody = paths[requestedSpecPath][method]['requestBody'];
     if (requestBody.required != undefined && requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
-      console.log("   VALIDATE THIS: " + JSON.stringify(req.swagger.params))
       if (req.body == undefined || JSON.stringify(req.body) == '{}') {
         var newErr = {
           message: "Missing object in the request body. "
@@ -372,6 +371,16 @@ function convertValue(value, schema, type) {
   return value;
 };
 
+/**
+ * Subtracts the basePath of the requested path.
+ * @param {string} reqRoutePath - Value of req.route.path.
+ */
+function removeBasePath(reqRoutePath){
+    return reqRoutePath.split('').filter(function (a, i) {
+        return a !== config.basePath[i];
+    }).join('');
+}
+
 
 exports = module.exports = function(oasDoc) {
 
@@ -381,7 +390,7 @@ exports = module.exports = function(oasDoc) {
 
     logger.info("Requested method-url pair: " + method + " - " + req.url);
 
-    var requestedSpecPath = config.pathsDict[req.route.path];
+    var requestedSpecPath = config.pathsDict[removeBasePath(req.route.path)];
 
     req.swagger = {
       params: {}
