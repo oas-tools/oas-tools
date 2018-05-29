@@ -254,6 +254,9 @@ var initialize = function initialize(oasDoc, app, callback) {
  */
 var initializeMiddleware = function initializeMiddleware(specDoc, app, callback) {
 
+  var bodyParser = require('body-parser');
+  app.use(bodyParser.json());
+
   init_checks(specDoc, callback);
 
   var fullSchema = deref(specDoc);
