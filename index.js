@@ -184,11 +184,15 @@ function appendBasePath(specDoc, expressPath) {
       }
     }
     basePath = basePath.slice(0, basePath.length - 1);
+    if(basePath=='/'){
+      basePath = '';
+    }
     config.basePath = basePath;
     res = basePath + expressPath;
   } else {
     res = expressPath;
   }
+
   return res;
 }
 
