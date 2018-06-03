@@ -41,7 +41,6 @@ var controllers;
  * @param {string} next - Express middleware next function (necessary for the execution of the controller).
  */
 function executeFunctionByName(functionName, context, req, res, next) {
-  var args = Array.prototype.slice.call(arguments, 3);
   var namespaces = functionName.split(".");
   var func = namespaces.pop();
   for (var i = 0; i < namespaces.length; i++) {
@@ -52,6 +51,7 @@ function executeFunctionByName(functionName, context, req, res, next) {
   logger.debug("   -context[func]: " + func)
   return context[func].apply(context, [req, res, next]);
 }
+
 
 /**
  * Checks if the data sent as a response for the previous request matches the indicated in the specification file in the responses section for that request.
