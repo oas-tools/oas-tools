@@ -41,15 +41,9 @@ var controllers;
  * @param {string} next - Express middleware next function (necessary for the execution of the controller).
  */
 function executeFunctionByName(functionName, context, req, res, next) {
-  var namespaces = functionName.split(".");
-  var func = namespaces.pop();
-  for (var i = 0; i < namespaces.length; i++) {
-    context = context[namespaces[i]];
-  }
   logger.debug("Processing at executeFunctionByName:");
   logger.debug("   -functionName: " + functionName);
-  logger.debug("   -context[func]: " + func)
-  return context[func].apply(context, [req, res, next]);
+  return context[functionName].apply(context, [req, res, next]);
 }
 
 
