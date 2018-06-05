@@ -32,20 +32,6 @@ var validator = new ZSchema({
 var utils = require("../lib/utils.js");
 var controllers;
 
-/**
- * Executes a function whose name is stored in a string value.
- * @param {string} functionName - Name of the function to be executed.
- * @param {string} context - Location of the function to be executed.
- * @param {string} req - Request object (necessary for the execution of the controller).
- * @param {string} res - Response object (necessary for the execution of the controller).
- * @param {string} next - Express middleware next function (necessary for the execution of the controller).
- */
-function executeFunctionByName(functionName, context, req, res, next) {
-  logger.debug("Processing at executeFunctionByName:");
-  logger.debug("   -functionName: " + functionName);
-  return context[functionName].apply(context, [req, res, next]);
-}
-
 
 /**
  * Checks if the data sent as a response for the previous request matches the indicated in the specification file in the responses section for that request.
@@ -174,6 +160,6 @@ exports = module.exports = function(controllers) {
       res.header("Content-Type", "application/json;charset=utf-8");
       checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, arguments);
     }
-    executeFunctionByName(opID, controller, req, res, next);
+    controller[opID].apply(undefined, [req, res, next]); // execute function by name
   }
 }

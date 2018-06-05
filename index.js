@@ -132,7 +132,7 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
     controller = methodSection[router_property];
     logger.debug("    OAS-doc has " + router_property + " property");
     try {
-      load = require(pathModule.join(controllersLocation, controller));
+      load = require(pathModule.join(controllersLocation, utils.generateName(controller,undefined)));
       checkOperationId(load, pathName, methodName, methodSection);
     } catch (err) {
       logger.error(err);
