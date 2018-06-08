@@ -20,6 +20,13 @@
     "path": "^0.12.7",
     "type-of-is": "^3.5.1",
     "winston": "^2.4.2",
-    "z-schema": "^3.19.1"
+    "z-schema": "^3.19.1",
+    "chai": "^4.1.2",
+    "chai-http": "^4.0.0",
+    "fs": "0.0.1-security",
+    "http": "0.0.0",
+    "mongoose": "^5.0.12",
+    "request": "^2.85.0",
+    "swagger2openapi": "^2.11.16"
   }
 }
