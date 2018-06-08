@@ -198,17 +198,17 @@ function appendBasePath(specDoc, expressPath) {
 
 /**
  * Function to initialize swagger-tools middlewares.
- *@param {object} specDoc - Specification file.
+ *@param {object} specDoc - Specification file (dereferenced).
  *@param {function} app - Express application object.
  */
 function registerPaths(specDoc, app) {
   var OASRouterMid = function() {
     var OASRouter = require('./middleware/oas-router');
-    return OASRouter.call(undefined, config.controllers); // ROUTER NEEDS JUST CONTROLLERS
+    return OASRouter.call(undefined, config.controllers);
   };
   var OASValidatorMid = function() {
     var OASValidator = require('./middleware/oas-validator');
-    return OASValidator.call(undefined, specDoc); // VALIDATOR NEEDS JUST SPEC-FILE
+    return OASValidator.call(undefined, specDoc); 
   };
 
   var dictionary = {};

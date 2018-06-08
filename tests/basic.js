@@ -7,7 +7,7 @@ var auxRequire = require('./testServer/controllers/petsController');
 
 auxRequire.corruptPets();
 
-function getTests() {
+function getTests() { //this one calls postTests()
   describe('/GET pets', () => {
 
     it('it should get and error informing the required parameter limit was not specified in the query', (done) => {
@@ -229,7 +229,7 @@ function getTests() {
   });
 }
 
-function postTests() {
+function postTests() { //this one calls putTests()
   describe('/POST pets', () => {
     var prePostSize = auxRequire.pets.length;
     it('it should POST a pet ', (done) => {
@@ -367,7 +367,7 @@ function postTests() {
   });
 }
 
-function putTests() {
+function putTests() { //this one calls deletePets()
   describe('/PUT/:id pet', () => {
     it('it should UPDATE a pet given the id', (done) => {
       var pet = {

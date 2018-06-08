@@ -78,7 +78,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
         keepGoing = false;
       } else {
         var validSchema = requestBody.content['application/json'].schema;
-        var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen
+        var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
         var err = validator.validate(data, validSchema);
         if (err == false) {
           var newErr = {
