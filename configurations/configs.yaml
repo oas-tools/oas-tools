@@ -9,8 +9,8 @@ production:
   ignoreUnknownFormats: true
 
 development:
-  loglevel: info
-  #logfile: './dev-logs.log' #if dir is specified before file: EXCEPTION
+  loglevel: debug
+  #logfile: './dev-logs.log' #if dir is specified before file and that dir doesnt exist: EXCEPTION! winston can create file but not folder
   strict: true
   router: true
   validator: true
