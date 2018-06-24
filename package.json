@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha ./tests/basic.js"
+    "test": "mocha ./tests/basic.js",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "author": "",
   "license": "ISC",
@@ -29,6 +31,8 @@
     "type-of-is": "^3.5.1",
     "validator": "^10.3.0",
     "winston": "^2.4.2",
-    "z-schema": "^3.19.1"
-  }
+    "z-schema": "^3.19.1",
+    "snyk": "^1.83.0"
+  },
+  "snyk": true
 }
