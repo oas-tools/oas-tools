@@ -32,13 +32,13 @@ __It is also possible to set configuration variables, these are them:__
 
 | Name	| Type	| Explanation / Values |
 | ------------- | ------------- | ------------- |
-|logLevel | String | Possible values from less to more level of verbosity are: error, warning, custom, info and debug. Default is info |
-|logFile | String | Logs file path |
-|controllers | String | Controllers location path |
-|strict	| Boolean | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default |
-|router	| Boolean | Indicates whether router middleware should be used. True by default |
-|valdator | Boolean | Indicates whether validator middleware should be used. True by default |
-|ignoreUnknownFormats | Boolean	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default |
+|`logLevel` | `String` | Possible values from less to more level of verbosity are: error, warning, custom, info and debug. Default is info |
+|`logFile` | `String` | Logs file path |
+|`controllers` | `String` | Controllers location path |
+|`strict`	| `Boolean` | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default |
+|`router`	| `Boolean` | Indicates whether router middleware should be used. True by default |
+|`valdator` | `Boolean` | Indicates whether validator middleware should be used. True by default |
+|`ignoreUnknownFormats` | `Boolean`	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default |
 
 For setting these variables you can use the function configure and pass to it either a JavaScript object or a yaml/json file containing such object.
 
@@ -147,9 +147,6 @@ post:
 
 Once you have done all this, leave the rest the way it is and just run your appliaction with ‘node index.js’ or any other command you have specified at your package.json for running the application.
 
-
-
-
 ## Latest release
 
 [![Build Status](https://travis-ci.org/isa-group/project-template-nodejs.svg?branch=master)](https://travis-ci.org/http://github.com/isa-group/project-template-nodejs)
@@ -160,23 +157,14 @@ see [release note](http://github.com/isa-group/oas-tools/releases/tag/0.0.0) for
 For running:
 
 - Download latest version from [0.0.0](http://github.com/isa-group/oas-tools/releases/tag/0.0.0)
-## Copyright notice
 
-**OAS-tools module** is open-source software available under the GNU General Public License (GPL) version 3 (GPL v3).
+## License
 
-All including documentation and code are copyrighted and the copyright is owned by [ISA Group](http://www.isa.us.es),
-[University of Sevilla](http://www.us.es), unauthorized reproduction or distribution of this copyrighted work is illegal.
+Copyright 2018, [ISA Group](http://www.isa.us.es), [University of Sevilla](http://www.us.es)
+
+Licensed under the **Apache License, Version 2.0** (the "[License](./LICENSE)"); you may not use this file except in compliance with the License. You may obtain a copy of the License at apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
 For commercial licensing terms, please [contact](./extra/contact.md) for any inquiry.
-
 For technical inquiry please contact to [engineering team](./extra/about.md).
-
-## Latest release
-
-[![Build Status](https://travis-ci.org/https://github.com/isa-group/oas-tools.svg?branch=master)](https://travis-ci.org/https://github.com/isa-group/oas-tools)
-
-The version 0.0.0 is the latest stable version of OAS-tools module component.
-see [release note](https://github.com/isa-group/oas-tools/releases/tag/0.0.0) for details.
-
-For running:
-
-- Download latest version from [0.0.0](https://github.com/isa-group/oas-tools/releases/tag/0.0.0)

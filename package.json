@@ -10,7 +10,7 @@
     "coverage": "nyc --reporter=html --reporter=text mocha ./tests/basic.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "body-parser": "^1.18.3",
     "chai": "^4.1.2",
