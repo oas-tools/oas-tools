@@ -5,11 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha ./tests/basic.js",
+    "test:tdd": "mocha ./tests/basic.js -w",
+    "lint": "eslint index.js configurations/ Gruntfile.js middleware/ lib/ tests/",
+    "coverage": "nyc --reporter=html --reporter=text mocha ./tests/basic.js"
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
   },
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "body-parser": "^1.18.3",
     "chai": "^4.1.2",
@@ -31,8 +34,12 @@
     "type-of-is": "^3.5.1",
     "validator": "^10.3.0",
     "winston": "^2.4.2",
-    "z-schema": "^3.19.1",
-    "snyk": "^1.83.0"
+    "z-schema": "^3.19.1"
   },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "nyc": "^12.0.2",
+    "snyk": "^1.83.0"
+  }
   "snyk": true
 }
