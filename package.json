@@ -8,6 +8,8 @@
     "test:tdd": "mocha ./tests/basic.js -w",
     "lint": "eslint index.js configurations/ Gruntfile.js middleware/ lib/ tests/",
     "coverage": "nyc --reporter=html --reporter=text mocha ./tests/basic.js"
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -36,6 +38,8 @@
   },
   "devDependencies": {
     "eslint": "^4.19.1",
-    "nyc": "^12.0.2"
+    "nyc": "^12.0.2",
+    "snyk": "^1.83.0"
   }
+  "snyk": true
 }
