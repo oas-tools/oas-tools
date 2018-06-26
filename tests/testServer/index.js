@@ -19,27 +19,39 @@ var options_string = path.join(__dirname, './configurations/customConfig.yaml');
 
 var options_object = {
   controllers: path.join(__dirname, './controllers'),
-  loglevel: 'debug',
+  //loglevel: 'debug',
+  loglevel: 'none',
   strict: true,
   router: true,
   validator: true,
   ignoreUnknownFormats: true
 };
 
-oasTools.configure(options_object);
 
-oasTools.initialize(oasDoc, app, function() { // oas-tools version
-  http.createServer(app).listen(serverPort, function() {
-    console.log("App running at http://localhost:" + serverPort);
-    console.log("________________________________________________________________");
-  });
-});
+function init(done) {
+  oasTools.configure(options_object);
 
-app.get('/info', function(req, res) {
-  res.send({
-    infoEN: "This is a very simple API that uses the oas-tools Module!",
-    infoDE: "Diese ist eine sehr einfach API die benutzt unsere oas-tools module!"
+  oasTools.initialize(oasDoc, app, () => { // oas-tools version
+    http.createServer(app).listen(serverPort, () => {
+      // console.log("App running at http://localhost:" + serverPort);
+      // console.log("________________________________________________________________");
+      done();
+    });
   });
-});
+  
+  app.get('/info', (req, res) => {
+    res.send({
+      infoEN: "This is a very simple API that uses the oas-tools Module!",
+      infoDE: "Diese ist eine sehr einfach API die benutzt unsere oas-tools module!"
+    });
+  });
+}
+app.init = init;
+app.getServer = function getServer() { 
+  return app;
+}
+app.close = function close() { 
+  process.exit(0);
+}
 
 module.exports = app; //export for chai tests
