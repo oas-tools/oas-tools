@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha ./tests/basic.js"
+    "test": "mocha ./tests/basic.js",
+    "lint": "eslint index.js configurations/ Gruntfile.js middleware/ lib/ tests/"
   },
   "author": "",
   "license": "ISC",
@@ -30,5 +31,8 @@
     "validator": "^10.3.0",
     "winston": "^2.4.2",
     "z-schema": "^3.19.1"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1"
   }
 }
