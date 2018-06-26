@@ -19,13 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 'use strict';
 
-var exports;
+var exports;  // eslint-disable-line
 var ZSchema = require("z-schema");
-var yaml = require('js-yaml');
-var fs = require('fs');
-var path = require('path');
-var http = require('http');
-var urlModule = require('url');
+
+// unused: review
+// var yaml = require('js-yaml');
+// var fs = require('fs');
+// var path = require('path');
+// var http = require('http');
+// var urlModule = require('url');
+
 var config = require('../configurations'),
   logger = config.logger;
 var validator = new ZSchema({
@@ -63,12 +66,9 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
   var keepGoing = true;
   //var msg = "";
   var msg = [];
-  var missingOrWrongParameters = [];
-  var missingParameters = [];
-  var wrongParameters = [];
-
+ 
   if (paths[requestedSpecPath][method].hasOwnProperty('requestBody')) {
-    var requestBody = paths[requestedSpecPath][method]['requestBody'];
+    var requestBody = paths[requestedSpecPath][method].requestBody;
     if (requestBody.required != undefined && requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
       if (req.body == undefined || JSON.stringify(req.body) == '{}') {
         var newErr = {
@@ -81,7 +81,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
         var err = validator.validate(data, validSchema);
         if (err == false) {
-          var newErr = {
+          newErr = {
             message: "Wrong data in the body of the request. ",
             error: validator.getLastErrors(),
             content: data
@@ -97,7 +97,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
 
   if (paths[requestedSpecPath][method].hasOwnProperty('parameters')) {
 
-    var params = paths[requestedSpecPath][method]['parameters'];
+    var params = paths[requestedSpecPath][method].parameters;
 
     for (var i = 0; i < params.length; i++) {
 
@@ -107,29 +107,30 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
         var name = params[i].name;
         var location = params[i].in;
         var schema = params[i].schema;
+        var value;
 
         location = locationFormat(location);
         if (req[location][name] == undefined) { //if the request is missing a required parameter acording to the oasDoc: warning
-          var newErr = {
+          newErr = {
             message: "Missing parameter " + name + " in " + location + ". "
           };
           msg.push(newErr);
           keepGoing = false;
         } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
-          try {
-            var value = JSON.parse(req[location][name]);
+          try { // eslint-disable-line
+            value = JSON.parse(req[location][name]);
           } catch (err) {
-            var value = req[location][name] + ""; //new String(req[location][name]);
+            value = String(req[location][name]);
           }
-          var err = validator.validate(value, schema);
-          if (err == false) {
+          err = validator.validate(value, schema);
+          if (err == false) {  // eslint-disable-line
             keepGoing = false;
-            if (err.code == "UNKNOWN_FORMAT") {
+            if (err.code == "UNKNOWN_FORMAT") { // eslint-disable-line
               var registeredFormats = ZSchema.getRegisteredFormats();
               logger.error("UNKNOWN_FORMAT error - Registered Formats: ");
               logger.error(registeredFormats);
             }
-            var newErr = {
+            newErr = {
               message: "Wrong parameter " + name + " in " + location + ". ",
               error: validator.getLastErrors()
             };
@@ -166,7 +167,7 @@ function getParameterType(schema) {
     type = 'object';
   }
   return type;
-};
+}
 
 /**
  * .
@@ -193,7 +194,7 @@ function getParameterValue(req, parameter) {
     case 'formData':
       if (paramType.toLowerCase() === 'file') {
         if (_.isArray(req.files)) {
-          val = _.find(req.files, function(file) {
+          val = _.find(req.files, (file) => {
             return file.fieldname === parameter.name;
           });
         } else if (!_.isUndefined(req.files)) {
@@ -230,23 +231,23 @@ function getParameterValue(req, parameter) {
   }
 
   return val;
-};
+}
 
 /**
  * .
  * @param {string}  - .
  */
-function convertValue(value, schema, type) {
+function convertValue(value, schema, type) { // eslint-disable-line
   var original = value;
 
   // Default to {}
   if (_.isUndefined(schema)) {
-    schema = {};
+    schema = {}; // eslint-disable-line
   }
 
   // Try to find the type or default to 'object'
   if (_.isUndefined(type)) {
-    type = getParameterType(schema);
+    type = getParameterType(schema); // eslint-disable-line
   }
 
   // If there is no value, do not convert it
@@ -266,36 +267,36 @@ function convertValue(value, schema, type) {
           case 'csv':
           case undefined:
             try {
-              value = JSON.parse(value);
+              value = JSON.parse(value); // eslint-disable-line
             } catch (err) {
-              value = original;
+              value = original; // eslint-disable-line
             }
 
             if (_.isString(value)) {
-              value = value.split(',');
+              value = value.split(','); // eslint-disable-line
             }
             break;
           case 'multi':
-            value = [value];
+            value = [value]; // eslint-disable-line
             break;
           case 'pipes':
-            value = value.split('|');
+            value = value.split('|'); // eslint-disable-line
             break;
           case 'ssv':
-            value = value.split(' ');
+            value = value.split(' '); // eslint-disable-line
             break;
           case 'tsv':
-            value = value.split('\t');
+            value = value.split('\t'); // eslint-disable-line
             break;
         }
       }
 
       // Handle situation where the expected type is array but only one value was provided
       if (!_.isArray(value)) {
-        value = [value];
+        value = [value]; // eslint-disable-line
       }
 
-      value = _.map(value, function(item, index) {
+      value = _.map(value, function(item, index) { // eslint-disable-line
         var iSchema = _.isArray(schema.items) ? schema.items[index] : schema.items;
 
         return convertValue(item, iSchema, iSchema ? iSchema.type : undefined);
@@ -306,9 +307,9 @@ function convertValue(value, schema, type) {
     case 'boolean':
       if (!_.isBoolean(value)) {
         if (['false', 'true'].indexOf(value) === -1) {
-          value = original;
+          value = original; // eslint-disable-line
         } else {
-          value = value === 'true' || value === true ? true : false;
+          value = value === 'true' || value; // eslint-disable-line
         }
       }
 
@@ -317,13 +318,13 @@ function convertValue(value, schema, type) {
     case 'integer':
       if (!_.isNumber(value)) {
         if (_.isString(value) && _.trim(value).length === 0) {
-          value = NaN;
+          value = NaN; // eslint-disable-line
         }
 
-        value = Number(value);
+        value = Number(value); // eslint-disable-line
 
         if (isNaN(value)) {
-          value = original;
+          value = original; // eslint-disable-line
         }
       }
 
@@ -332,13 +333,13 @@ function convertValue(value, schema, type) {
     case 'number':
       if (!_.isNumber(value)) {
         if (_.isString(value) && _.trim(value).length === 0) {
-          value = NaN;
+          value = NaN; // eslint-disable-line
         }
 
-        value = Number(value);
+        value = Number(value); // eslint-disable-line
 
         if (isNaN(value)) {
-          value = original;
+          value = original; // eslint-disable-line
         }
       }
 
@@ -347,9 +348,9 @@ function convertValue(value, schema, type) {
     case 'object':
       if (_.isString(value)) {
         try {
-          value = JSON.parse(value);
+          value = JSON.parse(value); // eslint-disable-line
         } catch (err) {
-          value = original;
+          value = original; // eslint-disable-line
         }
       }
 
@@ -357,10 +358,10 @@ function convertValue(value, schema, type) {
 
     case 'string':
       if (['date', 'date-time'].indexOf(schema.format) > -1 && !_.isDate(value)) {
-        value = new Date(value);
+        value = new Date(value); // eslint-disable-line
 
         if (!_.isDate(value) || value.toString() === 'Invalid Date') {
-          value = original;
+          value = original; // eslint-disable-line
         }
       }
 
@@ -369,20 +370,21 @@ function convertValue(value, schema, type) {
   }
 
   return value;
-};
+}
 
 /**
  * Subtracts the basePath of the requested path.
  * @param {string} reqRoutePath - Value of req.route.path.
  */
 function removeBasePath(reqRoutePath){
-    return reqRoutePath.split('').filter(function (a, i) {
+    return reqRoutePath.split('').filter((a, i) => {
         return a !== config.basePath[i];
-    }).join('');
+    })
+    .join('');
 }
 
 
-exports = module.exports = function(oasDoc) {
+module.exports = (oasDoc) => {
 
   return function OASValidator(req, res, next) {
 
@@ -396,9 +398,9 @@ exports = module.exports = function(oasDoc) {
       params: {}
     }
 
-    var parameters = oasDoc.paths[requestedSpecPath][method]['parameters'];
+    var parameters = oasDoc.paths[requestedSpecPath][method].parameters;
     if (parameters != undefined) {
-      parameters.forEach(function(parameter) { // TODO: para POST y PUT el objeto se define en 'requestBody' y no en 'parameters'
+      parameters.forEach((parameter) => { // TODO: para POST y PUT el objeto se define en 'requestBody' y no en 'parameters'
         var pType = getParameterType(parameter);
         var oVal = getParameterValue(req, parameter);
         var value = convertValue(oVal, parameter.schema == undefined ? parameter : parameter.schema, pType);
@@ -412,7 +414,7 @@ exports = module.exports = function(oasDoc) {
       });
     }
 
-    var requestBody = oasDoc.paths[requestedSpecPath][method]['requestBody'];
+    var requestBody = oasDoc.paths[requestedSpecPath][method].requestBody;
     if (requestBody != undefined) {
       req.swagger.params[requestBody['x-name']] = {
         path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
@@ -426,3 +428,7 @@ exports = module.exports = function(oasDoc) {
     checkRequestData(oasDoc, requestedSpecPath, method, res, req, next);
   }
 }
+
+exports = module.exports;
+
+

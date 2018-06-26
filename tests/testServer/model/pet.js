@@ -1,21 +1,29 @@
-let mongoose = require('mongoose');
-let Schema = mongoose.Schema;
+"use strict";
+
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 //book schema definition
-let PetSchema = new Schema(
-  {
-    id: { type: Number, required: true },
-    tag: { type: String, required: false },
-    name: { type: String, required: true },
+const PetSchema = new Schema({
+  id: {
+    type: Number,
+    required: true
   },
-  {
-    versionKey: false
-  }
-);
+  tag: {
+    type: String,
+    required: false
+  },
+  name: {
+    type: String,
+    required: true
+  },
+}, {
+  versionKey: false
+});
 
-PetSchema.pre('save', next => {
-  now = new Date();
-  if(!this.createdAt) {
+PetSchema.pre('save', (next) => {
+  const now = new Date();
+  if (!this.createdAt) {
     this.createdAt = now;
   }
   next();

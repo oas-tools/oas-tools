@@ -1,21 +1,9 @@
-/*!
+/*
 OAS-tools module 0.0.0, built on: 2017-03-30
 Copyright (C) 2017 Ignacio Peluaga Lozada (ISA Group)
 https://github.com/ignpelloz
 https://github.com/isa-group/project-oas-tools
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+*/
 
 'use strict';
 
@@ -33,8 +21,9 @@ var validator = new ZSchema({
   breakOnFirstError: false
 });
 var utils = require("./lib/utils.js");
-var controllers;
-var customConfigurations = false;
+
+// var controllers;
+// var customConfigurations = false;
 
 var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.yaml'), 'utf8');
 schemaV3 = jsyaml.safeLoad(schemaV3);
@@ -142,13 +131,13 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
     controller = utils.generateName(pathName, "controller");
     logger.debug("    Spec-file does not have router property -> try generic controller name: " + controller)
     try {
-      var load = require(pathModule.join(controllersLocation, controller));
+      load = require(pathModule.join(controllersLocation, controller));
       checkOperationId(load, pathName, methodName, methodSection);
     } catch (err) {
       logger.debug("    Controller with generic controller name wasn't found either -> try Default one");
       try {
         controller = 'Default' //try to load default one
-        var load = require(pathModule.join(controllersLocation, controller));
+        load = require(pathModule.join(controllersLocation, controller));
         checkOperationId(load, pathName, methodName, methodSection);
       } catch (err) {
         logger.error("    There is no controller for " + methodName.toUpperCase() + " - " + pathName);

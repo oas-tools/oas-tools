@@ -1,7 +1,8 @@
 module.exports = {
     "env": {
         "es6": true,
-        "node": true
+        "node": true,
+        "mocha": true
     },
     "extends": "eslint:recommended",
     "rules": {
@@ -9,8 +10,8 @@ module.exports = {
         "array-bracket-newline": "error",
         "array-bracket-spacing": "error",
         "array-callback-return": "error",
-        "array-element-newline": "error",
-        "arrow-body-style": "error",
+        "array-element-newline": "off",
+        "arrow-body-style": "off",
         "arrow-parens": "error",
         "arrow-spacing": "error",
         "block-scoped-var": "off",
@@ -38,7 +39,7 @@ module.exports = {
         "consistent-this": "error",
         "curly": "error",
         "default-case": "off",
-        "dot-location": "error",
+        "dot-location": "off",
         "dot-notation": [
             "error",
             {
@@ -86,11 +87,8 @@ module.exports = {
         "max-params": "off",
         "max-statements": "off",
         "max-statements-per-line": "error",
-        "multiline-comment-style": [
-            "error",
-            "bare-block"
-        ],
-        "multiline-ternary": "error",
+        "multiline-comment-style": "off",
+        "multiline-ternary": "off",
         "new-parens": "error",
         "newline-after-var": "off",
         "newline-before-return": "off",
@@ -123,7 +121,7 @@ module.exports = {
             "error",
             "functions"
         ],
-        "no-invalid-this": "error",
+        "no-invalid-this": "off",
         "no-iterator": "error",
         "no-label-var": "error",
         "no-labels": "error",
@@ -155,10 +153,10 @@ module.exports = {
                 "allowForLoopAfterthoughts": true
             }
         ],
-        "no-process-env": "error",
+        "no-process-env": "off",
         "no-process-exit": "off",
         "no-proto": "error",
-        "no-prototype-builtins": "error",
+        "no-prototype-builtins": "off",
         "no-restricted-globals": "error",
         "no-restricted-imports": "error",
         "no-restricted-modules": "error",
@@ -180,7 +178,7 @@ module.exports = {
         ],
         "no-tabs": "error",
         "no-template-curly-in-string": "error",
-        "no-ternary": "error",
+        "no-ternary": "off",
         "no-throw-literal": "error",
         "no-trailing-spaces": "off",
         "no-undef-init": "off",
@@ -202,7 +200,7 @@ module.exports = {
         "no-whitespace-before-property": "error",
         "no-with": "error",
         "nonblock-statement-body-position": "error",
-        "object-curly-newline": "error",
+        "object-curly-newline": "off",
         "object-curly-spacing": "error",
         "object-property-newline": "error",
         "object-shorthand": "off",
