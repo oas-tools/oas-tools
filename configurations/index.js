@@ -32,12 +32,12 @@ var winston = require('winston');
  * Export functions and Objects
  */
 var config = {
-  setConfigurations: _setConfigurations
+  setConfigurations: _setConfigurations // eslint-disable-line
 };
 
 module.exports = config;
 
-module.exports.setProperty = function(propertyName, newValue) {
+module.exports.setProperty = function setProperty(propertyName, newValue) { 
   this[propertyName] = newValue;
 };
 
@@ -45,16 +45,16 @@ module.exports.setProperty = function(propertyName, newValue) {
 /**
  * Implement the functions
  */
-function _setConfigurations(options, encoding) {
+function _setConfigurations(options, encoding) { // eslint-disable-line
 
   if (!options) {
     throw new Error("Configurations parameter is required");
   } else if (typeof options == 'string') {
     try {
-      var configString = fs.readFileSync(options, encoding);
+      var configString = fs.readFileSync(options, encoding); // eslint-disable-line
       var newConfigurations = jsyaml.safeLoad(configString)[process.env.NODE_ENV ? process.env.NODE_ENV : 'development'];
     } catch (err) {
-      console.log("The specified configuration file wasn't found at " + options + ".  Default configurations will be set");
+      console.log("The specified configuration file wasn't found at " + options + ".  Default configurations will be set"); // eslint-disable-line
       config.setConfigurations(path.join(__dirname, 'configs.yaml'), 'utf8');
     }
   } else {
@@ -68,7 +68,7 @@ function _setConfigurations(options, encoding) {
   for (var c in newConfigurations) {
     this.setProperty(c, newConfigurations[c]);
     if(c == 'loglevel'){ //loglevel changes, then new logger is needed
-      createLogger();
+      createLogger(); // eslint-disable-line
     }
   }
 }

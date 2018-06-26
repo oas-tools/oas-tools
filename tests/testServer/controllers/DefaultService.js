@@ -1,7 +1,7 @@
 'use strict';
 
-
-var pets = [{
+let pets = [
+  {
     id: 1,
     name: "Wolf",
     tag: "Barks at the moon"
@@ -34,7 +34,8 @@ var pets = [{
 ];
 
 function corruptPets() {
-  pets = [{
+  pets = [
+    {
       id: "1",
       name: "Wolf",
       tag: "Barks at the moon"
@@ -68,7 +69,8 @@ function corruptPets() {
 }
 
 function setCorrectPets() {
-  pets = [{
+  pets = [
+    {
       id: 1,
       name: "Wolf",
       tag: "Barks at the moon"
@@ -106,8 +108,8 @@ function setCorrectPets() {
 /**
  *  Creates a pet
  */
-exports.createPets = function(args, res, next) {
-  pets.push(args['pet'].value);
+exports.createPets = (args, res) => {
+  pets.push(args.pet.value);
   exports.pets = pets;
   res.status(201).send(pets);
 }
@@ -115,26 +117,26 @@ exports.createPets = function(args, res, next) {
 /**
  *  Retrieves the whole pets collection
  */
-exports.listPets = function(args, res, next) {
+exports.listPets = (args, res) => {
   exports.pets = pets;
-  res.status(200).send(pets.slice(0, args['limit'].value));
+  res.status(200).send(pets.slice(0, args.limit.value));
 }
 
 /**
  *  Retrieves a single pet
  */
-exports.showPetById = function(args, res, next) {
+exports.showPetById = (args, res) => {
   exports.pets = pets;
   var res_pet;
   for (var i = 0; i < pets.length; i++) {
-    if (pets[i].id == args['petId'].value) {
+    if (pets[i].id == args.petId.value) {
       res_pet = pets[i];
       break;
     }
   }
   if (res_pet == undefined) {
     res.status(404).send({
-      message: "There is no pet with id " + args['petId'].value
+      message: "There is no pet with id " + args.petId.value
     });
   } else {
     res.status(200).send(res_pet);
@@ -144,16 +146,16 @@ exports.showPetById = function(args, res, next) {
 /**
  *  Deletes a single pet from the collection
  */
-exports.deletePet = function(args, res, next) {
+exports.deletePet = (args, res) => {
   var index = -1;
   for (var i = 0; i < pets.length; i++) {
-    if (pets[i].id == args['petId'].value) {
+    if (pets[i].id == args.petId.value) {
       index = i;
     }
   }
   if (index == -1) {
     res.status(404).send({
-      message: "There is no pet with id " + args['petId'].value + " to be deleted"
+      message: "There is no pet with id " + args.petId.value + " to be deleted"
     });
   } else {
     pets.splice(index, 1);
@@ -165,7 +167,7 @@ exports.deletePet = function(args, res, next) {
 /**
  *  Deletes all the pets in the collection
  */
-exports.deletePets = function(args, res, next) {
+exports.deletePets = (args, res) => {
   exports.pets = pets;
   pets.splice(0, pets.length);
   exports.pets = pets;
@@ -175,12 +177,12 @@ exports.deletePets = function(args, res, next) {
 /**
  *  Updates a pet
  */
-exports.updatePet = function(args, res, next) {
+exports.updatePet = (args, res) => {
   var present = false;
   for (var i = 0; i < pets.length; i++) {
-    if (pets[i].id == args['petId'].value) {
+    if (pets[i].id == args.petId.value) {
       present = true;
-      pets[i] = args['pet'].value;
+      pets[i] = args.pet.value;
       res.status(200).send({
         message: "Updated pet"
       });
@@ -188,7 +190,7 @@ exports.updatePet = function(args, res, next) {
   }
   if (present == false) {
     res.status(404).send({
-      message: "There is no pet with id " + args['petId'].value
+      message: "There is no pet with id " + args.petId.value
     });
   }
   exports.pets = pets;

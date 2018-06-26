@@ -4,7 +4,7 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const serverProto = require('./testServer');
 let server = require('./testServer');
-const should = chai.should();
+const should = chai.should(); // eslint-disable-line  no-unused-vars
 chai.use(chaiHttp);
 const auxRequire = require('./testServer/controllers/petsController');
 auxRequire.corruptPets();
@@ -32,17 +32,24 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/pets')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Missing parameter limit in query");
         done();
       });
   });
+
   /* testing of parameters in query */
   it('it should get an error informing of missing required parameters in query', (done) => {
     chai.request(server)
       .get('/api/v1/paramTestsQuery')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Missing parameter integerParam in query");
@@ -56,6 +63,9 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/paramTestsQuery?integerParam=wrong&booleanParam=true&stringParam=okay&doubleParam=1.9')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong parameter integerParam in query");
@@ -66,6 +76,9 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/paramTestsQuery?integerParam=9&booleanParam=wrong90&stringParam=okay&doubleParam=1.9')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong parameter booleanParam in query");
@@ -76,6 +89,9 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/paramTestsQuery?integerParam=9&booleanParam=false&stringParam=89&doubleParam=1.9')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong parameter stringParam in query");
@@ -86,19 +102,25 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/paramTestsQuery?integerParam=9&booleanParam=false&stringParam=okay&doubleParam=wrong')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong parameter doubleParam in query");
         done();
       });
   });
-  /* end of query parameters test */
+  // end of query parameters test
 
   /* testing of parameters in path */
   it('it should get an error informing the required parameter integerParam was not of the right type', (done) => {
     chai.request(server)
       .get('/api/v1/paramTestsPath/wrong/true/okay/1.9')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong parameter integerParam in params");
@@ -109,6 +131,9 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/paramTestsPath/21/wrong/okay/1.9')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong parameter booleanParam in params");
@@ -119,6 +144,9 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/paramTestsPath/21/false/90/1.9')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong parameter stringParam in params");
@@ -129,19 +157,25 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/paramTestsPath/21/false/okay/wrong')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong parameter doubleParam in params");
         done();
       });
   });
-  /* end of path parameters test */
+  // end of path parameters test
 
   /* test of properties type of request body */
   it('it should get an error informing of wrong data in the response: types do not match', (done) => {
     chai.request(server)
       .get('/api/v1/responseBodyTest')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong data in the response");
@@ -152,12 +186,15 @@ describe('/A GET pets', () => {
         done();
       });
   });
-  /* test of properties type of request body end*/
+  // test of properties type of request body end
 
   it('it shouldn´t GET all the pets but show a message with errors (missing/wrong parameters)', (done) => {
     chai.request(server)
       .get('/api/v1/pets?limit=10')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong data in the response");
@@ -170,6 +207,9 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/pets?limit=' + auxRequire.pets.length)
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(200);
         res.body.should.be.a('Array');
         res.body.length.should.be.eql(auxRequire.pets.length);
@@ -181,6 +221,9 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/pets?limit=3')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(200);
         res.body.should.be.a('Array');
         res.body.length.should.be.eql(3);
@@ -197,6 +240,9 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/pets/' + pet.id)
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(200);
         res.body.should.be.a('object');
         res.body.should.have.property('id');
@@ -213,6 +259,9 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/pets/badId')
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(400);
         res.body.should.be.a('array');
         JSON.stringify(res.body).should.contain("Wrong parameter petId in params");
@@ -225,22 +274,22 @@ describe('/A GET pets', () => {
     chai.request(server)
       .get('/api/v1/pets/' + someId)
       .end((err, res) => {
+        if (err) {
+          done(err);
+        }
         res.should.have.status(404);
         res.body.should.be.a('object');
         res.body.should.have.property('message');
         res.body.message.should.be.eql("There is no pet with id " + someId);
-        //  postTests();
+        // postTests();
         done();
       });
   });
 
 });
 
-function getTests() { //this one calls postTests()
+// function getTests() {} //this one calls postTests()
 
-
-
-}
 
 function postTests() { //this one calls putTests()
   describe('/POST pets', () => {
@@ -255,6 +304,9 @@ function postTests() { //this one calls putTests()
         .post('/api/v1/pets')
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(201);
           res.body.should.be.a('Array');
           res.body.length.should.be.eql(prePostSize + 1);
@@ -270,6 +322,9 @@ function postTests() { //this one calls putTests()
         .post('/api/v1/pets')
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(201);
           res.body.should.be.a('Array');
           res.body.length.should.be.eql(prePostSize + 2);
@@ -280,6 +335,9 @@ function postTests() { //this one calls putTests()
       chai.request(server)
         .post('/api/v1/pets')
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("Missing object in the request body. ");
@@ -296,6 +354,9 @@ function postTests() { //this one calls putTests()
         .post('/api/v1/pets')
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("INVALID_TYPE")
@@ -308,6 +369,9 @@ function postTests() { //this one calls putTests()
         .post('/api/v1/pets')
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("Missing object in the request body. ")
@@ -324,6 +388,9 @@ function postTests() { //this one calls putTests()
         .post('/api/v1/pets')
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("INVALID_TYPE")
@@ -339,6 +406,9 @@ function postTests() { //this one calls putTests()
         .post('/api/v1/pets')
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("OBJECT_MISSING_REQUIRED_PROPERTY")
@@ -354,6 +424,9 @@ function postTests() { //this one calls putTests()
         .post('/api/v1/pets')
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("OBJECT_MISSING_REQUIRED_PROPERTY")
@@ -370,6 +443,9 @@ function postTests() { //this one calls putTests()
         .post('/api/v1/pets')
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("INVALID_TYPE")
@@ -392,6 +468,9 @@ function putTests() { //this one calls deletePets()
         .put('/api/v1/pets/' + pet.id)
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
@@ -408,6 +487,9 @@ function putTests() { //this one calls deletePets()
         .put('/api/v1/pets/' + pet.id)
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
@@ -424,6 +506,9 @@ function putTests() { //this one calls deletePets()
         .put('/api/v1/pets/' + 2)
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("OBJECT_MISSING_REQUIRED_PROPERTY")
@@ -439,6 +524,9 @@ function putTests() { //this one calls deletePets()
         .put('/api/v1/pets/' + 2)
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("OBJECT_MISSING_REQUIRED_PROPERTY")
@@ -455,6 +543,9 @@ function putTests() { //this one calls deletePets()
         .put('/api/v1/pets/' + pet.id)
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("INVALID_TYPE")
@@ -471,6 +562,9 @@ function putTests() { //this one calls deletePets()
         .put('/api/v1/pets/' + pet.id)
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("INVALID_TYPE")
@@ -487,6 +581,9 @@ function putTests() { //this one calls deletePets()
         .put('/api/v1/pets/' + pet.id)
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("INVALID_TYPE")
@@ -504,6 +601,9 @@ function putTests() { //this one calls deletePets()
         .put('/api/v1/pets/' + someId)
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(404);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
@@ -517,6 +617,9 @@ function putTests() { //this one calls deletePets()
         .put('/api/v1/pets/' + 2)
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("Missing object in the request body. ")
@@ -533,6 +636,9 @@ function putTests() { //this one calls deletePets()
         .put('/api/v1/pets/badId')
         .send(pet)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("INVALID_TYPE")
@@ -554,6 +660,9 @@ function deleteTests() {
       chai.request(server)
         .delete('/api/v1/pets/' + pet.id)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(204);
           done();
         });
@@ -562,6 +671,9 @@ function deleteTests() {
       chai.request(server)
         .get('/api/v1/pets/10')
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(404);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
@@ -574,6 +686,9 @@ function deleteTests() {
       chai.request(server)
         .delete('/api/v1/pets/' + someId)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(404);
           res.body.should.be.a('object');
           res.body.should.have.property('message');
@@ -585,6 +700,9 @@ function deleteTests() {
       chai.request(server)
         .delete('/api/v1/pets/wrongType')
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(400);
           JSON.stringify(res.body).should.contain("INVALID_TYPE")
           done();
@@ -594,6 +712,9 @@ function deleteTests() {
       chai.request(server)
         .get('/api/v1/pets?limit=' + auxRequire.pets.length)
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(200);
           res.body.should.be.a('Array');
           res.body.length.should.be.eql(auxRequire.pets.length);
@@ -604,12 +725,20 @@ function deleteTests() {
       chai.request(server)
         .delete('/api/v1/pets')
         .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
           res.should.have.status(204);
-          chai.request(server).get('/api/v1/pets?limit=10').end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.a('Array');
-            res.body.length.should.be.eql(0);
-          });
+          chai.request(server)
+            .get('/api/v1/pets?limit=10')
+            .end((err, res) => {
+              if (err) {
+                done(err);
+              }
+              res.should.have.status(200);
+              res.body.should.be.a('Array');
+              res.body.length.should.be.eql(0);
+            });
           done();
         });
     });

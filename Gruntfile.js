@@ -1,37 +1,19 @@
-/*!
+/*
 OAS-tools module 0.0.0, built on: 2017-03-30
 Copyright (C) 2017 Ignacio Peluaga Lozada (ISA Group)
 https://github.com/ignpelloz
 https://github.com/isa-group/project-oas-tools
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-
+*/
 
 'use strict';
 
-module.exports = function(grunt) {
+module.exports = (grunt) => {
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
-
   grunt.loadNpmTasks('grunt-contrib-watch');
-
   grunt.loadNpmTasks('grunt-mocha-test');
-
   grunt.loadNpmTasks('grunt-release-github');
-
   grunt.loadNpmTasks('grunt-banner');
-
   grunt.loadNpmTasks('grunt-dockerize');
 
   // Project configuration.
@@ -148,7 +130,7 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('buildOn', function() {
+  grunt.registerTask('buildOn', () => {
     grunt.config('pkg.buildOn', grunt.template.today("yyyy-mm-dd"));
     grunt.file.write('package.json', JSON.stringify(grunt.config('pkg'), null, 2));
   });

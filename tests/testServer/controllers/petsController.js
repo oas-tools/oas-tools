@@ -1,6 +1,7 @@
 'use strict';
 
-var pets = [{
+var pets = [
+  {
     id: 1,
     name: "Wolf",
     tag: "Barks at the moon"
@@ -33,7 +34,8 @@ var pets = [{
 ];
 
 function corruptPets() {
-  pets = [{
+  pets = [
+    {
       id: "1",
       name: "Wolf",
       tag: "Barks at the moon"
@@ -68,7 +70,8 @@ function corruptPets() {
 }
 
 function setCorrectPets() {
-  pets = [{
+  pets = [
+    {
       id: 1,
       name: "Wolf",
       tag: "Barks at the moon"
@@ -104,7 +107,7 @@ function setCorrectPets() {
 /**
  *  Path for testing path parameters
  */
-exports.paramTestsPath = function(req, res, next) {
+exports.paramTestsPath = (req, res) => {
   res.send({
     message: 'Path for path parameters tests was requested, this it its controller response'
   });
@@ -113,7 +116,7 @@ exports.paramTestsPath = function(req, res, next) {
 /**
  *  Path for testing query parameters
  */
-exports.paramTestsQuery = function(req, res, next) {
+exports.paramTestsQuery = (req, res) => {
   res.send({
     message: 'Path for query parameters tests was requested, this it its controller response'
   });
@@ -122,7 +125,7 @@ exports.paramTestsQuery = function(req, res, next) {
 /**
  *  Path for testing properties type on responses
  */
-exports.responseBodyTest = function(req, res, next) {
+exports.responseBodyTest = (req, res) => {
   var arrayRes = [];
   var okay = {
     integerProperty: 2,
@@ -144,7 +147,7 @@ exports.responseBodyTest = function(req, res, next) {
 /**
  *  Creates a pet
  */
-exports.createPets = function(args, res, next) {
+exports.createPets = (args, res) => {
   pets.push(args.body);
   exports.pets = pets;
   res.status(201).send(pets);
@@ -153,7 +156,7 @@ exports.createPets = function(args, res, next) {
 /**
  *  Retrieves the whole pets collection
  */
-exports.listPets = function(args, res, next) {
+exports.listPets = (args, res) => {
   exports.pets = pets;
   res.status(200).send(pets.slice(0, args.query.limit));
 }
@@ -161,7 +164,7 @@ exports.listPets = function(args, res, next) {
 /**
  *  Retrieves a single pet
  */
-exports.showPetById = function(args, res, next) {
+exports.showPetById = (args, res) => {
   exports.pets = pets;
   var res_pet;
   for (var i = 0; i < pets.length; i++) {
@@ -182,7 +185,7 @@ exports.showPetById = function(args, res, next) {
 /**
  *  Deletes a single pet from the collection
  */
-exports.deletePet = function(args, res, next) {
+exports.deletePet = (args, res) => {
   var index = -1;
   for (var i = 0; i < pets.length; i++) {
     if (pets[i].id == args.params.petId) {
@@ -203,7 +206,7 @@ exports.deletePet = function(args, res, next) {
 /**
  *  Deletes all the pets in the collection
  */
-exports.deletePets = function(args, res, next) {
+exports.deletePets = (args, res) => {
   exports.pets = pets;
   pets.splice(0, pets.length);
   exports.pets = pets;
@@ -213,7 +216,7 @@ exports.deletePets = function(args, res, next) {
 /**
  *  Updates a pet
  */
-exports.updatePet = function(args, res, next) {
+exports.updatePet = (args, res) => {
 
   var present = false;
   for (var i = 0; i < pets.length; i++) {
