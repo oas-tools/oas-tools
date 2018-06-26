@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha ./tests/basic.js",
-    "lint": "eslint index.js configurations/ Gruntfile.js middleware/ lib/ tests/"
+    "test:tdd": "mocha ./tests/basic.js -w",
+    "lint": "eslint index.js configurations/ Gruntfile.js middleware/ lib/ tests/",
+    "coverage": "nyc --reporter=html --reporter=text mocha ./tests/basic.js"
   },
   "author": "",
   "license": "ISC",
@@ -33,6 +35,7 @@
     "z-schema": "^3.19.1"
   },
   "devDependencies": {
-    "eslint": "^4.19.1"
+    "eslint": "^4.19.1",
+    "nyc": "^12.0.2"
   }
 }
