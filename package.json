@@ -7,7 +7,7 @@
     "test": "mocha ./tests/basic.js",
     "test:tdd": "mocha ./tests/basic.js -w",
     "lint": "eslint index.js configurations/ Gruntfile.js middleware/ lib/ tests/",
-    "coverage": "nyc --reporter=html --reporter=text mocha ./tests/basic.js"
+    "coverage": "nyc --reporter=html --reporter=text mocha ./tests/basic.js",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
   },
