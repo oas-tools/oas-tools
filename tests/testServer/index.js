@@ -29,14 +29,12 @@ var options_object = {
 
 
 function init(done) {
-  console.log('init');
-
   oasTools.configure(options_object);
 
   oasTools.initialize(oasDoc, app, () => { // oas-tools version
     http.createServer(app).listen(serverPort, () => {
-      console.log("App running at http://localhost:" + serverPort);
-      console.log("________________________________________________________________");
+      // console.log("App running at http://localhost:" + serverPort);
+      // console.log("________________________________________________________________");
       done();
     });
   });
