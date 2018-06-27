@@ -1,6 +1,7 @@
 # oas-tools
 
 [![Build Status](https://travis-ci.org/isa-group/oas-tools.svg?branch=master)](https://travis-ci.org/isa-group/oas-tools)
+[![Known Vulnerabilities](https://snyk.io/test/github/isa-group/oas-tools/badge.svg?targetFile=package.json)](https://snyk.io/test/github/isa-group/oas-tools?targetFile=package.json)
 
 Middlewares to be used on NodeJS applications working with OpenAPI Specification (v3).
 
