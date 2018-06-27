@@ -1,5 +1,7 @@
 # oas-tools
 
+[![Build Status](https://travis-ci.org/isa-group/oas-tools.svg?branch=master)](https://travis-ci.org/isa-group/oas-tools)
+
 Middlewares to be used on NodeJS applications working with OpenAPI Specification (v3).
 
 ## 1. Install oas-tools
