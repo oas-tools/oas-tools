@@ -151,8 +151,6 @@ Once you have done all this, leave the rest the way it is and just run your appl
 
 ## Latest release
 
-[![Build Status](https://travis-ci.org/isa-group/project-template-nodejs.svg?branch=master)](https://travis-ci.org/http://github.com/isa-group/project-template-nodejs)
-
 The version 0.0.0 is the latest stable version of oas-tools component.
 see [release note](http://github.com/isa-group/oas-tools/releases/tag/0.0.0) for details.
 
