@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha ./tests/basic.js",
     "test:tdd": "mocha ./tests/basic.js -w",
-    "lint": "eslint index.js configurations/ Gruntfile.js middleware/ lib/ tests/",
+    "lint": "eslint src/**/*.js Gruntfile.js tests/**/*.js",
     "coverage": "nyc mocha ./tests/basic.js",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect"
