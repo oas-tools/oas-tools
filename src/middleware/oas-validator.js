@@ -181,7 +181,6 @@ function getParameterValue(req, parameter){ //TODO handle: body, form, formData,
 function getParameterValue(req, parameter) {
   var defaultVal = parameter.default;
   var paramLocation = parameter.in;
-  var paramType = getParameterType(parameter);
   var val;
 
   // Get the value to validate based on the operation parameter type
@@ -192,26 +191,6 @@ function getParameterValue(req, parameter) {
       break;
     case 'form':
     case 'formData':
-      if (paramType.toLowerCase() === 'file') {
-        if (_.isArray(req.files)) {
-          val = _.find(req.files, (file) => {
-            return file.fieldname === parameter.name;
-          });
-        } else if (!_.isUndefined(req.files)) {
-          val = req.files[parameter.name] ? req.files[parameter.name] : undefined;
-        }
-
-        // Swagger does not allow an array of files
-        if (_.isArray(val)) {
-          val = val[0];
-        }
-      } else if (isModelParameter(version, parameter)) {
-        val = req.body;
-      } else {
-        val = req.body[parameter.name];
-      }
-
-      break;
     case 'header':
       val = req.headers[parameter.name.toLowerCase()];
 

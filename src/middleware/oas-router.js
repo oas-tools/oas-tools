@@ -67,8 +67,7 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
       logger.warning(msg);
       oldSend.apply(res, content);
     }
-  } else {
-    if (responseCodeSection.hasOwnProperty('content')) { // eslint-disable-line
+  } else if (responseCodeSection.hasOwnProperty('content')) {
       //if there is no content property for the given response then there is nothing to validate.  
       var validSchema = responseCodeSection.content['application/json'].schema;
       logger.debug("Schema to use for validation: " + validSchema);
@@ -96,7 +95,6 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
     } else {
       oldSend.apply(res, content);
     }
-  }
 }
 
 /**
