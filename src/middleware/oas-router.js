@@ -67,7 +67,7 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
       logger.warning(msg);
       oldSend.apply(res, content);
     }
-  } else if (responseCodeSection.hasOwnProperty('content')) {
+  } else if (responseCodeSection.hasOwnProperty('content') && responseCodeSection.content.hasOwnProperty('application/json')) {
       //if there is no content property for the given response then there is nothing to validate.  
       var validSchema = responseCodeSection.content['application/json'].schema;
       logger.debug("Schema to use for validation: " + validSchema);
