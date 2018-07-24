@@ -66,5 +66,8 @@ githubCredential.json
 .version
 .vscode/
 
-#Netbeans project folder
+# Netbeans project folder
 nbproject/
+
+# Vunerability tracking file
+.snyk
