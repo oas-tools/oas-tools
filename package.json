@@ -9,10 +9,16 @@
     "lint": "eslint src/**/*.js Gruntfile.js tests/**/*.js",
     "coverage": "nyc mocha ./tests/basic.js",
     "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "prepare": "npm run snyk-protect",
+    "publish-please": "publish-please",
+    "prepublishOnly": "publish-please guard"
   },
   "author": "ISA Group, University of Seville",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/isa-group/oas-tools.git"
+  },
   "dependencies": {
     "body-parser": "^1.18.3",
     "fs": "0.0.1-security",
@@ -36,6 +42,7 @@
     "mocha": "^5.2.0",
     "mongoose": "^5.2.5",
     "nyc": "^12.0.2",
+    "publish-please": "^3.2.0",
     "snyk": "^1.89.0"
   },
   "snyk": true,
