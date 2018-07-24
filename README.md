@@ -5,7 +5,9 @@
 [![codecov](https://codecov.io/gh/isa-group/oas-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/isa-group/oas-tools)
 [![Known Vulnerabilities](https://snyk.io/test/github/isa-group/oas-tools/badge.svg?targetFile=package.json)](https://snyk.io/test/github/isa-group/oas-tools?targetFile=package.json)
 
-Middlewares to be used on NodeJS applications working with OpenAPI Specification (v3).
+[![NPM](https://nodei.co/npm/oas-tools.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/oas-tools/)
+
+Middleware to be used with NodeJS applications working with OpenAPI Specification v. 3.x.
 
 ## 1. Install oas-tools
 ```bash
