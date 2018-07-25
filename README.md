@@ -159,7 +159,7 @@ Once you have done all this, leave the rest the way it is and just run your appl
 
 Copyright 2018, [ISA Group](http://www.isa.us.es), [University of Sevilla](http://www.us.es)
 
-[![ISA Group](http://www.isa.us.es/2.0/assets/img/theme/logo2.png)](http://www.isa.us.es)
+[![ISA Group](http://www.isa.us.es/2.0/assets/img/theme/logo2.png)](http://www.isa.us.es) [![Greenkeeper badge](https://badges.greenkeeper.io/isa-group/oas-tools.svg)](https://greenkeeper.io/)
 
 Licensed under the **Apache License, Version 2.0** (the "[License](./LICENSE)"); you may not use this file except in compliance with the License. You may obtain a copy of the License at apache.org/licenses/LICENSE-2.0
 
