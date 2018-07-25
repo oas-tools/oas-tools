@@ -68,7 +68,7 @@ function _setConfigurations(options, encoding) { // eslint-disable-line
   for (var c in newConfigurations) {
     this.setProperty(c, newConfigurations[c]);
     if(c == 'loglevel'){ //loglevel changes, then new logger is needed
-      createLogger(); // eslint-disable-line
+      createNewLogger(); // eslint-disable-line
     }
   }
 }
@@ -78,26 +78,29 @@ function _setConfigurations(options, encoding) { // eslint-disable-line
  */
 config.setConfigurations(path.join(__dirname, 'configs.yaml'), 'utf8');
 
-winston.emitErrs = true;
 
-function consoleLogger(customLevels) {
-  module.exports.logger = new winston.Logger({
+function consoleLogger(customLevels, customFormat) {
+  module.exports.logger = winston.createLogger({
     levels: customLevels.levels,
-    colors: customLevels.colors,
     transports: [
       new winston.transports.Console({
         level: config.loglevel,
         handleExceptions: true,
         json: false,
-        colorize: true,
-        timestamp: true
+        format: winston.format.combine(
+          winston.format.colorize(),
+          winston.format.timestamp(),
+          winston.format.splat(),
+          customFormat
+        )
       })
     ],
     exitOnError: false
   });
 }
 
-function createLogger(){
+function createNewLogger(){
+  var customFormat = winston.format.printf((info) => `${info.timestamp} ${info.level}: ${info.message}`);
 
   /**
    * Configure here your custom levels.
@@ -120,31 +123,38 @@ function createLogger(){
   };
 
   if (config.logfile != undefined) {
-    module.exports.logger = new winston.Logger({
+    module.exports.logger = winston.createLogger({
       levels: customLevels.levels,
-      colors: customLevels.colors,
       transports: [
         new winston.transports.File({
           level: config.loglevel,
           filename: config.logfile,
           handleExceptions: true,
-          json: false,
           maxsize: 5242880, //5MB
-          colorize: false
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.splat(),
+            customFormat
+          )
         }),
         new winston.transports.Console({
           level: config.loglevel,
           handleExceptions: true,
           json: false,
-          colorize: true,
-          timestamp: true
+          format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.timestamp(),
+            winston.format.splat(),
+            customFormat
+          )
         })
       ],
       exitOnError: false
     });
   } else {
-    consoleLogger(customLevels);
+    consoleLogger(customLevels, customFormat);
   }
+  winston.addColors(customLevels.colors);
 }
 
-createLogger();
+createNewLogger();

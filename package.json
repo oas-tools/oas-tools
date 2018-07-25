@@ -28,7 +28,7 @@
     "lodash-compat": "^3.10.2",
     "path": "^0.12.7",
     "validator": "^10.4.0",
-    "winston": "^2.4.2",
+    "winston": "^3.0.0",
     "z-schema": "^3.19.1"
   },
   "devDependencies": {
