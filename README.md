@@ -154,14 +154,6 @@ post:
 
 Once you have done all this, leave the rest the way it is and just run your appliaction with ‘node index.js’ or any other command you have specified at your package.json for running the application.
 
-## Latest release
-
-The version 0.0.0 is the latest stable version of oas-tools component.
-see [release note](http://github.com/isa-group/oas-tools/releases/tag/0.0.0) for details.
-
-For running:
-
-- Download latest version from [0.0.0](http://github.com/isa-group/oas-tools/releases/tag/0.0.0)
 
 ## License
 
