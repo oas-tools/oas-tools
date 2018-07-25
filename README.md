@@ -11,7 +11,7 @@ Middleware to be used with NodeJS applications working with OpenAPI Specificatio
 
 ## 1. Install oas-tools
 ```bash
-npm install oas-tools
+npm install oas-tools --save
 ```
 
 ## 2. Use oas-tools
@@ -87,7 +87,7 @@ Oas-tools needs express module to work, connect doesn’t have the needed featur
 Therefore you must install express:
 
 ```bash
-npm install express
+npm install express --save
 ```
 
 Then change the require on your app’s index file, get rid of connect!
@@ -103,7 +103,7 @@ __2.Require oas-tools instead of swagger-tools:__
 Change from swagger-tools to oas-tools by just installing it and modifying the require:
 
 ```bash
-npm install oas-tools
+npm install oas-tools --save
 ```
 
 ```javascript
