@@ -1,3 +1,2 @@
-## Engineering Team
 
 TBD
