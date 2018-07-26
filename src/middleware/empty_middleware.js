@@ -14,4 +14,4 @@ module.exports = (options) => {
     next();
   };
 }
-const exports = module.exports; // eslint-disable-line
+var exports = module.exports; // eslint-disable-line
