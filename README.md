@@ -9,6 +9,12 @@
 
 This module supports the management of RESTfull APIs defined with OpenAPI 3.0 Specs over express servers.
 
+If you are creating an API from scratch we recommend you to take a look at [oas-generator](https://github.com/isa-group/oas-generator)
+
+We have a 3 min. tutorial:
+
+<a href="https://youtu.be/SmAwT8wa8Tk" alt="oas-tools introduction - Click to Watch!"><img src="https://i.imgur.com/DFJx5LK.jpg" align="center" width="300" alt="oas-tools introduction - Click to Watch!"></a>
+
 ## 1. Install oas-tools
 ```bash
 npm install oas-tools --save
