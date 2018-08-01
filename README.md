@@ -7,7 +7,7 @@
 
 [![NPM](https://nodei.co/npm/oas-tools.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/oas-tools/)
 
-Middleware to be used with NodeJS applications working with OpenAPI Specification v. 3.x.
+This module supports the management of RESTfull APIs defined with OpenAPI 3.0 Specs over express servers.
 
 ## 1. Install oas-tools
 ```bash
