@@ -242,32 +242,11 @@ function convertValue(value, schema, type) { // eslint-disable-line
   switch (type) {
     case 'array':
       if (_.isString(value)) {
-        switch (schema.collectionFormat) {
-          case 'csv':
-          case undefined:
-            try {
-              value = JSON.parse(value); // eslint-disable-line
-            } catch (err) {
-              value = original; // eslint-disable-line
-            }
-
-            if (_.isString(value)) {
-              value = value.split(','); // eslint-disable-line
-            }
-            break;
-          case 'multi':
-            value = [value]; // eslint-disable-line
-            break;
-          case 'pipes':
-            value = value.split('|'); // eslint-disable-line
-            break;
-          case 'ssv':
-            value = value.split(' '); // eslint-disable-line
-            break;
-          case 'tsv':
-            value = value.split('\t'); // eslint-disable-line
-            break;
-        }
+          try {
+            value = JSON.parse(value); // eslint-disable-line
+          } catch (err) {
+            value = original; // eslint-disable-line
+          }
       }
 
       // Handle situation where the expected type is array but only one value was provided
