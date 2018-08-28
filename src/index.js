@@ -21,6 +21,7 @@ var validator = new ZSchema({
   breakOnFirstError: false
 });
 var utils = require("./lib/utils.js");
+var express = require('express');
 
 // var controllers;
 // var customConfigurations = false;
@@ -248,6 +249,10 @@ function registerPaths(specDoc, app) {
       }
     }
   }
+  app.use('/api', function (req, res) {
+    res.send(specDoc);
+  })
+  app.use('/docs', express.static(pathModule.join(__dirname, '../swagger-ui')));
   config.pathsDict = dictionary;
 }
 
