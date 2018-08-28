@@ -304,6 +304,7 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
 };
 
 module.exports = {
+  init_checks: init_checks,
   initialize: initialize,
   initializeMiddleware: initializeMiddleware,
   configure: configure,

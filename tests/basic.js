@@ -2,10 +2,15 @@
 
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+var fs = require('fs');
+var path = require('path');
+var jsyaml = require('js-yaml');
 const serverProto = require('./testServer');
 let server = require('./testServer');
-chai.should(); 
+const indexFile = require('./../src/index');
+chai.should();
 chai.use(chaiHttp);
+var expect = chai.expect;
 const auxRequire = require('./testServer/controllers/petsController');
 auxRequire.corruptPets();
 
@@ -728,6 +733,55 @@ function deleteTests() {
   });
 }
 
+function miscTests() {
+  var testFunc = function() {
+    return 0;
+  };
+  var spec = fs.readFileSync(path.join(__dirname, './testServer/api/oai-spec.yaml'), 'utf8');
+  var oasDoc = jsyaml.safeLoad(spec);
+  
+  describe('Initialization', () => {
+    it('No spec file', () => {
+      expect(() => indexFile.init_checks(undefined, testFunc())).to.throw(Error, 'specDoc is required');
+    });
+    it('Spec file not an object', () => {
+      expect(() => indexFile.init_checks("Test", testFunc())).to.throw(Error, 'specDoc must be an object');
+    });
+    it('No callback', () => {
+      expect(() => indexFile.init_checks(oasDoc, undefined)).to.throw(Error, 'callback is required');
+    });
+    it('Callback not a function', () => {
+      expect(() => indexFile.init_checks(oasDoc, "Test")).to.throw(Error, 'callback must be a function');
+    });
+  });
+
+  describe('Docs and API spec', () => {
+    it('Docs should be available', (done) => {
+      chai.request(server)
+        .get('/docs')
+        .end((err, res) => {
+          if (err) {
+            done (err);
+          }
+          res.should.have.status(200);
+          done();
+        });
+    });
+
+    it('API spec should be available', (done) => {
+      chai.request(server)
+        .get('/api')
+        .end((err, res) => {
+          if (err) {
+            done (err);
+          }
+          res.should.have.status(200);
+          done();
+        });
+    });
+  })
+}
+
 describe('Pets', () => {
   before((done) => {
     // await for server creation
@@ -748,4 +802,5 @@ describe('Pets', () => {
   postTests(); //this one calls putTests()
   putTests(); //this one calls deletePets()
   deleteTests();
+  miscTests();
 });
