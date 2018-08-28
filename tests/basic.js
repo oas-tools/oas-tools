@@ -8,6 +8,7 @@ var jsyaml = require('js-yaml');
 const serverProto = require('./testServer');
 let server = require('./testServer');
 const indexFile = require('./../src/index');
+const utilsFile = require('./../src/lib/utils');
 chai.should();
 chai.use(chaiHttp);
 var expect = chai.expect;
@@ -755,6 +756,18 @@ function miscTests() {
     });
   });
 
+  describe('Auxiliary functions', () => {
+    it('Generate controller name', () => {
+      utilsFile.generateName('pets', 'controller').should.equal('petsController');
+    });
+    it('Generate function name', () => {
+      utilsFile.generateName('pets', 'function').should.equal('funcpets');
+    });
+    it('Generate variable name', () => {
+      utilsFile.generateName('pets', 'variable').should.equal('varpets');
+    });
+  });
+
   describe('Docs and API spec', () => {
     it('Docs should be available', (done) => {
       chai.request(server)
@@ -779,7 +792,7 @@ function miscTests() {
           done();
         });
     });
-  })
+  });
 }
 
 describe('Pets', () => {
