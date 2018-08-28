@@ -252,7 +252,9 @@ function registerPaths(specDoc, app) {
   app.use('/api', function (req, res) {
     res.send(specDoc);
   })
-  app.use('/docs', express.static(pathModule.join(__dirname, '../swagger-ui')));
+  if (config.docs) {
+    app.use('/docs', express.static(pathModule.join(__dirname, '../swagger-ui')));
+  }
   config.pathsDict = dictionary;
 }
 

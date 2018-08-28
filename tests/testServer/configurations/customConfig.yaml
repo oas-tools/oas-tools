@@ -4,4 +4,5 @@ logfile: './logs/dev-logs.log'
 strict: false
 router: true
 validator: true
+docs: true
 controllers: 'C:\Users\ipelu\OneDrive\Documentos\GitHub\project-oas-tools\example\controllers'
