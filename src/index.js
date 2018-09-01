@@ -21,6 +21,7 @@ var validator = new ZSchema({
   breakOnFirstError: false
 });
 var utils = require("./lib/utils.js");
+var express = require('express');
 
 // var controllers;
 // var customConfigurations = false;
@@ -248,6 +249,12 @@ function registerPaths(specDoc, app) {
       }
     }
   }
+  app.use('/api', function (req, res) {
+    res.send(specDoc);
+  })
+  if (config.docs) {
+    app.use('/docs', express.static(pathModule.join(__dirname, '../swagger-ui')));
+  }
   config.pathsDict = dictionary;
 }
 
@@ -297,6 +304,7 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
 };
 
 module.exports = {
+  init_checks: init_checks,
   initialize: initialize,
   initializeMiddleware: initializeMiddleware,
   configure: configure,

@@ -87,6 +87,9 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
           oldSend.apply(res, content);
         } else {
           logger.warning(msg + JSON.stringify(validator.getLastErrors()));
+          if (content[0].substr(0, 46) === '{"message":"This is the mockup controller for ') {
+            logger.warning('The used controller might not have been implemented');
+          }
           oldSend.apply(res, content);
         }
       } else {
