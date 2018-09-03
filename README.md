@@ -64,6 +64,7 @@ var options_object = {
   strict: false,
   router: true,
   validator: true,
+  docs: true,
   ignoreUnknownFormats: true
 };
 
