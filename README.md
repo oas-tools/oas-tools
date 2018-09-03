@@ -51,6 +51,7 @@ __It is also possible to set configuration variables, these are them:__
 |`strict`	| `Boolean` | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default |
 |`router`	| `Boolean` | Indicates whether router middleware should be used. True by default |
 |`valdator` | `Boolean` | Indicates whether validator middleware should be used. True by default |
+|`docs` | `Boolean` | Indicates whether API docs (Swagger UI) should be available. True by default |
 |`ignoreUnknownFormats` | `Boolean`	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default |
 
 For setting these variables you can use the function configure and pass to it either a JavaScript object or a yaml/json file containing such object.
@@ -63,6 +64,7 @@ var options_object = {
   strict: false,
   router: true,
   validator: true,
+  docs: true,
   ignoreUnknownFormats: true
 };
 
