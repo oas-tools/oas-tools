@@ -206,7 +206,7 @@ function registerPaths(specDoc, app) {
   if (specDoc.servers) {
     var localServer = specDoc.servers.find((server) => server.url.substr(0, 16) === 'http://localhost' || server.url.charAt(0) === '/');
     if (!localServer) {
-      logger.info("No localhost server found in spec file, added for testing in Swagger UI");
+      logger.info("No localhost or relative server found in spec file, added for testing in Swagger UI");
       var foundServer = specDoc.servers[0];
       var basePath = '/' + foundServer.url.split('/').slice(3).join('/');
       specDoc.servers.push({
@@ -214,7 +214,7 @@ function registerPaths(specDoc, app) {
       });
     }
   } else {
-    logger.info("No servers found in spec file, added localhost server for testing in Swagger UI");
+    logger.info("No servers found in spec file, added relative server for testing in Swagger UI");
     specDoc.servers = [
       {
         url: '/'
