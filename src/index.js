@@ -203,6 +203,25 @@ function registerPaths(specDoc, app) {
 
   var dictionary = {};
 
+  if (specDoc.servers) {
+    var localServer = specDoc.servers.find((server) => server.url.substr(0, 16) === 'http://localhost' || server.url.charAt(0) === '/');
+    if (!localServer) {
+      logger.info("No localhost or relative server found in spec file, added for testing in Swagger UI");
+      var foundServer = specDoc.servers[0];
+      var basePath = '/' + foundServer.url.split('/').slice(3).join('/');
+      specDoc.servers.push({
+        url: basePath
+      });
+    }
+  } else {
+    logger.info("No servers found in spec file, added relative server for testing in Swagger UI");
+    specDoc.servers = [
+      {
+        url: '/'
+      }
+    ];
+  }
+
   var paths = specDoc.paths;
   for (var path in paths) {
     for (var method in paths[path]) {
