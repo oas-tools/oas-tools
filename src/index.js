@@ -164,18 +164,23 @@ var getExpressVersion = function(oasPath) {
 function appendBasePath(specDoc, expressPath) {
   var res;
   if (specDoc.servers != undefined) {
-    var url = specDoc.servers[0].url.split('/');
+    var specServer = specDoc.servers[0].url;
+    var url = specServer.split('/');
 
     var basePath = "/";
 
-    for (var i = 0; i < url.length; i++) {
-      if (i >= 3) {
-        basePath += url[i] + "/";
+    if (specServer.charAt(0) === '/') {
+      basePath = specServer.charAt(specServer.length - 1) !== '/' ? specServer : specServer.slice(0, -1);
+    } else {
+      for (var i = 0; i < url.length; i++) {
+        if (i >= 3) {
+          basePath += url[i] + "/";
+        }
       }
-    }
-    basePath = basePath.slice(0, basePath.length - 1);
-    if(basePath=='/'){
-      basePath = '';
+      basePath = basePath.slice(0, -1);
+      if(basePath=='/'){
+        basePath = '';
+      }
     }
     config.basePath = basePath;
     res = basePath + expressPath;
