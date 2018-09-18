@@ -5,9 +5,11 @@ var fs = require('fs'),
   path = require('path');
 
 var express = require("express");
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 var app = express();
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+  strict: false
+}));
 var oasTools = require('../../src/index.js');
 var jsyaml = require('js-yaml');
 var serverPort = 8080;
