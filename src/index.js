@@ -205,6 +205,10 @@ function registerPaths(specDoc, app) {
     var OASValidator = require('./middleware/oas-validator');
     return OASValidator.call(undefined, specDoc); 
   };
+  var OASSecurityMid = function() {
+    var OASSecurity = require('./middleware/oas-security');
+    return OASSecurity.call(undefined, config.oasSecurity, specDoc);
+  }
 
   var dictionary = {};
 
@@ -239,6 +243,9 @@ function registerPaths(specDoc, app) {
       expressPath = appendBasePath(specDoc, expressPath);
       switch (method) { //TODO: paths must be registered for each url in servers property of the spec doc.
         case 'get':
+          if (config.OASSecurity) {
+            app.get(expressPath, OASSecurityMid());
+          }
           if (config.validator == true) {
             app.get(expressPath, OASValidatorMid());
           }
@@ -247,6 +254,9 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'post':
+          if (config.OASSecurity) {
+            app.post(expressPath, OASSecurityMid());
+          }
           if (config.validator == true) {
             app.post(expressPath, OASValidatorMid());
           }
@@ -255,6 +265,9 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'put':
+          if (config.OASSecurity) {
+            app.put(expressPath, OASSecurityMid());
+          }
           if (config.validator == true) {
             app.put(expressPath, OASValidatorMid());
           }
@@ -263,6 +276,9 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'delete':
+          if (config.OASSecurity) {
+            app.delete(expressPath, OASSecurityMid());
+          }
           if (config.validator == true) {
             app.delete(expressPath, OASValidatorMid());
           }
