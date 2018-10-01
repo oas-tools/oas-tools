@@ -1,36 +1,30 @@
 'use strict';
 
-var _ = require('lodash');
+var _ = require('lodash-compat');
 var async = require('async');
-var qs = require('qs');
-var parseurl = require('parseurl');
 var config = require('../configurations'),
     logger = config.logger;
 
-function parseQueryString(req) {
-    return req.url.indexOf('?') > -1 ? qs.parse(parseurl(req).query, {}) : {};
-}
-
-var getScopeOrAPIKey = (req, secDef, secName, secReq) => {
-    var apiKeyPropName = secDef.name;
-    var apiKeyLocation = secDef.in;
-    var scopeOrKey;
+var getValue = (req, secDef, secName, secReq) => {
+    var propName = secDef.name;
+    var propLocation = secDef.in;
+    var value;
 
     if (secDef.type === 'oauth2') {
-        scopeOrKey = secReq[secName];
+        value = secReq[secName];
     } else if (secDef.type === 'http') {
         if (secDef.scheme === 'bearer') {
-            scopeOrKey = req.headers.authorization;
+            value = req.headers.authorization;
         }
     } else if (secDef.type === 'apiKey') {
-        if (apiKeyLocation === 'query') {
-            scopeOrKey = (req.query ? req.query : parseQueryString(req))[apiKeyPropName];
-        } else if (apiKeyLocation === 'header') {
-            scopeOrKey = req.headers[apiKeyPropName.toLowerCase()];
+        if (propLocation === 'query') {
+            value = req.query;
+        } else if (propLocation === 'header') {
+            value = req.headers[propName.toLowerCase()];
         }
     }
 
-    return scopeOrKey;
+    return value;
 };
 var sendSecurityError = (err, res, next) => {
     // Populate default values if not present
@@ -49,7 +43,6 @@ var sendSecurityError = (err, res, next) => {
     }
 
     res.statusCode = err.statusCode;
-
     next(err);
 };
 
@@ -60,80 +53,46 @@ function removeBasePath(reqRoutePath) {
         .join('');
 }
 
-/**
- * Middleware for using Swagger security information to authenticate requests.
- *
- * This middleware also requires that you use the swagger-metadata middleware before this middleware. It is recommended
- * that this middleware is included before swagger-validator and swagger-router. This makes no attempt to work around
- * invalid Swagger documents.
- *
- *
- * A SecurityImplementation is essentially middleware must include 2 exported methods:
- *   configure (SecurityDefinition)
- *   authorize (request, response, SecurityRequirement)
- *
- * @param {object} [options] - The middleware options
- *                 [options.{name}={handler}] - the keys match SecurityDefinition names and the associated values are
- *                                              functions that accept the following parameters: (request,
- *                                              securityDefinition, scopes, callback) where callback accepts one
- *                                              argument - an Error if unauthorized. The Error may include "message",
- *                                              "state", and "code" fields to be conveyed to the client in the response
- *                                              body and a "headers" field containing an object representing headers
- *                                              to be set on the response to the client. In addition, if the Error has
- *                                              a statusCode field, the response statusCode will be set to match -
- *                                              otherwise, the statusCode will be set to 403.
- *
- * @returns the middleware function
- */
-exports = module.exports = (options, specDoc) => { //eslint-disable-line
-    var handlers = options || {};
+module.exports = (options, specDoc) => {
 
-    logger.debug('Initializing swagger-security middleware');
-    logger.debug('  Security handlers:%s', Object.keys(handlers).length > 0 ? '' : ' ' + Object.keys(handlers).length);
-
-    _.each(options, (func, name) => {
-        logger.debug('    %s', name);
-    });
-
-    return function swaggerSecurity(req, res, next) { //eslint-disable-line
+    return function OASSecurity(req, res, next) {
+        var handlers = options || {};
         var operation = config.pathsDict[removeBasePath(req.route.path)];
         var securityReqs;
 
-        logger.debug('%s %s', req.method, req.url);
-        logger.debug('  Will process: %s', _.isUndefined(operation) ? 'no' : 'yes');
-
         if (operation) {
+            logger.debug('Checking security...');
             securityReqs = specDoc.paths[operation].security || specDoc.security;
 
             if (securityReqs && securityReqs.length > 0) {
-                async.mapSeries(securityReqs, (secReq, cb) => { // logical OR - any one can allow
+                async.mapSeries(securityReqs, (secReq, callback) => { // logical OR - any one can allow
                     var secName;
 
-                    async.map(Object.keys(secReq), (name, cb) => { // logical AND - all must allow
+                    async.map(Object.keys(secReq), (name, callback) => { // logical AND - all must allow
                         var secDef = specDoc.components.securitySchemes[name];
                         var handler = handlers[name];
 
                         secName = name;
 
                         if (!handler) {
-                            return cb(new Error('unknown security handler: ' + name));
+                            return callback(new Error('No handler was specified for security scheme ' + name));
                         }
 
-                        return handler(req, secDef, getScopeOrAPIKey(req, secDef, name, secReq), cb);
+                        return handler(req, secDef, getValue(req, secDef, name, secReq), callback);
                     }, (err) => {
-                        logger.debug('    Security check (%s): %s', secName, _.isNull(err) ? 'allowed' : 'denied');
+                        logger.debug('    Security check ' + secName + ': ' + _.isNull(err) ? 'allowed' : 'denied');
 
                         // swap normal err and result to short-circuit the logical OR
                         if (err) {
-                            return cb(undefined, err);
+                            return callback(undefined, err);
                         }
 
-                        return cb(new Error('OK'));
+                        return callback(new Error('OK'));
                     });
                 }, (ok, errors) => { // note swapped results
                     var allowed = !_.isNull(ok) && ok.message === 'OK';
 
-                    logger.debug('    Request allowed: %s', allowed);
+                    logger.debug('    Request allowed: ' + allowed);
 
                     if (allowed) {
                         return next();
@@ -149,3 +108,5 @@ exports = module.exports = (options, specDoc) => { //eslint-disable-line
         }
     };
 };
+
+exports = module.exports;
