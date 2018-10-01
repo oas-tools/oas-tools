@@ -19,6 +19,7 @@ var oasDoc = jsyaml.safeLoad(spec);
 
 function verifyToken(req, authOrSecDef, token, next) {
   return next();
+  //return next(req.res.sendStatus(401));
 }
 
 var options_object = {
@@ -28,7 +29,9 @@ var options_object = {
   strict: true,
   router: true,
   validator: true,
-  oasSecurity: verifyToken,
+  oasSecurity: {
+    Bearer: verifyToken
+  },
   ignoreUnknownFormats: true
 };
 

@@ -243,7 +243,7 @@ function registerPaths(specDoc, app) {
       expressPath = appendBasePath(specDoc, expressPath);
       switch (method) { //TODO: paths must be registered for each url in servers property of the spec doc.
         case 'get':
-          if (config.OASSecurity) {
+          if (config.oasSecurity) {
             app.get(expressPath, OASSecurityMid());
           }
           if (config.validator == true) {
@@ -254,7 +254,7 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'post':
-          if (config.OASSecurity) {
+          if (config.oasSecurity) {
             app.post(expressPath, OASSecurityMid());
           }
           if (config.validator == true) {
@@ -265,7 +265,7 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'put':
-          if (config.OASSecurity) {
+          if (config.oasSecurity) {
             app.put(expressPath, OASSecurityMid());
           }
           if (config.validator == true) {
@@ -276,7 +276,7 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'delete':
-          if (config.OASSecurity) {
+          if (config.oasSecurity) {
             app.delete(expressPath, OASSecurityMid());
           }
           if (config.validator == true) {
