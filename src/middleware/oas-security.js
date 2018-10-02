@@ -2,6 +2,7 @@
 
 var _ = require('lodash-compat');
 var async = require('async');
+var jwt = require('jsonwebtoken');
 var config = require('../configurations'),
     logger = config.logger;
 
@@ -53,6 +54,33 @@ function removeBasePath(reqRoutePath) {
         .join('');
 }
 
+function verifyToken(req, secDef, token, next) { // eslint-disable-line
+    const bearerRegex = /^Bearer\s/;
+
+    function sendError(statusCode) {
+        return req.res.sendStatus(statusCode);
+    }
+
+    if (token && bearerRegex.test(token)) {
+        var newToken = token.replace(bearerRegex, '');
+        jwt.verify(
+            newToken, config.oasSecurity[secDef.name].key,
+            {
+                //algorithms: config.oasSecurity[secDef.name].algorithms || ['HS256'],
+                issuer: config.oasSecurity[secDef.name].issuer
+            },
+            (error, decoded) => {
+                if (error === null && decoded) {
+                    return next();
+                }
+                return next(sendError(403));
+            }
+            );
+    } else {
+        return next(sendError(401));
+    }
+}
+
 module.exports = (options, specDoc) => {
 
     return function OASSecurity(req, res, next) {
@@ -70,12 +98,17 @@ module.exports = (options, specDoc) => {
 
                     async.map(Object.keys(secReq), (name, callback) => { // logical AND - all must allow
                         var secDef = specDoc.components.securitySchemes[name];
+                        secDef.name = name
                         var handler = handlers[name];
 
                         secName = name;
 
-                        if (!handler) {
-                            return callback(new Error('No handler was specified for security scheme ' + name));
+                        if (!handler || !_.isFunction(handler)) {
+                            if (secDef.type === 'http' && secDef.scheme === 'bearer' && secDef.bearerFormat === 'JWT') {
+                                handler = verifyToken;
+                            } else {
+                                return callback(new Error('No handler was specified for security scheme ' + name));
+                            }
                         }
 
                         return handler(req, secDef, getValue(req, secDef, name, secReq), callback);

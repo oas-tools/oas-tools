@@ -25,6 +25,7 @@
     "js-yaml": "^3.11.0",
     "json-schema-deref": "^0.4.4",
     "json-schema-deref-sync": "^0.5.0",
+    "jsonwebtoken": "^8.3.0",
     "lodash-compat": "^3.10.2",
     "path": "^0.12.7",
     "validator": "^10.4.0",

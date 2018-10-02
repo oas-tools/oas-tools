@@ -5,6 +5,8 @@ const chaiHttp = require('chai-http');
 var fs = require('fs');
 var path = require('path');
 var jsyaml = require('js-yaml');
+var jwt = require('jsonwebtoken');
+var token = jwt.sign({}, 'test', {issuer: 'ISA Auth'});
 const serverProto = require('./testServer');
 let server = require('./testServer');
 const indexFile = require('./../src/index');
@@ -21,6 +23,7 @@ function getTests() {
     it('it should get and error informing the required parameter limit was not specified in the query', (done) => {
       chai.request(server)
         .get('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -36,6 +39,7 @@ function getTests() {
     it('it should get an error informing of missing required parameters in query', (done) => {
       chai.request(server)
         .get('/api/v1/paramTestsQuery')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -52,6 +56,7 @@ function getTests() {
     it('it should get an error informing the required parameter integerParam was not of the right type', (done) => {
       chai.request(server)
         .get('/api/v1/paramTestsQuery?integerParam=wrong&booleanParam=true&stringParam=okay&doubleParam=1.9')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -65,6 +70,7 @@ function getTests() {
     it('it should get an error informing the required parameter booleanParam was not of the right type', (done) => {
       chai.request(server)
         .get('/api/v1/paramTestsQuery?integerParam=9&booleanParam=wrong90&stringParam=okay&doubleParam=1.9')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -78,6 +84,7 @@ function getTests() {
     it('it should get an error informing the required parameter stringParam was not of the right type', (done) => {
       chai.request(server)
         .get('/api/v1/paramTestsQuery?integerParam=9&booleanParam=false&stringParam=89&doubleParam=1.9')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -91,6 +98,7 @@ function getTests() {
     it('it should get an error informing the required parameter doubleParam was not of the right type', (done) => {
       chai.request(server)
         .get('/api/v1/paramTestsQuery?integerParam=9&booleanParam=false&stringParam=okay&doubleParam=wrong')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -107,6 +115,7 @@ function getTests() {
     it('it should get an error informing the required parameter integerParam was not of the right type', (done) => {
       chai.request(server)
         .get('/api/v1/paramTestsPath/wrong/true/okay/1.9')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -120,6 +129,7 @@ function getTests() {
     it('it should get an error informing the required parameter booleanParam was not of the right type', (done) => {
       chai.request(server)
         .get('/api/v1/paramTestsPath/21/wrong/okay/1.9')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -133,6 +143,7 @@ function getTests() {
     it('it should get an error informing the required parameter stringParam was not of the right type', (done) => {
       chai.request(server)
         .get('/api/v1/paramTestsPath/21/false/90/1.9')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -146,6 +157,7 @@ function getTests() {
     it('it should get an error informing the required parameter doubleParam was not of the right type', (done) => {
       chai.request(server)
         .get('/api/v1/paramTestsPath/21/false/okay/wrong')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -162,6 +174,7 @@ function getTests() {
     it('it should get an error informing of wrong data in the response: types do not match', (done) => {
       chai.request(server)
         .get('/api/v1/responseBodyTest')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -181,6 +194,7 @@ function getTests() {
     it('it shouldn´t GET all the pets but show a message with errors (missing/wrong parameters)', (done) => {
       chai.request(server)
         .get('/api/v1/pets?limit=10')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -196,6 +210,7 @@ function getTests() {
     it('it should GET all the pets', (done) => {
       chai.request(server)
         .get('/api/v1/pets?limit=' + auxRequire.pets.length)
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -210,6 +225,7 @@ function getTests() {
     it('it should GET the first 3 pets', (done) => {
       chai.request(server)
         .get('/api/v1/pets?limit=3')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -229,6 +245,7 @@ function getTests() {
       };
       chai.request(server)
         .get('/api/v1/pets/' + pet.id)
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -248,6 +265,7 @@ function getTests() {
     it('it should not GET a pet by an id of type string instead of integer', (done) => {
       chai.request(server)
         .get('/api/v1/pets/badId')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -263,6 +281,7 @@ function getTests() {
       var someId = 666;
       chai.request(server)
         .get('/api/v1/pets/' + someId)
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -292,6 +311,7 @@ function postTests() { //this one calls putTests()
       }
       chai.request(server)
         .post('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -310,6 +330,7 @@ function postTests() { //this one calls putTests()
       }
       chai.request(server)
         .post('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -324,6 +345,7 @@ function postTests() { //this one calls putTests()
     it('it should not accept a POST request without a pet in the body', (done) => {
       chai.request(server)
         .post('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -342,6 +364,7 @@ function postTests() { //this one calls putTests()
       }
       chai.request(server)
         .post('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -357,6 +380,7 @@ function postTests() { //this one calls putTests()
       var pet = "I_AM_A_PET";
       chai.request(server)
         .post('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -376,6 +400,7 @@ function postTests() { //this one calls putTests()
       }
       chai.request(server)
         .post('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -394,6 +419,7 @@ function postTests() { //this one calls putTests()
       }
       chai.request(server)
         .post('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -412,6 +438,7 @@ function postTests() { //this one calls putTests()
       }
       chai.request(server)
         .post('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -431,6 +458,7 @@ function postTests() { //this one calls putTests()
       }
       chai.request(server)
         .post('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -456,6 +484,7 @@ function putTests() { //this one calls deletePets()
       };
       chai.request(server)
         .put('/api/v1/pets/' + pet.id)
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -475,6 +504,7 @@ function putTests() { //this one calls deletePets()
       };
       chai.request(server)
         .put('/api/v1/pets/' + pet.id)
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -494,6 +524,7 @@ function putTests() { //this one calls deletePets()
       };
       chai.request(server)
         .put('/api/v1/pets/' + 2)
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -512,6 +543,7 @@ function putTests() { //this one calls deletePets()
       };
       chai.request(server)
         .put('/api/v1/pets/' + 2)
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -531,6 +563,7 @@ function putTests() { //this one calls deletePets()
       };
       chai.request(server)
         .put('/api/v1/pets/' + pet.id)
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -550,6 +583,7 @@ function putTests() { //this one calls deletePets()
       };
       chai.request(server)
         .put('/api/v1/pets/' + pet.id)
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -569,6 +603,7 @@ function putTests() { //this one calls deletePets()
       };
       chai.request(server)
         .put('/api/v1/pets/' + pet.id)
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -589,6 +624,7 @@ function putTests() { //this one calls deletePets()
       };
       chai.request(server)
         .put('/api/v1/pets/' + someId)
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -605,6 +641,7 @@ function putTests() { //this one calls deletePets()
       var pet = "I_AM_A_PET";
       chai.request(server)
         .put('/api/v1/pets/' + 2)
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -624,6 +661,7 @@ function putTests() { //this one calls deletePets()
       };
       chai.request(server)
         .put('/api/v1/pets/badId')
+        .set('Authorization', 'Bearer ' + token)
         .send(pet)
         .end((err, res) => {
           if (err) {
@@ -648,6 +686,7 @@ function deleteTests() {
       };
       chai.request(server)
         .delete('/api/v1/pets/' + pet.id)
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -659,6 +698,7 @@ function deleteTests() {
     it('it should try to GET the previously deleted pet and get 404', (done) => {
       chai.request(server)
         .get('/api/v1/pets/10')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -674,6 +714,7 @@ function deleteTests() {
       var someId = 666;
       chai.request(server)
         .delete('/api/v1/pets/' + someId)
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -688,6 +729,7 @@ function deleteTests() {
     it('Should show an error indicating wrong type of parameter id', (done) => {
       chai.request(server)
         .delete('/api/v1/pets/wrongType')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -700,6 +742,7 @@ function deleteTests() {
     it('Before deleting all pets...it should GET all the pets: all of them matching oas-doc constraints', (done) => {
       chai.request(server)
         .get('/api/v1/pets?limit=' + auxRequire.pets.length)
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -713,6 +756,7 @@ function deleteTests() {
     it('it should DELETE all pets and then send GET request to check length==0', (done) => {
       chai.request(server)
         .delete('/api/v1/pets')
+        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -720,6 +764,7 @@ function deleteTests() {
           res.should.have.status(204);
           chai.request(server)
             .get('/api/v1/pets?limit=10')
+            .set('Authorization', 'Bearer ' + token)
             .end((err, res) => {
               if (err) {
                 done(err);

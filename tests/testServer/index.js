@@ -17,11 +17,6 @@ var serverPort = 8080;
 var spec = fs.readFileSync(path.join(__dirname, 'api/oai-spec.yaml'), 'utf8'); //this one works
 var oasDoc = jsyaml.safeLoad(spec);
 
-function verifyToken(req, authOrSecDef, token, next) {
-  return next();
-  //return next(req.res.sendStatus(401));
-}
-
 var options_object = {
   controllers: path.join(__dirname, './controllers'),
   //loglevel: 'debug',
@@ -30,7 +25,10 @@ var options_object = {
   router: true,
   validator: true,
   oasSecurity: {
-    Bearer: verifyToken
+    Bearer: {
+      issuer: 'ISA Auth',
+      key: 'test'
+    }
   },
   ignoreUnknownFormats: true
 };
