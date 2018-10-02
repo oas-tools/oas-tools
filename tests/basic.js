@@ -20,6 +20,33 @@ auxRequire.corruptPets();
 function getTests() {
   describe('/A GET pets', () => {
 
+    it('it should get a 401 code informing that no JWT token was provided', (done) => {
+      chai.request(server)
+        .get('/api/v1/pets')
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(401);
+          res.text.should.contain('Unauthorized');
+          done();
+        });
+    });
+
+    it('it should get a 403 code informing that the provided JWT token is not valid', (done) => {
+      chai.request(server)
+        .get('/api/v1/pets')
+        .set('Authorization', 'Bearer invalidtoken')
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(403);
+          res.text.should.contain('Forbidden')
+          done();
+        });
+    });
+
     it('it should get and error informing the required parameter limit was not specified in the query', (done) => {
       chai.request(server)
         .get('/api/v1/pets')
@@ -303,6 +330,43 @@ function getTests() {
 function postTests() { //this one calls putTests()
   describe('/POST pets', () => {
     var prePostSize = auxRequire.pets.length;
+    it('it should throw a 401 code informing that no JWT was provided', (done) => {
+      var pet = {
+        id: 11,
+        name: "Frog",
+        tag: "Green animal"
+      }
+      chai.request(server)
+        .post('/api/v1/pets')
+        .send(pet)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
+          res.should.have.status(401);
+          res.text.should.contain('Unauthorized');
+          done();
+        });
+    });
+    it('it should throw a 403 code informing that the provided JWT is not valid', (done) => {
+      var pet = {
+        id: 11,
+        name: "Frog",
+        tag: "Green animal"
+      }
+      chai.request(server)
+        .post('/api/v1/pets')
+        .set('Authorization', 'Bearer invalidtoken')
+        .send(pet)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
+          res.should.have.status(403);
+          res.text.should.contain('Forbidden');
+          done();
+        });
+    });
     it('it should POST a pet ', (done) => {
       var pet = {
         id: 11,
@@ -476,6 +540,43 @@ function postTests() { //this one calls putTests()
 
 function putTests() { //this one calls deletePets()
   describe('/PUT/:id pet', () => {
+    it('it should throw a 401 code informing that no JWT was provided', (done) => {
+      var pet = {
+        id: 10,
+        name: "Pig",
+        tag: "Pet updated by the mocha+chai test"
+      };
+      chai.request(server)
+        .put('/api/v1/pets/' + pet.id)
+        .send(pet)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
+          res.should.have.status(401);
+          res.text.should.contain('Unauthorized');
+          done();
+        });
+    });
+    it('it should throw a 403 code informing that the provided JWT is not valid', (done) => {
+      var pet = {
+        id: 10,
+        name: "Pig",
+        tag: "Pet updated by the mocha+chai test"
+      };
+      chai.request(server)
+        .put('/api/v1/pets/' + pet.id)
+        .set('Authorization', 'Bearer invalidtoken')
+        .send(pet)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
+          res.should.have.status(403);
+          res.text.should.contain('Forbidden');
+          done();
+        });
+    });
     it('it should UPDATE a pet given the id', (done) => {
       var pet = {
         id: 10,
@@ -678,6 +779,41 @@ function putTests() { //this one calls deletePets()
 
 function deleteTests() {
   describe('/DELETE pets', () => {
+    it('it should throw a 401 code informing that no JWT was provided', (done) => {
+      var pet = {
+        id: 10,
+        name: "Pig",
+        tag: "Looking for mud"
+      };
+      chai.request(server)
+        .delete('/api/v1/pets/' + pet.id)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
+          res.should.have.status(401);
+          res.text.should.contain('Unauthorized');
+          done();
+        });
+    });
+    it('it should throw a 403 code informing that the provided JWT is not valid', (done) => {
+      var pet = {
+        id: 10,
+        name: "Pig",
+        tag: "Looking for mud"
+      };
+      chai.request(server)
+        .delete('/api/v1/pets/' + pet.id)
+        .set('Authorization', 'Bearer invalidtoken')
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }  
+          res.should.have.status(403);
+          res.text.should.contain('Forbidden');
+          done();
+        });
+    });
     it('it should DELETE a pet given the id', (done) => {
       var pet = {
         id: 10,
