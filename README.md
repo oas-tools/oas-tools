@@ -13,7 +13,7 @@ If you are creating an API from scratch we recommend you to take a look at [oas-
 
 We have a 3 min. tutorial:
 
-<a href="https://youtu.be/SmAwT8wa8Tk" alt="oas-tools introduction - Click to Watch!"><img src="https://i.imgur.com/DFJx5LK.jpg" align="center" width="300" alt="oas-tools introduction - Click to Watch!"></a>
+<a href="https://youtu.be/1R0K2smpBt0" alt="oas-tools (v2.0.3) introduction - Click to Watch!"><img src="https://i.imgur.com/DFJx5LK.jpg" align="center" width="300" alt="oas-tools introduction (v2.0.3)- Click to Watch!"></a>
 
 ## 1. Install oas-tools
 ```bash
