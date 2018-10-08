@@ -20,6 +20,8 @@
     "url": "git+https://github.com/isa-group/oas-tools.git"
   },
   "dependencies": {
+    "accesscontrol": "^2.2.1",
+    "accesscontrol-middleware": "^1.0.3",
     "body-parser": "^1.18.3",
     "fs": "0.0.2",
     "js-yaml": "^3.11.0",
