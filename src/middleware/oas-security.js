@@ -63,11 +63,13 @@ function verifyToken(req, secDef, token, next) { // eslint-disable-line
 
     if (token && bearerRegex.test(token)) {
         var newToken = token.replace(bearerRegex, '');
+        var algorithms = secDef['x-bearer-config'] ? secDef['x-bearer-config'].algorithms : config.oasSecurity[secDef.name].algorithms || ['HS256'];
+        var issuer = secDef['x-bearer-config'] ? secDef['x-bearer-config'].issuer : config.oasSecurity[secDef.name].issuer
         jwt.verify(
             newToken, config.oasSecurity[secDef.name].key,
             {
-                //algorithms: config.oasSecurity[secDef.name].algorithms || ['HS256'],
-                issuer: config.oasSecurity[secDef.name].issuer
+                algorithms: algorithms,
+                issuer: issuer
             },
             (error, decoded) => {
                 if (error === null && decoded) {
@@ -75,7 +77,7 @@ function verifyToken(req, secDef, token, next) { // eslint-disable-line
                 }
                 return next(sendError(403));
             }
-            );
+        );
     } else {
         return next(sendError(401));
     }
