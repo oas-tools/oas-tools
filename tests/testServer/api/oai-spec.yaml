@@ -286,7 +286,14 @@ paths:
                 $ref: '#/components/schemas/Error'
       #x-router-controller: "petsController"
       #x-router-controller: "Default"
+security:
+  - Bearer: []
 components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     ResponseTest:
       type: array
