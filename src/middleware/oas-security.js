@@ -64,9 +64,10 @@ function verifyToken(req, secDef, token, next) { // eslint-disable-line
     if (token && bearerRegex.test(token)) {
         var newToken = token.replace(bearerRegex, '');
         var algorithms = secDef['x-bearer-config'] ? secDef['x-bearer-config'].algorithms : config.oasSecurity[secDef.name].algorithms || ['HS256'];
-        var issuer = secDef['x-bearer-config'] ? secDef['x-bearer-config'].issuer : config.oasSecurity[secDef.name].issuer
+        var issuer = secDef['x-bearer-config'] ? secDef['x-bearer-config'].issuer : config.oasSecurity[secDef.name].issuer;
+        var key = secDef['x-bearer-config'] ? secDef['x-bearer-config'].key : config.oasSecurity[secDef.name].key;
         jwt.verify(
-            newToken, config.oasSecurity[secDef.name].key,
+            newToken, key,
             {
                 algorithms: algorithms,
                 issuer: issuer
@@ -100,7 +101,7 @@ module.exports = (options, specDoc) => {
 
                     async.map(Object.keys(secReq), (name, callback) => { // logical AND - all must allow
                         var secDef = specDoc.components.securitySchemes[name];
-                        secDef.name = name
+                        secDef.name = name;
                         var handler = handlers[name];
 
                         secName = name;
@@ -115,7 +116,7 @@ module.exports = (options, specDoc) => {
 
                         return handler(req, secDef, getValue(req, secDef, name, secReq), callback);
                     }, (err) => {
-                        logger.debug('    Security check ' + secName + ': ' + _.isNull(err) ? 'allowed' : 'denied');
+                        logger.debug('    Security check ' + secName + ': ' + (_.isNull(err) ? 'allowed' : 'denied'));
 
                         // swap normal err and result to short-circuit the logical OR
                         if (err) {

@@ -1,0 +1,60 @@
+{
+    "anonymous": {
+        "paramTestsQuery": {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        },
+        "paramTestsPath": {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        },
+        "responseBodyTest": {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        },
+        "pets": {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        }
+    }
+}

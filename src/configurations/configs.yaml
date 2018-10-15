@@ -8,6 +8,8 @@ production:
   validator: true
   docs: true
   oasSecurity: null
+  oasAuth: false
+  grantsFile: null
   ignoreUnknownFormats: true
 
 development:
@@ -18,4 +20,6 @@ development:
   validator: true
   docs: true
   oasSecurity: null
+  oasAuth: false
+  grantsFile: null
   ignoreUnknownFormats: true

@@ -191,6 +191,36 @@ function appendBasePath(specDoc, expressPath) {
   return res;
 }
 
+function extendGrants(specDoc, grantsFile) {
+  var newGrants = {};
+  Object.keys(grantsFile).forEach(role => {
+    newGrants[role] = {};
+    Object.keys(grantsFile[role]).forEach(resource => {
+      if (resource !== '$extend') {
+        var grants = grantsFile[role][resource];
+        var splitRes = resource.split('/');
+        Object.keys(specDoc.paths).forEach(specPath => {
+          var found = true;
+          var pos = -1;
+          var splitPath = specPath.split('/');
+          splitRes.forEach(resPart => {
+            var foundPos = splitPath.indexOf(resPart);
+            if (!found || foundPos <= pos) {
+              found = false;
+            }
+          });
+          if (found && !newGrants[role][specPath]) {
+            newGrants[role][specPath] = grants;
+          }
+        });
+      } else {
+        newGrants[role]['$extend'] = grantsFile[role]['$extend'];
+      }
+    });
+  });
+  config.grantsFile = newGrants;
+}
+
 /**
  * Function to initialize swagger-tools middlewares.
  *@param {object} specDoc - Specification file (dereferenced).
@@ -208,6 +238,15 @@ function registerPaths(specDoc, app) {
   var OASSecurityMid = function() {
     var OASSecurity = require('./middleware/oas-security');
     return OASSecurity.call(undefined, config.oasSecurity, specDoc);
+  }
+  var grantsFile;
+  if (config.oasAuth) {
+    grantsFile = require(config.grantsFile.charAt(0) === '/' ? config.grantsFile : pathModule.join(process.cwd(), config.grantsFile));
+    extendGrants(specDoc, grantsFile);
+  }
+  var OASAuthMid = function () {
+    var OASAuth = require('./middleware/oas-auth');
+    return OASAuth.call(undefined, specDoc);
   }
 
   var dictionary = {};
@@ -246,6 +285,9 @@ function registerPaths(specDoc, app) {
           if (config.oasSecurity) {
             app.get(expressPath, OASSecurityMid());
           }
+          if (config.oasAuth) {
+            app.get(expressPath, OASAuthMid());
+          }
           if (config.validator == true) {
             app.get(expressPath, OASValidatorMid());
           }
@@ -256,6 +298,9 @@ function registerPaths(specDoc, app) {
         case 'post':
           if (config.oasSecurity) {
             app.post(expressPath, OASSecurityMid());
+          }
+          if (config.oasAuth) {
+            app.post(expressPath, OASAuthMid());
           }
           if (config.validator == true) {
             app.post(expressPath, OASValidatorMid());
@@ -268,6 +313,9 @@ function registerPaths(specDoc, app) {
           if (config.oasSecurity) {
             app.put(expressPath, OASSecurityMid());
           }
+          if (config.oasAuth) {
+            app.put(expressPath, OASAuthMid());
+          }
           if (config.validator == true) {
             app.put(expressPath, OASValidatorMid());
           }
@@ -278,6 +326,9 @@ function registerPaths(specDoc, app) {
         case 'delete':
           if (config.oasSecurity) {
             app.delete(expressPath, OASSecurityMid());
+          }
+          if (config.oasAuth) {
+            app.delete(expressPath, OASAuthMid());
           }
           if (config.validator == true) {
             app.delete(expressPath, OASValidatorMid());

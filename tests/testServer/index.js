@@ -30,6 +30,8 @@ var options_object = {
       key: 'test'
     }
   },
+  oasAuth: true,
+  grantsFile: './tests/testServer/abac.json',
   ignoreUnknownFormats: true
 };
 

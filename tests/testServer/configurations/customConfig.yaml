@@ -6,4 +6,6 @@ router: true
 validator: true
 docs: true
 oasSecurity: null
+oasAuth: false
+grantsFile: null
 controllers: 'C:\Users\ipelu\OneDrive\Documentos\GitHub\project-oas-tools\example\controllers'
