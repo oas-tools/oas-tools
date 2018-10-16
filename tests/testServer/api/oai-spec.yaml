@@ -111,6 +111,67 @@ paths:
                 $ref: "#/components/schemas/Error"
       x-router-controller: "petsController"
       #x-router-controller: "Default"
+  /ownershipTest/{idParam}:
+    get:
+      summary: This path is for testing ownership control
+      operationId: ownershipTest
+      tags:
+        - pets
+      parameters:
+        - name: idParam
+          in: path
+          description: ID to check ownership
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A sample response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      x-router-controller: "petsController"
+  /ownershipBindingTest/{sampleParam}:
+    get:
+      summary: This path is for testing ownership control with acl binding
+      operationId: ownershipBindingTest
+      tags:
+        - pets
+      parameters:
+        - name: sampleParam
+          in: path
+          description: ID to check ownership
+          required: true
+          schema:
+            type: string
+          x-acl-binding: idParam
+      responses:
+        '200':
+          description: A sample response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      x-router-controller: "petsController"
   /responseBodyTest:
     get:
       summary: should return an object with both right and wrong properties

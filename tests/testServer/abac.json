@@ -28,6 +28,16 @@
                 "*"
             ]
         },
+        "ownershipTest": {
+            "read:own": [
+                "*"
+            ]
+        },
+        "ownershipBindingTest": {
+            "read:own": [
+                "*"
+            ]
+        },
         "responseBodyTest": {
             "create:any": [
                 "*"

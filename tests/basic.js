@@ -6,7 +6,17 @@ var fs = require('fs');
 var path = require('path');
 var jsyaml = require('js-yaml');
 var jwt = require('jsonwebtoken');
-var token = jwt.sign({}, 'test', {issuer: 'ISA Auth'});
+var token = jwt.sign({
+  iss: 'ISA Auth',
+  idParam: 'prueba'
+}, 'test');
+var tokenError = jwt.sign({
+  iss: 'ISA Auth',
+  idParam: 'pruebaerror'
+}, 'test');
+var tokenNoParam = jwt.sign({
+  iss: 'ISA Auth'
+}, 'test');
 const serverProto = require('./testServer');
 let server = require('./testServer');
 const indexFile = require('./../src/index');
@@ -217,6 +227,64 @@ function getTests() {
         });
     });
     // test of properties type of request body end
+
+    /* test of ownership */
+    it('it should get a sample response', (done) => {
+      chai.request(server)
+        .get('/api/v1/ownershipTest/prueba')
+        .set('Authorization', 'Bearer ' + token)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          done();
+        });
+    });
+
+    it('it should get a sample response using acl binding', (done) => {
+      chai.request(server)
+        .get('/api/v1/ownershipBindingTest/prueba')
+        .set('Authorization', 'Bearer ' + token)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          done();
+        });
+    });
+
+    it('it should get a 403 error informing that the user does not have access', (done) => {
+      chai.request(server)
+        .get('/api/v1/ownershipTest/prueba')
+        .set('Authorization', 'Bearer ' + tokenError)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(403);
+          res.body.should.be.eql({});
+          done();
+        });
+    });
+
+    it('it should get a 403 error because the user does not have a binding property', (done) => {
+      chai.request(server)
+        .get('/api/v1/ownershipTest/prueba')
+        .set('Authorization', 'Bearer ' + tokenNoParam)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(403);
+          res.body.should.be.eql({});
+          done();
+        });
+    });
+    // end of ownership test
 
     it('it shouldn´t GET all the pets but show a message with errors (missing/wrong parameters)', (done) => {
       chai.request(server)

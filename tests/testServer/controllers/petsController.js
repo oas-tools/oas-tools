@@ -123,6 +123,24 @@ exports.paramTestsQuery = (req, res) => {
 };
 
 /**
+ *  Path for testing ownership
+ */
+exports.ownershipTest = (req, res) => {
+  res.send({
+    message: 'Path for ownership tests was requested, this is its controller response'
+  });
+};
+
+/**
+ *  Path for testing ownership with acl binding
+ */
+exports.ownershipBindingTest = (req, res) => {
+  res.send({
+    message: 'Path for ownership with acl binding tests was requested, this is its controller response'
+  });
+};
+
+/**
  *  Path for testing properties type on responses
  */
 exports.responseBodyTest = (req, res) => {

@@ -66,9 +66,9 @@ module.exports = (oasDoc) => {
                 var decoded = jwt.decode(token);
                 if (parameters !== undefined) {
                     parameters.forEach((parameter) => {
-                        if (parameter['x-aclbinding']) {
+                        if (parameter['x-acl-binding']) {
                             usedParameter = parameter.name;
-                            userProperty = parameter['x-aclbinding'];
+                            userProperty = parameter['x-acl-binding'];
                             paramLocation = locationFormat(parameter.in);
                         } else if (!usedParameter && parameter.in === 'path' && decoded[parameter.name]) {
                             usedParameter = parameter.name;
