@@ -4,10 +4,7 @@ var config = require('../configurations'),
     logger = config.logger;
 var jwt = require('jsonwebtoken');
 const AccessControl = require('accesscontrol');
-var grantsFile = config.grantsFile;
-const ac = new AccessControl(grantsFile);
 const AccessControlMiddleware = require('accesscontrol-middleware');
-const accessControlMiddleware = new AccessControlMiddleware(ac);
 
 function removeBasePath(reqRoutePath) {
     return reqRoutePath.split('').filter((a, i) => {
@@ -30,8 +27,9 @@ module.exports = (oasDoc) => {
 
     return function OASAuth(req, res, next) {
         const usedPath = config.pathsDict[removeBasePath(req.route.path)];
+        const method = req.method.toLowerCase();
         logger.debug('Checking authorization...');
-        var securityReqs = oasDoc.paths[usedPath].security || oasDoc.security;
+        var securityReqs = oasDoc.paths[usedPath][method].security || oasDoc.security;
 
         if (securityReqs && securityReqs.length > 0) {
             var secName;
@@ -43,7 +41,8 @@ module.exports = (oasDoc) => {
                 });
             });
             if (secName) {
-                const method = req.method.toLowerCase();
+                const ac = new AccessControl(config.grantsFile[secName]);
+                const accessControlMiddleware = new AccessControlMiddleware(ac);
                 var action;
                 switch (method) {
                     case 'get':

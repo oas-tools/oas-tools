@@ -254,6 +254,92 @@ exports.updatePet = (args, res) => {
   exports.pets = pets;
 }
 
+ /**
+  * Sends a security config file
+  */
+exports.securityFile = (req, res) => {
+  res.send({
+    issuer: 'ISA Auth',
+    key: 'test'
+  });
+};
+
+/**
+ * Sends an auth config file
+ */
+exports.grantsFile = (req, res) => {
+  res.send({
+    anonymous: {
+        paramTestsQuery: {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        },
+        paramTestsPath: {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        },
+        ownershipTest: {
+            "read:own": [
+                "*"
+            ]
+        },
+        ownershipBindingTest: {
+            "read:own": [
+                "*"
+            ]
+        },
+        responseBodyTest: {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        },
+        pets: {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        }
+    }
+  });
+};
+
 exports.pets = pets;
 exports.corruptPets = corruptPets;
 exports.setCorrectPets = setCorrectPets;

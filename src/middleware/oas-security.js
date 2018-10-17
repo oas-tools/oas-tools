@@ -63,14 +63,11 @@ function verifyToken(req, secDef, token, next) { // eslint-disable-line
 
     if (token && bearerRegex.test(token)) {
         var newToken = token.replace(bearerRegex, '');
-        var algorithms = secDef['x-bearer-config'] ? secDef['x-bearer-config'].algorithms : config.oasSecurity[secDef.name].algorithms || ['HS256'];
-        var issuer = secDef['x-bearer-config'] ? secDef['x-bearer-config'].issuer : config.oasSecurity[secDef.name].issuer;
-        var key = secDef['x-bearer-config'] ? secDef['x-bearer-config'].key : config.oasSecurity[secDef.name].key;
         jwt.verify(
-            newToken, key,
+            newToken, config.oasSecurity[secDef.name].key,
             {
-                algorithms: algorithms,
-                issuer: issuer
+                algorithms: config.oasSecurity[secDef.name].algorithms || ['HS256'],
+                issuer: config.oasSecurity[secDef.name].issuer
             },
             (error, decoded) => {
                 if (error === null && decoded) {
@@ -84,16 +81,16 @@ function verifyToken(req, secDef, token, next) { // eslint-disable-line
     }
 }
 
-module.exports = (options, specDoc) => {
+module.exports = (specDoc) => {
 
     return function OASSecurity(req, res, next) {
-        var handlers = options || {};
+        var handlers = config.oasSecurity;
         var operation = config.pathsDict[removeBasePath(req.route.path)];
         var securityReqs;
 
         if (operation) {
             logger.debug('Checking security...');
-            securityReqs = specDoc.paths[operation].security || specDoc.security;
+            securityReqs = specDoc.paths[operation][req.method.toLowerCase()].security || specDoc.security;
 
             if (securityReqs && securityReqs.length > 0) {
                 async.mapSeries(securityReqs, (secReq, callback) => { // logical OR - any one can allow

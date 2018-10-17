@@ -22,6 +22,7 @@ var validator = new ZSchema({
 });
 var utils = require("./lib/utils.js");
 var express = require('express');
+var request = require('request');
 
 // var controllers;
 // var customConfigurations = false;
@@ -218,7 +219,41 @@ function extendGrants(specDoc, grantsFile) {
       }
     });
   });
-  config.grantsFile = newGrants;
+  return newGrants;
+}
+
+function initializeSecurityAndAuth(specDoc) {
+  if (specDoc.components && specDoc.components.securitySchemes) {
+    Object.keys(specDoc.components.securitySchemes).forEach((secName) => {
+      var secDef = specDoc.components.securitySchemes[secName];
+      if (secDef.type === 'http' && secDef.scheme === 'bearer' && secDef.bearerFormat === 'JWT') {
+        if (secDef['x-bearer-config'] && !config.oasSecurity[secName]) {
+          if (config.oasSecurity === true) {
+            config.oasSecurity = {};
+          }
+          if (typeof secDef['x-bearer-config'] === 'string') {
+            request(secDef['x-bearer-config'], (err, res, body) => {
+              config.oasSecurity[secName] = JSON.parse(body);
+            });
+          } else {
+            config.oasSecurity[secName] = secDef['x-bearer-config'];
+          }
+        }
+        if (secDef['x-acl-config'] && config.oasAuth && (!config.grantsFile || !config.grantsFile[secName])) {
+          if (!config.grantsFile) {
+            config.grantsFile = {};
+          }
+          if (typeof secDef['x-acl-config'] === 'string') {
+            request(secDef['x-acl-config'], (err, res, body) => {
+              config.grantsFile[secName] = extendGrants(specDoc, JSON.parse(body));
+            });
+          } else {
+            config.grantsFile[secName] = extendGrants(secDef['x-acl-config']);
+          }
+        }
+      }
+    });
+  }
 }
 
 /**
@@ -235,14 +270,10 @@ function registerPaths(specDoc, app) {
     var OASValidator = require('./middleware/oas-validator');
     return OASValidator.call(undefined, specDoc); 
   };
+  initializeSecurityAndAuth(specDoc);
   var OASSecurityMid = function() {
     var OASSecurity = require('./middleware/oas-security');
-    return OASSecurity.call(undefined, config.oasSecurity, specDoc);
-  }
-  var grantsFile;
-  if (config.oasAuth) {
-    grantsFile = require(config.grantsFile.charAt(0) === '/' ? config.grantsFile : pathModule.join(process.cwd(), config.grantsFile));
-    extendGrants(specDoc, grantsFile);
+    return OASSecurity.call(undefined, specDoc);
   }
   var OASAuthMid = function () {
     var OASAuth = require('./middleware/oas-auth');

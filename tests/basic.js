@@ -1049,7 +1049,7 @@ describe('Pets', () => {
     // await for server creation
     serverProto.init(() => {
       server = serverProto.getServer();
-      done();
+      setTimeout(done, 1000);
     });
   });
 

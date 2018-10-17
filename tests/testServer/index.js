@@ -24,14 +24,8 @@ var options_object = {
   strict: true,
   router: true,
   validator: true,
-  oasSecurity: {
-    Bearer: {
-      issuer: 'ISA Auth',
-      key: 'test'
-    }
-  },
+  oasSecurity: true,
   oasAuth: true,
-  grantsFile: './tests/testServer/abac.json',
   ignoreUnknownFormats: true
 };
 
