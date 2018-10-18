@@ -224,33 +224,49 @@ function extendGrants(specDoc, grantsFile) {
 
 function initializeSecurityAndAuth(specDoc) {
   if (specDoc.components && specDoc.components.securitySchemes) {
+    if (!config.securityFile) {
+      config.securityFile = {};
+    }
+    if (!config.grantsFile) {
+      config.grantsFile = {};
+    }
     Object.keys(specDoc.components.securitySchemes).forEach((secName) => {
       var secDef = specDoc.components.securitySchemes[secName];
       if (secDef.type === 'http' && secDef.scheme === 'bearer' && secDef.bearerFormat === 'JWT') {
-        if (secDef['x-bearer-config'] && !config.oasSecurity[secName]) {
-          if (config.oasSecurity === true) {
-            config.oasSecurity = {};
-          }
-          if (typeof secDef['x-bearer-config'] === 'string') {
-            request(secDef['x-bearer-config'], (err, res, body) => {
-              config.oasSecurity[secName] = JSON.parse(body);
-            });
-          } else {
-            config.oasSecurity[secName] = secDef['x-bearer-config'];
-          }
+        if (secDef['x-bearer-config'] && !config.securityFile[secName]) {
+          config.securityFile[secName] = secDef['x-bearer-config'];
         }
-        if (secDef['x-acl-config'] && config.oasAuth && (!config.grantsFile || !config.grantsFile[secName])) {
-          if (!config.grantsFile) {
-            config.grantsFile = {};
-          }
-          if (typeof secDef['x-acl-config'] === 'string') {
-            request(secDef['x-acl-config'], (err, res, body) => {
-              config.grantsFile[secName] = extendGrants(specDoc, JSON.parse(body));
-            });
-          } else {
-            config.grantsFile[secName] = extendGrants(secDef['x-acl-config']);
-          }
+        if (secDef['x-acl-config'] && !config.grantsFile[secName]) {
+          config.grantsFile[secName] = secDef['x-acl-config'];
         }
+      }
+    });
+    Object.keys(config.securityFile).forEach((secName) => {
+      if (typeof config.securityFile[secName] === 'string') {
+        if (config.securityFile[secName].substr(0, 4) === 'http') {
+          request(config.securityFile[secName], (err, res, body) => {
+            config.securityFile[secName] = JSON.parse(body);
+          });
+        } else if (config.securityFile[secName].charAt(0) === '/') {
+          config.securityFile[secName] = require(config.securityFile[secName]);
+        } else {
+          config.securityFile[secName] = require(pathModule.join(process.cwd(), config.securityFile[secName]));
+        }
+      }
+    });
+    Object.keys(config.grantsFile).forEach((secName) => {
+      if (typeof config.grantsFile[secName] === 'string') {
+        if (config.grantsFile[secName].substr(0, 4) === 'http') {
+          request(config.grantsFile[secName], (err, res, body) => {
+            config.grantsFile[secName] = extendGrants(specDoc, JSON.parse(body));
+          });
+        } else if (config.grantsFile[secName].charAt(0) === '/') {
+          config.grantsFile[secName] = require(config.grantsFile[secName]);
+        } else {
+          config.grantsFile[secName] = require(pathModule.join(process.cwd(), config.grantsFile[secName]));
+        }
+      } else {
+        config.grantsFile[secName] = extendGrants(specDoc, grantsFile[secName]);
       }
     });
   }
@@ -313,10 +329,10 @@ function registerPaths(specDoc, app) {
       expressPath = appendBasePath(specDoc, expressPath);
       switch (method) { //TODO: paths must be registered for each url in servers property of the spec doc.
         case 'get':
-          if (config.oasSecurity) {
+          if (config.oasSecurity == true) {
             app.get(expressPath, OASSecurityMid());
           }
-          if (config.oasAuth) {
+          if (config.oasAuth == true) {
             app.get(expressPath, OASAuthMid());
           }
           if (config.validator == true) {
@@ -327,10 +343,10 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'post':
-          if (config.oasSecurity) {
+          if (config.oasSecurity == true) {
             app.post(expressPath, OASSecurityMid());
           }
-          if (config.oasAuth) {
+          if (config.oasAuth == true) {
             app.post(expressPath, OASAuthMid());
           }
           if (config.validator == true) {
@@ -341,10 +357,10 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'put':
-          if (config.oasSecurity) {
+          if (config.oasSecurity == true) {
             app.put(expressPath, OASSecurityMid());
           }
-          if (config.oasAuth) {
+          if (config.oasAuth == true) {
             app.put(expressPath, OASAuthMid());
           }
           if (config.validator == true) {
@@ -355,10 +371,10 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'delete':
-          if (config.oasSecurity) {
+          if (config.oasSecurity == true) {
             app.delete(expressPath, OASSecurityMid());
           }
-          if (config.oasAuth) {
+          if (config.oasAuth == true) {
             app.delete(expressPath, OASAuthMid());
           }
           if (config.validator == true) {

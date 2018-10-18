@@ -64,10 +64,10 @@ function verifyToken(req, secDef, token, next) { // eslint-disable-line
     if (token && bearerRegex.test(token)) {
         var newToken = token.replace(bearerRegex, '');
         jwt.verify(
-            newToken, config.oasSecurity[secDef.name].key,
+            newToken, config.securityFile[secDef.name].key,
             {
-                algorithms: config.oasSecurity[secDef.name].algorithms || ['HS256'],
-                issuer: config.oasSecurity[secDef.name].issuer
+                algorithms: config.securityFile[secDef.name].algorithms || ['HS256'],
+                issuer: config.securityFile[secDef.name].issuer
             },
             (error, decoded) => {
                 if (error === null && decoded) {
@@ -84,7 +84,7 @@ function verifyToken(req, secDef, token, next) { // eslint-disable-line
 module.exports = (specDoc) => {
 
     return function OASSecurity(req, res, next) {
-        var handlers = config.oasSecurity;
+        var handlers = config.securityFile;
         var operation = config.pathsDict[removeBasePath(req.route.path)];
         var securityReqs;
 

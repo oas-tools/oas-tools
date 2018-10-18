@@ -25,7 +25,13 @@ var options_object = {
   router: true,
   validator: true,
   oasSecurity: true,
+  securityFile: {
+    SecondBearer: './tests/testServer/security.json'
+  },
   oasAuth: true,
+  grantsFile: {
+    SecondBearer: './tests/testServer/grants.json'
+  },
   ignoreUnknownFormats: true
 };
 
