@@ -59,7 +59,7 @@ module.exports = (oasDoc) => {
                 }
                 var paramLocation, usedParameter, userProperty;
                 var resource = usedPath;
-                var parameters = oasDoc.paths[usedPath][method].parameters;
+                var parameters = oasDoc.paths[usedPath][method].parameters || oasDoc.paths[usedPath].parameters;
                 const bearerRegex = /^Bearer\s/;
                 var token = req.headers.authorization.replace(bearerRegex, '');
                 var decoded = jwt.decode(token);

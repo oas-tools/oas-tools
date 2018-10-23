@@ -95,9 +95,9 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
     }
   }
 
-  if (paths[requestedSpecPath][method].hasOwnProperty('parameters')) {
+  if (paths[requestedSpecPath][method].hasOwnProperty('parameters') || paths[requestedSpecPath].hasOwnProperty('parameters')) {
 
-    var params = paths[requestedSpecPath][method].parameters;
+    var params = paths[requestedSpecPath][method].parameters || paths[requestedSpecPath].parameters;
 
     for (var i = 0; i < params.length; i++) {
 
@@ -356,7 +356,7 @@ module.exports = (oasDoc) => {
       params: {}
     }
 
-    var parameters = oasDoc.paths[requestedSpecPath][method].parameters;
+    var parameters = oasDoc.paths[requestedSpecPath][method].parameters || oasDoc.paths[requestedSpecPath].parameters;
     if (parameters != undefined) {
       parameters.forEach((parameter) => { // TODO: para POST y PUT el objeto se define en 'requestBody' y no en 'parameters'
         var pType = getParameterType(parameter);

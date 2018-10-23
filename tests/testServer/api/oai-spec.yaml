@@ -382,6 +382,28 @@ paths:
               schema:
                 type: object
       x-router-controller: "petsController"
+  /commonParamTest:
+    parameters:
+        - name: testParam
+          in: query
+          description: Test parameter
+          required: true
+          schema:
+            type: integer
+            format: int64
+    get:
+      summary: Common parameters test
+      operationId: commonParamTest
+      tags:
+        - pets
+      responses:
+        '200':
+          description: A sample response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-router-controller: "petsController"
 security:
   - Bearer: []
 components:

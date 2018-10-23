@@ -270,80 +270,94 @@ exports.securityFile = (req, res) => {
 exports.grantsFile = (req, res) => {
   res.send({
     anonymous: {
-        paramTestsQuery: {
-            "create:any": [
-                "*"
-            ],
-            "read:any": [
-                "*"
-            ],
-            "update:any": [
-                "*"
-            ],
-            "delete:any": [
-                "*"
-            ]
-        },
-        paramTestsPath: {
-            "create:any": [
-                "*"
-            ],
-            "read:any": [
-                "*"
-            ],
-            "update:any": [
-                "*"
-            ],
-            "delete:any": [
-                "*"
-            ]
-        },
-        ownershipTest: {
-            "read:own": [
-                "*"
-            ]
-        },
-        ownershipBindingTest: {
-            "read:own": [
-                "*"
-            ]
-        },
-        responseBodyTest: {
-            "create:any": [
-                "*"
-            ],
-            "read:any": [
-                "*"
-            ],
-            "update:any": [
-                "*"
-            ],
-            "delete:any": [
-                "*"
-            ]
-        },
-        pets: {
-            "create:any": [
-                "*"
-            ],
-            "read:any": [
-                "*"
-            ],
-            "update:any": [
-                "*"
-            ],
-            "delete:any": [
-                "*"
-            ]
-        }
-    },
-    user: {
-      pets: {
+      paramTestsQuery: {
+        "create:any": [
+          "*"
+        ],
         "read:any": [
+          "*"
+        ],
+        "update:any": [
+          "*"
+        ],
+        "delete:any": [
+          "*"
+        ]
+      },
+      paramTestsPath: {
+        "create:any": [
+          "*"
+        ],
+        "read:any": [
+          "*"
+        ],
+        "update:any": [
+          "*"
+        ],
+        "delete:any": [
+          "*"
+        ]
+      },
+      ownershipTest: {
+        "read:own": [
+          "*"
+        ]
+      },
+      ownershipBindingTest: {
+        "read:own": [
+          "*"
+        ]
+      },
+      commonParamTest: {
+        "read:any": [
+          "*"
+        ]
+      },
+      responseBodyTest: {
+        "create:any": [
+          "*"
+        ],
+        "read:any": [
+          "*"
+        ],
+        "update:any": [
+          "*"
+        ],
+        "delete:any": [
+          "*"
+        ]
+      },
+      pets: {
+        "create:any": [
+          "*"
+        ],
+        "read:any": [
+          "*"
+        ],
+        "update:any": [
+          "*"
+        ],
+        "delete:any": [
+          "*"
+        ]
+      }
+  },
+  user: {
+    pets: {
+      "read:any": [
           "*"
         ]
       }
     }
+  });
+};
+
+/**
+ * Sends a sample response
+ */
+exports.commonParamTest = (req, res) => {
+  res.send({
+    id: parseInt(req.query.testParam)
   });
 };
 

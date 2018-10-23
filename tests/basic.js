@@ -305,6 +305,22 @@ function getTests() {
     });
     // end of ownership test
 
+    it('it should get a sample response using a common parameter', (done) => {
+      chai.request(server)
+        .get('/api/v1/commonParamTest?testParam=123')
+        .set('Authorization', 'Bearer ' + token)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('id');
+          res.body.should.have.property('id').eql(123);
+          done();
+        });
+    });
+
     it('it shouldn´t GET all the pets but show a message with errors (missing/wrong parameters)', (done) => {
       chai.request(server)
         .get('/api/v1/pets?limit=10')
