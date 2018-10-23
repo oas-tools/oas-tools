@@ -336,6 +336,13 @@ exports.grantsFile = (req, res) => {
                 "*"
             ]
         }
+    },
+    user: {
+      pets: {
+        "read:any": [
+          "*"
+        ]
+      }
     }
   });
 };

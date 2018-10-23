@@ -10,6 +10,11 @@ var token = jwt.sign({
   iss: 'ISA Auth',
   idParam: 'prueba'
 }, 'test');
+var userToken = jwt.sign({
+  iss: 'ISA Auth',
+  idParam: 'prueba',
+  role: 'user'
+}, 'test');
 var tokenError = jwt.sign({
   iss: 'ISA Auth',
   idParam: 'pruebaerror'
@@ -238,6 +243,20 @@ function getTests() {
             done(err);
           }
           res.should.have.status(200);
+          res.body.should.be.a('object');
+          done();
+        });
+    });
+
+    it('it should get a 403 error because the user role does not have access', (done) => {
+      chai.request(server)
+        .get('/api/v1/ownershipTest/prueba')
+        .set('Authorization', 'Bearer ' + userToken)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(403);
           res.body.should.be.a('object');
           done();
         });
