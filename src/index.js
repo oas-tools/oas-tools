@@ -22,6 +22,7 @@ var validator = new ZSchema({
 });
 var utils = require("./lib/utils.js");
 var express = require('express');
+var request = require('request');
 
 // var controllers;
 // var customConfigurations = false;
@@ -191,6 +192,86 @@ function appendBasePath(specDoc, expressPath) {
   return res;
 }
 
+function extendGrants(specDoc, grantsFile) {
+  var newGrants = {};
+  Object.keys(grantsFile).forEach(role => {
+    newGrants[role] = {};
+    Object.keys(grantsFile[role]).forEach(resource => {
+      if (resource !== '$extend') {
+        var grants = grantsFile[role][resource];
+        var splitRes = resource.split('/');
+        Object.keys(specDoc.paths).forEach(specPath => {
+          var found = true;
+          var pos = -1;
+          var splitPath = specPath.split('/');
+          splitRes.forEach(resPart => {
+            var foundPos = splitPath.indexOf(resPart);
+            if (!found || foundPos <= pos) {
+              found = false;
+            }
+          });
+          if (found && !newGrants[role][specPath]) {
+            newGrants[role][specPath] = grants;
+          }
+        });
+      } else {
+        newGrants[role]['$extend'] = grantsFile[role]['$extend'];
+      }
+    });
+  });
+  return newGrants;
+}
+
+function initializeSecurityAndAuth(specDoc) {
+  if (specDoc.components && specDoc.components.securitySchemes) {
+    if (!config.securityFile) {
+      config.securityFile = {};
+    }
+    if (!config.grantsFile) {
+      config.grantsFile = {};
+    }
+    Object.keys(specDoc.components.securitySchemes).forEach((secName) => {
+      var secDef = specDoc.components.securitySchemes[secName];
+      if (secDef.type === 'http' && secDef.scheme === 'bearer' && secDef.bearerFormat === 'JWT') {
+        if (secDef['x-bearer-config'] && !config.securityFile[secName]) {
+          config.securityFile[secName] = secDef['x-bearer-config'];
+        }
+        if (secDef['x-acl-config'] && !config.grantsFile[secName]) {
+          config.grantsFile[secName] = secDef['x-acl-config'];
+        }
+      }
+    });
+    Object.keys(config.securityFile).forEach((secName) => {
+      if (typeof config.securityFile[secName] === 'string') {
+        if (config.securityFile[secName].substr(0, 4) === 'http') {
+          request(config.securityFile[secName], (err, res, body) => {
+            config.securityFile[secName] = JSON.parse(body);
+          });
+        } else if (config.securityFile[secName].charAt(0) === '/') {
+          config.securityFile[secName] = require(config.securityFile[secName]);
+        } else {
+          config.securityFile[secName] = require(pathModule.join(process.cwd(), config.securityFile[secName]));
+        }
+      }
+    });
+    Object.keys(config.grantsFile).forEach((secName) => {
+      if (typeof config.grantsFile[secName] === 'string') {
+        if (config.grantsFile[secName].substr(0, 4) === 'http') {
+          request(config.grantsFile[secName], (err, res, body) => {
+            config.grantsFile[secName] = extendGrants(specDoc, JSON.parse(body));
+          });
+        } else if (config.grantsFile[secName].charAt(0) === '/') {
+          config.grantsFile[secName] = require(config.grantsFile[secName]);
+        } else {
+          config.grantsFile[secName] = require(pathModule.join(process.cwd(), config.grantsFile[secName]));
+        }
+      } else {
+        config.grantsFile[secName] = extendGrants(specDoc, grantsFile[secName]);
+      }
+    });
+  }
+}
+
 /**
  * Function to initialize swagger-tools middlewares.
  *@param {object} specDoc - Specification file (dereferenced).
@@ -205,9 +286,14 @@ function registerPaths(specDoc, app) {
     var OASValidator = require('./middleware/oas-validator');
     return OASValidator.call(undefined, specDoc); 
   };
+  initializeSecurityAndAuth(specDoc);
   var OASSecurityMid = function() {
     var OASSecurity = require('./middleware/oas-security');
-    return OASSecurity.call(undefined, config.oasSecurity, specDoc);
+    return OASSecurity.call(undefined, specDoc);
+  }
+  var OASAuthMid = function () {
+    var OASAuth = require('./middleware/oas-auth');
+    return OASAuth.call(undefined, specDoc);
   }
 
   var dictionary = {};
@@ -243,8 +329,11 @@ function registerPaths(specDoc, app) {
       expressPath = appendBasePath(specDoc, expressPath);
       switch (method) { //TODO: paths must be registered for each url in servers property of the spec doc.
         case 'get':
-          if (config.oasSecurity) {
+          if (config.oasSecurity == true) {
             app.get(expressPath, OASSecurityMid());
+          }
+          if (config.oasAuth == true) {
+            app.get(expressPath, OASAuthMid());
           }
           if (config.validator == true) {
             app.get(expressPath, OASValidatorMid());
@@ -254,8 +343,11 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'post':
-          if (config.oasSecurity) {
+          if (config.oasSecurity == true) {
             app.post(expressPath, OASSecurityMid());
+          }
+          if (config.oasAuth == true) {
+            app.post(expressPath, OASAuthMid());
           }
           if (config.validator == true) {
             app.post(expressPath, OASValidatorMid());
@@ -265,8 +357,11 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'put':
-          if (config.oasSecurity) {
+          if (config.oasSecurity == true) {
             app.put(expressPath, OASSecurityMid());
+          }
+          if (config.oasAuth == true) {
+            app.put(expressPath, OASAuthMid());
           }
           if (config.validator == true) {
             app.put(expressPath, OASValidatorMid());
@@ -276,8 +371,11 @@ function registerPaths(specDoc, app) {
           }
           break;
         case 'delete':
-          if (config.oasSecurity) {
+          if (config.oasSecurity == true) {
             app.delete(expressPath, OASSecurityMid());
+          }
+          if (config.oasAuth == true) {
+            app.delete(expressPath, OASAuthMid());
           }
           if (config.validator == true) {
             app.delete(expressPath, OASValidatorMid());

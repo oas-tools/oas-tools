@@ -1,6 +1,6 @@
 {
   "name": "oas-tools",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "description": "",
   "main": "src/index.js",
   "scripts": {
@@ -20,6 +20,8 @@
     "url": "git+https://github.com/isa-group/oas-tools.git"
   },
   "dependencies": {
+    "accesscontrol": "^2.2.1",
+    "accesscontrol-middleware": "^1.0.3",
     "body-parser": "^1.18.3",
     "fs": "0.0.2",
     "js-yaml": "^3.11.0",
@@ -28,6 +30,7 @@
     "jsonwebtoken": "^8.3.0",
     "lodash-compat": "^3.10.2",
     "path": "^0.12.7",
+    "request": "^2.88.0",
     "validator": "^10.4.0",
     "winston": "^3.0.0",
     "z-schema": "^3.19.1"

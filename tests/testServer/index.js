@@ -24,11 +24,13 @@ var options_object = {
   strict: true,
   router: true,
   validator: true,
-  oasSecurity: {
-    Bearer: {
-      issuer: 'ISA Auth',
-      key: 'test'
-    }
+  oasSecurity: true,
+  securityFile: {
+    SecondBearer: './tests/testServer/security.json'
+  },
+  oasAuth: true,
+  grantsFile: {
+    SecondBearer: './tests/testServer/grants.json'
   },
   ignoreUnknownFormats: true
 };

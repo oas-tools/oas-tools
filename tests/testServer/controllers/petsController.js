@@ -123,6 +123,24 @@ exports.paramTestsQuery = (req, res) => {
 };
 
 /**
+ *  Path for testing ownership
+ */
+exports.ownershipTest = (req, res) => {
+  res.send({
+    message: 'Path for ownership tests was requested, this is its controller response'
+  });
+};
+
+/**
+ *  Path for testing ownership with acl binding
+ */
+exports.ownershipBindingTest = (req, res) => {
+  res.send({
+    message: 'Path for ownership with acl binding tests was requested, this is its controller response'
+  });
+};
+
+/**
  *  Path for testing properties type on responses
  */
 exports.responseBodyTest = (req, res) => {
@@ -235,6 +253,99 @@ exports.updatePet = (args, res) => {
   }
   exports.pets = pets;
 }
+
+ /**
+  * Sends a security config file
+  */
+exports.securityFile = (req, res) => {
+  res.send({
+    issuer: 'ISA Auth',
+    key: 'test'
+  });
+};
+
+/**
+ * Sends an auth config file
+ */
+exports.grantsFile = (req, res) => {
+  res.send({
+    anonymous: {
+        paramTestsQuery: {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        },
+        paramTestsPath: {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        },
+        ownershipTest: {
+            "read:own": [
+                "*"
+            ]
+        },
+        ownershipBindingTest: {
+            "read:own": [
+                "*"
+            ]
+        },
+        responseBodyTest: {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        },
+        pets: {
+            "create:any": [
+                "*"
+            ],
+            "read:any": [
+                "*"
+            ],
+            "update:any": [
+                "*"
+            ],
+            "delete:any": [
+                "*"
+            ]
+        }
+    },
+    user: {
+      pets: {
+        "read:any": [
+          "*"
+        ]
+      }
+    }
+  });
+};
 
 exports.pets = pets;
 exports.corruptPets = corruptPets;

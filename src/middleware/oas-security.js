@@ -63,13 +63,11 @@ function verifyToken(req, secDef, token, next) { // eslint-disable-line
 
     if (token && bearerRegex.test(token)) {
         var newToken = token.replace(bearerRegex, '');
-        var algorithms = secDef['x-bearer-config'] ? secDef['x-bearer-config'].algorithms : config.oasSecurity[secDef.name].algorithms || ['HS256'];
-        var issuer = secDef['x-bearer-config'] ? secDef['x-bearer-config'].issuer : config.oasSecurity[secDef.name].issuer
         jwt.verify(
-            newToken, config.oasSecurity[secDef.name].key,
+            newToken, config.securityFile[secDef.name].key,
             {
-                algorithms: algorithms,
-                issuer: issuer
+                algorithms: config.securityFile[secDef.name].algorithms || ['HS256'],
+                issuer: config.securityFile[secDef.name].issuer
             },
             (error, decoded) => {
                 if (error === null && decoded) {
@@ -83,16 +81,16 @@ function verifyToken(req, secDef, token, next) { // eslint-disable-line
     }
 }
 
-module.exports = (options, specDoc) => {
+module.exports = (specDoc) => {
 
     return function OASSecurity(req, res, next) {
-        var handlers = options || {};
+        var handlers = config.securityFile;
         var operation = config.pathsDict[removeBasePath(req.route.path)];
         var securityReqs;
 
         if (operation) {
             logger.debug('Checking security...');
-            securityReqs = specDoc.paths[operation].security || specDoc.security;
+            securityReqs = specDoc.paths[operation][req.method.toLowerCase()].security || specDoc.security;
 
             if (securityReqs && securityReqs.length > 0) {
                 async.mapSeries(securityReqs, (secReq, callback) => { // logical OR - any one can allow
@@ -100,7 +98,7 @@ module.exports = (options, specDoc) => {
 
                     async.map(Object.keys(secReq), (name, callback) => { // logical AND - all must allow
                         var secDef = specDoc.components.securitySchemes[name];
-                        secDef.name = name
+                        secDef.name = name;
                         var handler = handlers[name];
 
                         secName = name;
@@ -115,7 +113,7 @@ module.exports = (options, specDoc) => {
 
                         return handler(req, secDef, getValue(req, secDef, name, secReq), callback);
                     }, (err) => {
-                        logger.debug('    Security check ' + secName + ': ' + _.isNull(err) ? 'allowed' : 'denied');
+                        logger.debug('    Security check ' + secName + ': ' + (_.isNull(err) ? 'allowed' : 'denied'));
 
                         // swap normal err and result to short-circuit the logical OR
                         if (err) {
