@@ -313,6 +313,11 @@ exports.grantsFile = (req, res) => {
           "*"
         ]
       },
+      overrideCommonParamTest: {
+        "read:any": [
+          "*"
+        ]
+      },
       responseBodyTest: {
         "create:any": [
           "*"

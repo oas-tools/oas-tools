@@ -329,63 +329,17 @@ function registerPaths(specDoc, app) {
           checkControllers(path, method, paths[path][method], config.controllers);
         }
         expressPath = appendBasePath(specDoc, expressPath);
-        switch (method) { //TODO: paths must be registered for each url in servers property of the spec doc.
-          case 'get':
-            if (config.oasSecurity == true) {
-              app.get(expressPath, OASSecurityMid());
-            }
-            if (config.oasAuth == true) {
-              app.get(expressPath, OASAuthMid());
-            }
-            if (config.validator == true) {
-              app.get(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.get(expressPath, OASRouterMid());
-            }
-            break;
-          case 'post':
-            if (config.oasSecurity == true) {
-              app.post(expressPath, OASSecurityMid());
-            }
-            if (config.oasAuth == true) {
-              app.post(expressPath, OASAuthMid());
-            }
-            if (config.validator == true) {
-              app.post(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.post(expressPath, OASRouterMid());
-            }
-            break;
-          case 'put':
-            if (config.oasSecurity == true) {
-              app.put(expressPath, OASSecurityMid());
-            }
-            if (config.oasAuth == true) {
-              app.put(expressPath, OASAuthMid());
-            }
-            if (config.validator == true) {
-              app.put(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.put(expressPath, OASRouterMid());
-            }
-            break;
-          case 'delete':
-            if (config.oasSecurity == true) {
-              app.delete(expressPath, OASSecurityMid());
-            }
-            if (config.oasAuth == true) {
-              app.delete(expressPath, OASAuthMid());
-            }
-            if (config.validator == true) {
-              app.delete(expressPath, OASValidatorMid());
-            }
-            if (config.router == true) {
-              app.delete(expressPath, OASRouterMid());
-            }
-            break;
+        if (config.oasSecurity == true) {
+          app[method](expressPath, OASSecurityMid());
+        }
+        if (config.oasAuth == true) {
+          app[method](expressPath, OASAuthMid());
+        }
+        if (config.validator == true) {
+          app[method](expressPath, OASValidatorMid());
+        }
+        if (config.router == true) {
+          app[method](expressPath, OASRouterMid());
         }
       }
     }

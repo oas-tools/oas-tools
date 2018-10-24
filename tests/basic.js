@@ -321,6 +321,52 @@ function getTests() {
         });
     });
 
+    it('it should get a 400 error informing that the parameter type is incorrect', (done) => {
+      chai.request(server)
+        .get('/api/v1/commonParamTest?testParam=test')
+        .set('Authorization', 'Bearer ' + token)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter testParam in query");
+          done();
+        });
+    });
+
+    it('it should get a sample response using an overridden common parameter', (done) => {
+      chai.request(server)
+        .get('/api/v1/overrideCommonParamTest?testParam=123')
+        .set('Authorization', 'Bearer ' + token)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('id');
+          res.body.should.have.property('id').eql(123);
+          done();
+        });
+    });
+
+    it('it should get a 400 error informing that the overridden parameter type is incorrect', (done) => {
+      chai.request(server)
+        .get('/api/v1/overrideCommonParamTest?testParam=pruebas')
+        .set('Authorization', 'Bearer ' + token)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong parameter testParam in query");
+          done();
+        });
+    });
+
     it('it shouldn´t GET all the pets but show a message with errors (missing/wrong parameters)', (done) => {
       chai.request(server)
         .get('/api/v1/pets?limit=10')

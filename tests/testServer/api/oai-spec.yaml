@@ -404,6 +404,35 @@ paths:
               schema:
                 type: object
       x-router-controller: "petsController"
+  /overrideCommonParamTest:
+    parameters:
+        - name: testParam
+          in: query
+          description: Test parameter
+          required: true
+          schema:
+            type: string
+    get:
+      summary: Override common parameters test
+      operationId: commonParamTest
+      tags:
+        - pets
+      parameters:
+        - name: testParam
+          in: query
+          description: Test parameter
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: A sample response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-router-controller: "petsController"
 security:
   - Bearer: []
 components:

@@ -23,6 +23,19 @@ function locationFormat(inProperty) {
     return dict[inProperty];
 }
 
+function filterParams(methodParameters, pathParameters) {
+    var res = methodParameters;
+    var paramNames = methodParameters.map((param) => {
+        return param.name;
+    });
+    pathParameters.forEach((pathParam) => {
+        if (!paramNames.includes(pathParam.name)) {
+            res.push(pathParam);
+        }
+    });
+    return res;
+}
+
 module.exports = (oasDoc) => {
 
     return function OASAuth(req, res, next) {
@@ -59,7 +72,9 @@ module.exports = (oasDoc) => {
                 }
                 var paramLocation, usedParameter, userProperty;
                 var resource = usedPath;
-                var parameters = oasDoc.paths[usedPath][method].parameters || oasDoc.paths[usedPath].parameters;
+                var methodParameters = oasDoc.paths[usedPath][method].parameters || [];
+                var pathParameters = oasDoc.paths[usedPath].parameters || [];
+                var parameters = filterParams(methodParameters, pathParameters);
                 const bearerRegex = /^Bearer\s/;
                 var token = req.headers.authorization.replace(bearerRegex, '');
                 var decoded = jwt.decode(token);
