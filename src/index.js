@@ -64,7 +64,7 @@ function init_checks(specDoc, callback) {
  */
 var configure = function configure(options) {
   config.setConfigurations(options);
-  if (options.loglevel != undefined) {
+  if (options.customLogger || options.loglevel != undefined) {
     logger = config.logger; //loglevel changes, then new logger is needed
   }
 };

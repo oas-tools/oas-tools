@@ -69,6 +69,8 @@ function _setConfigurations(options, encoding) { // eslint-disable-line
     this.setProperty(c, newConfigurations[c]);
     if(c == 'loglevel'){ //loglevel changes, then new logger is needed
       createNewLogger(); // eslint-disable-line
+    } else if (c === 'customLogger') {
+      this.setProperty('logger', newConfigurations[c]);
     }
   }
 }
