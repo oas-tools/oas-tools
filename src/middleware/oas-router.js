@@ -36,6 +36,7 @@ var controllers; // eslint-disable-line
 /**
  * Checks if the data sent as a response for the previous request matches the indicated in the specification file in the responses section for that request.
  * This function is used in the interception of the response sent by the controller to the client that made the request.
+ * @param {object} req - req object of the request.
  * @param {object} res - res object of the request.
  * @param {object} oldSend - res object previous to interception.
  * @param {object} oasDoc - Specification file.
@@ -43,7 +44,7 @@ var controllers; // eslint-disable-line
  * @param {object} requestedSpecPath - Requested path, as shown in the specification file: /resource/{parameter}
  * @param {object} content - Data sent from controller to client.
  */
-function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content) {
+function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, content) {
   var code = res.statusCode;
   var msg = [];
   var data = content[0];
@@ -67,7 +68,43 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
       logger.warning(msg);
       oldSend.apply(res, content);
     }
-  } else if (responseCodeSection.hasOwnProperty('content') && responseCodeSection.content.hasOwnProperty('application/json')) {
+  } else if (responseCodeSection.hasOwnProperty('content')) {
+    var resultType;
+    var acceptTypes = [];
+    if (req.headers.accept) {
+      acceptTypes = req.headers.accept.split(',').map((type) => {
+        return type.trim();
+      });
+    }
+    acceptTypes.forEach((acceptType) => {
+      Object.keys(responseCodeSection.content).forEach((contentType) => {
+        if (!resultType) {
+          var acceptSplit = acceptType.split('/');
+          var contentSplit = contentType.split('/');
+          var firstMatch = acceptSplit[0] === contentSplit[0] || acceptSplit[0] === '*';
+          var secondMatch = acceptSplit[1] === contentSplit[1] || acceptSplit[1] === '*';
+          if (firstMatch && secondMatch) {
+            resultType = contentType;
+          }
+        }
+      });
+    });
+    if (!resultType && acceptTypes.length === 0) {
+      resultType = 'application/json';
+    } else if (!resultType && acceptTypes.length !== 0) {
+      newErr = {
+        message: "No acceptable content type.",
+        error: "No content type defined in this path satisfies the request Accept header",
+        content: acceptTypes
+      };
+      msg.push(newErr);
+      content[0] = JSON.stringify(msg);
+      logger.error(content[0]);
+      res.status(406);
+    } else {
+      res.header("Content-Type", resultType + ";charset=utf-8");
+    }
+    if (resultType === 'application/json') {
       //if there is no content property for the given response then there is nothing to validate.  
       var validSchema = responseCodeSection.content['application/json'].schema;
       logger.debug("Schema to use for validation: " + validSchema);
@@ -98,6 +135,9 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
     } else {
       oldSend.apply(res, content);
     }
+  } else {
+    oldSend.apply(res, content);
+  }
 }
 
 /**
@@ -163,7 +203,7 @@ module.exports = (controllers) => {
       arguments[0] = JSON.stringify(arguments[0]); // eslint-disable-line
       //Avoids res.send being executed twice: https://stackoverflow.com/questions/41489528/why-is-res-send-being-called-twice
       res.header("Content-Type", "application/json;charset=utf-8");
-      checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, arguments); // eslint-disable-line
+      checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, arguments); // eslint-disable-line
     }
     controller[opID].apply(undefined, [req, res, next]); // execute function by name
   }

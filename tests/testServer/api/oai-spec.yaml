@@ -382,6 +382,24 @@ paths:
               schema:
                 type: object
       x-router-controller: "petsController"
+  /contentTypeTest:
+    get:
+      summary: Auth config file
+      operationId: contentTypeTest
+      security: []
+      tags:
+        - pets
+      responses:
+        '200':
+          description: An auth config file
+          content:
+            application/json:
+              schema:
+                type: object
+            text/csv:
+              schema:
+                type: object
+      x-router-controller: "petsController"
   /commonParamTest:
     parameters:
         - name: testParam

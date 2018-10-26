@@ -358,11 +358,20 @@ exports.grantsFile = (req, res) => {
 };
 
 /**
- * Sends a sample response
+ * Sends a sample response for common parameter tests
  */
 exports.commonParamTest = (req, res) => {
   res.send({
     id: parseInt(req.query.testParam)
+  });
+};
+
+/**
+ * Sends a sample response for content type tests
+ */
+exports.contentTypeTest = (req, res) => {
+  res.send({
+    id: 123
   });
 };
 
