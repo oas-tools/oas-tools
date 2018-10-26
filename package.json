@@ -23,7 +23,7 @@
     "body-parser": "^1.18.3",
     "fs": "0.0.2",
     "js-yaml": "^3.11.0",
-    "json-schema-deref": "^0.4.4",
+    "json-schema-deref": "^0.5.0",
     "json-schema-deref-sync": "^0.7.0",
     "lodash-compat": "^3.10.2",
     "path": "^0.12.7",
