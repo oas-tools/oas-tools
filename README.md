@@ -45,14 +45,19 @@ __It is also possible to set configuration variables, these are them:__
 
 | Name	| Type	| Explanation / Values |
 | ------------- | ------------- | ------------- |
-|`logLevel` | `String` | Possible values from less to more level of verbosity are: error, warning, custom, info and debug. Default is info |
-|`logFile` | `String` | Logs file path |
-|`controllers` | `String` | Controllers location path |
-|`strict`	| `Boolean` | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default |
-|`router`	| `Boolean` | Indicates whether router middleware should be used. True by default |
-|`valdator` | `Boolean` | Indicates whether validator middleware should be used. True by default |
-|`docs` | `Boolean` | Indicates whether API docs (Swagger UI) should be available. True by default |
-|`ignoreUnknownFormats` | `Boolean`	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default |
+|`logLevel` | `String` | Possible values from less to more level of verbosity are: error, warning, custom, info and debug. Ignored if `customLogger` is used. Default is info. |
+|`logFile` | `String` | Logs file path. Ignored if `customLogger` is used. |
+|`customLogger` | `Object` | Replaces the included logger with the one specified here, so that you can reuse your own logger. `logLevel` and `logFile` will be ignored if this variable is used. Null by default. |
+|`controllers` | `String` | Controllers location path. |
+|`strict`	| `Boolean` | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default. |
+|`router`	| `Boolean` | Indicates whether router middleware should be used. True by default. |
+|`validator` | `Boolean` | Indicates whether validator middleware should be used. True by default. |
+|`docs` | `Boolean` | Indicates whether API docs (Swagger UI) should be available. True by default. |
+|`oasSecurity` | `Boolean` | Indicates whether security components defined in the spec file will be handled based on `securityFile` settings. `securityFile` will be ignored if this is set to false. False by default. |
+|`securityFile` | `Object`| Defines the settings that will be used to handle security. Ignored if `oasSecurity` is set to false. Null by default. |
+|`oasAuth` | `Boolean` | Indicates whether authorization will be automatically handled based on `grantsFile` settings. `grantsFile` will be ignored if this is set to false. False by default. |
+|`grantsFile` | `Object` | Defines the settings that will be use to handle automatic authorization. Ignored if `oasAuth` is set to false. Null by default. |
+|`ignoreUnknownFormats` | `Boolean`	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default. |
 
 For setting these variables you can use the function configure and pass to it either a JavaScript object or a yaml/json file containing such object.
 
@@ -61,10 +66,19 @@ var options_object = {
   controllers: '/path/to/controllers',
   loglevel: 'info',
   logfile: '/path/to/logs/file',
+  customLogger: null,
   strict: false,
   router: true,
   validator: true,
   docs: true,
+  oasSecurity: true,
+  securityFile: {
+    // your security settings
+  },
+  oasAuth: true,
+  grantsFile: {
+    // your authorization settings
+  },
   ignoreUnknownFormats: true
 };
 
