@@ -4,6 +4,7 @@
 [![dependencies Status](https://david-dm.org/isa-group/oas-tools/status.svg)](https://david-dm.org/isa-group/oas-tools)
 [![codecov](https://codecov.io/gh/isa-group/oas-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/isa-group/oas-tools)
 [![Known Vulnerabilities](https://snyk.io/test/github/isa-group/oas-tools/badge.svg?targetFile=package.json)](https://snyk.io/test/github/isa-group/oas-tools?targetFile=package.json)
+[![Greenkeeper badge](https://badges.greenkeeper.io/isa-group/oas-tools.svg)](https://greenkeeper.io/)
 
 [![NPM](https://nodei.co/npm/oas-tools.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/oas-tools/)
 
@@ -53,9 +54,9 @@ __It is also possible to set configuration variables, these are them:__
 |`router`	| `Boolean` | Indicates whether router middleware should be used. True by default. |
 |`validator` | `Boolean` | Indicates whether validator middleware should be used. True by default. |
 |`docs` | `Boolean` | Indicates whether API docs (Swagger UI) should be available. True by default. |
-|`oasSecurity` | `Boolean` | Indicates whether security components defined in the spec file will be handled based on `securityFile` settings. `securityFile` will be ignored if this is set to false. Refer to [oasSecurity](##2.-oasSecurity) for more information. False by default. |
+|`oasSecurity` | `Boolean` | Indicates whether security components defined in the spec file will be handled based on `securityFile` settings. `securityFile` will be ignored if this is set to false. Refer to [oasSecurity](##2-oassecurity) for more information. False by default. |
 |`securityFile` | `Object`| Defines the settings that will be used to handle security. Ignored if `oasSecurity` is set to false. Null by default. |
-|`oasAuth` | `Boolean` | Indicates whether authorization will be automatically handled based on `grantsFile` settings. `grantsFile` will be ignored if this is set to false. Refer to [oasAuth](##3.-oasAuth) for more information. False by default. |
+|`oasAuth` | `Boolean` | Indicates whether authorization will be automatically handled based on `grantsFile` settings. `grantsFile` will be ignored if this is set to false. Refer to [oasAuth](##3-oasauth) for more information. False by default. |
 |`grantsFile` | `Object` | Defines the settings that will be use to handle automatic authorization. Ignored if `oasAuth` is set to false. Null by default. |
 |`ignoreUnknownFormats` | `Boolean`	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default. |
 
@@ -178,12 +179,103 @@ Once you have done all this, leave the rest the way it is and just run your appl
 
 ## 2. oasSecurity
 
-This is some help.
+The configuration variables `oasSecurity` and `securityFile` allow the use of handlers to manage authentication. This works similarly to the swagger-security middleware found in [swagger-tools](https://github.com/apigee-127/swagger-tools). In fact, most of our code is reused from that same middleware. We have only adapted it to work with OAS 3.0 and made some changes to allow automatic validation of JWTs (more on that later).
+
+To start using oasSecurity, you should include some [security schemes](https://swagger.io/docs/specification/authentication/) in your specification file. For example, to define a scheme named Bearer that will use JWTs:
+
+```yaml
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+```
+
+Then you need to bind the different schemes to your endpoints. You can bind a scheme to the whole API, or to specific paths and methods. Refer to the previous link for more information.
+
+Now you need to define the handlers that will take care of the validation of the requests made to your API. To do this, simply create a function that takes the express req object, the security scheme, the value that will be validated, and a callback as inputs. Inside this function, perform all the checks and validations that you need, and finally call the callback function. Following the previous example, if we want to validate a JWT signed with the key 'secretKey' and check that the issuer is 'ISA Auth', we would define the following function:
+
+```javascript
+var jwt = require('jsonwebtoken');
+
+function verifyToken(req, secDef, token, next) {
+  const bearerRegex = /^Bearer\s/;
+  
+  if (token && bearerRegex.test(token) {
+    var newToken = token.replace(bearerRegex, '');
+    jwt.verify(newToken, 'secretKey',
+      {
+        issuer: 'ISA Auth'
+      },
+      (error, decoded) => {
+        if (error === null && decoded) {
+          return next();
+        }
+        return next(req.res.sendStatus(403));
+      }
+    );
+  } else {
+    return next(req.res.sendStatus(403));
+  }
+}
+```
+
+Finally, you must link the defined functions to their corresponding security schemes. In order to do that, you need to pass an object to the `securityFile` configuration variable containing these relationships. For example, to specify that our `verifyToken` function should be used to handle our previously defined Bearer scheme:
+
+```javascript
+oasTools.configure({
+  // other configuration variables
+  oasSecurity: true,
+  securityFile: {
+    Bearer: verifyToken
+  }
+});
+```
+
+After following these steps, your validating function will be executed each time a request to any of the endpoints you applied the corresponding security scheme to is made.
+
+Moreover, since JWT ([JSON Web Token](https://jwt.io/)) validations are almost always the same, oas-tools can do them automatically, that is, you just need to specify some simple parameters instead of a whole function. However, only the issuer, the expiration date and the key are validated, so if you want to check something else, you will need to create a function.
+
+To automatically validate a JWT, simply specify the issuer, the supported algorithms (optional, defaults to only HS256) and the key in the `securityFile` configuration variable. In our previous example, this would be:
+
+```javascript
+oasTools.configure({
+  // other configuration variables
+  oasSecurity: true,
+  securityFile: {
+    Bearer: {
+      issuer: 'ISA Auth',
+      algorithms: ['HS256'],
+      key: 'secretKey'
+  }
+});
+```
+
+You can also pass a file path (absolute or relative) or a URL containing the JSON representation of an object containing these parameters. For example, we have this grants.json file:
+```json
+{
+  "issuer": "ISA Auth",
+  "algorithms": ["HS256"],
+  "key": "secretKey"
+}
+```
+
+Our corresponding configuration would be as follows:
+
+```javascript
+oasTools.configure({
+  // other configuration variables
+  oasSecurity: true,
+  securityFile: {
+    Bearer: 'path/to/grants.json'
+  }
+});
+```
 
 ## 3. oasAuth
 
-This is more help.
-
+This is a placeholder text.
 
 ## License
 
@@ -191,7 +283,7 @@ Copyright 2018, [ISA Group](http://www.isa.us.es), [University of Sevilla](http:
 
 For technical inquiry please contact to [engineering team](./extra/team.md).
 
-[![ISA Group](http://www.isa.us.es/2.0/assets/img/theme/logo2.png)](http://www.isa.us.es) [![Greenkeeper badge](https://badges.greenkeeper.io/isa-group/oas-tools.svg)](https://greenkeeper.io/)
+[![ISA Group](http://www.isa.us.es/2.0/assets/img/theme/logo2.png)](http://www.isa.us.es)
 
 Licensed under the **Apache License, Version 2.0** (the "[License](./LICENSE)"); you may not use this file except in compliance with the License. You may obtain a copy of the License at apache.org/licenses/LICENSE-2.0
 
