@@ -53,9 +53,9 @@ __It is also possible to set configuration variables, these are them:__
 |`router`	| `Boolean` | Indicates whether router middleware should be used. True by default. |
 |`validator` | `Boolean` | Indicates whether validator middleware should be used. True by default. |
 |`docs` | `Boolean` | Indicates whether API docs (Swagger UI) should be available. True by default. |
-|`oasSecurity` | `Boolean` | Indicates whether security components defined in the spec file will be handled based on `securityFile` settings. `securityFile` will be ignored if this is set to false. False by default. |
+|`oasSecurity` | `Boolean` | Indicates whether security components defined in the spec file will be handled based on `securityFile` settings. `securityFile` will be ignored if this is set to false. Refer to [oasSecurity](##2.-oasSecurity) for more information. False by default. |
 |`securityFile` | `Object`| Defines the settings that will be used to handle security. Ignored if `oasSecurity` is set to false. Null by default. |
-|`oasAuth` | `Boolean` | Indicates whether authorization will be automatically handled based on `grantsFile` settings. `grantsFile` will be ignored if this is set to false. False by default. |
+|`oasAuth` | `Boolean` | Indicates whether authorization will be automatically handled based on `grantsFile` settings. `grantsFile` will be ignored if this is set to false. Refer to [oasAuth](##3.-oasAuth) for more information. False by default. |
 |`grantsFile` | `Object` | Defines the settings that will be use to handle automatic authorization. Ignored if `oasAuth` is set to false. Null by default. |
 |`ignoreUnknownFormats` | `Boolean`	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default. |
 
@@ -66,7 +66,7 @@ var options_object = {
   controllers: '/path/to/controllers',
   loglevel: 'info',
   logfile: '/path/to/logs/file',
-  customLogger: null,
+  // customLogger: myLogger,
   strict: false,
   router: true,
   validator: true,
@@ -98,7 +98,7 @@ oasTools.initialize(oasDoc, app, function() {
 });
 ```
 
-### 1.1. Migrate from swagger-tools to oas-tools
+### 1. Migrate from swagger-tools to oas-tools
 
 Oas-tools works with Express while swagger-tools works with Connect, therefore in order to use your swagger-codegen generated NodeJS server with oas-tools you have to leave connect behind and use express and an openapi version 3 file. This can be easily achievable by following just 4 simple steps:
 
@@ -175,6 +175,14 @@ post:
 ```
 
 Once you have done all this, leave the rest the way it is and just run your appliaction with ‘node index.js’ or any other command you have specified at your package.json for running the application.
+
+## 2. oasSecurity
+
+This is some help.
+
+## 3. oasAuth
+
+This is more help.
 
 
 ## License
