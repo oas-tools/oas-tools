@@ -289,7 +289,7 @@ components:
         key: secretKey
 ```
 
-Similarly to the `securityFile` variable, you could specify a path or a URL with a JSON representation of an object with these parameters instead. Remember that even if 'x-bearer-config' is defined in a security scheme, it will be ignored if the `oasSecurity` variable is set to false. Moreover, if a security scheme has been configured in the `securityFile` variable, that will take preference over the configuration included in 'x-bearer-config'.
+Similarly to the `securityFile` variable, you could specify a path or a URL with a JSON representation of an object with these parameters instead. Remember that even if 'x-bearer-config' is defined in a security scheme, it will be ignored if the `oasSecurity` variable is set to false. Moreover, if a security scheme has been configured in the `securityFile` variable, that configuration will take preference over the one included in 'x-bearer-config'.
 
 ## 3. oasAuth
 
