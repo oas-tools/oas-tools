@@ -233,11 +233,11 @@ oasTools.configure({
 });
 ```
 
-After following these steps, your validating function will be executed each time a request to any of the endpoints you applied the corresponding security scheme to is made.
+After following these steps, your validating function will be executed each time a request to any of the endpoints you applied the corresponding security scheme to is made. Please note that any schemes without a linked function will be ignored, except for the ones based on JWTs where configuration is included in the specification file (explained later).
 
 Moreover, since JWT ([JSON Web Token](https://jwt.io/)) validations are almost always the same, oas-tools can do them automatically, that is, you just need to specify some simple parameters instead of a whole function. However, only the issuer, the expiration date and the key are validated, so if you want to check something else, you will need to create a function.
 
-To automatically validate a JWT, simply specify the issuer, the supported algorithms (optional, defaults to only HS256) and the key in the `securityFile` configuration variable. In our previous example, this would be:
+To automatically validate a JWT, first ensure that your security scheme defines that its type is 'http', its scheme is 'bearer' and its bearerFormat is 'JWT'. Then, simply specify the issuer, the supported algorithms (optional, defaults to only HS256) and the key in the `securityFile` configuration variable. In our previous example, this would be:
 
 ```javascript
 oasTools.configure({
@@ -272,6 +272,24 @@ oasTools.configure({
   }
 });
 ```
+
+You can also include these parameters directly in your specification file. Simply add an additional attribute in your security scheme definition called 'x-bearer-config' containing the parameters to be used during validation. For example:
+
+```yaml
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearer-config:
+        issuer: ISA Auth
+        algorithms:
+          - HS256
+        key: secretKey
+```
+
+Similarly to the `securityFile` variable, you could specify a path or a URL with a JSON representation of an object with these parameters instead. Remember that even if 'x-bearer-config' is defined in a security scheme, it will be ignored if the `oasSecurity` variable is set to false. Moreover, if a security scheme has been configured in the `securityFile` variable, that will take preference over the configuration included in 'x-bearer-config'.
 
 ## 3. oasAuth
 
