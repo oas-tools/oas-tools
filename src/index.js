@@ -222,6 +222,10 @@ function extendGrants(specDoc, grantsFile) {
   return newGrants;
 }
 
+function isJWTScheme(secDef) {
+  return secDef.type === 'http' && secDef.scheme === 'bearer' && secDef.bearerFormat === 'JWT';
+}
+
 function initializeSecurityAndAuth(specDoc) {
   if (specDoc.components && specDoc.components.securitySchemes) {
     if (!config.securityFile) {
@@ -232,7 +236,7 @@ function initializeSecurityAndAuth(specDoc) {
     }
     Object.keys(specDoc.components.securitySchemes).forEach((secName) => {
       var secDef = specDoc.components.securitySchemes[secName];
-      if (secDef.type === 'http' && secDef.scheme === 'bearer' && secDef.bearerFormat === 'JWT') {
+      if (isJWTScheme(secDef)) {
         if (secDef['x-bearer-config'] && !config.securityFile[secName]) {
           config.securityFile[secName] = secDef['x-bearer-config'];
         }
@@ -242,7 +246,7 @@ function initializeSecurityAndAuth(specDoc) {
       }
     });
     Object.keys(config.securityFile).forEach((secName) => {
-      if (typeof config.securityFile[secName] === 'string') {
+      if (typeof config.securityFile[secName] === 'string' && isJWTScheme(specDoc.components.securitySchemes[secName])) {
         if (config.securityFile[secName].substr(0, 4) === 'http') {
           request(config.securityFile[secName], (err, res, body) => {
             config.securityFile[secName] = JSON.parse(body);
@@ -255,7 +259,7 @@ function initializeSecurityAndAuth(specDoc) {
       }
     });
     Object.keys(config.grantsFile).forEach((secName) => {
-      if (typeof config.grantsFile[secName] === 'string') {
+      if (typeof config.grantsFile[secName] === 'string' && isJWTScheme(specDoc.components.securitySchemes[secName])) {
         if (config.grantsFile[secName].substr(0, 4) === 'http') {
           request(config.grantsFile[secName], (err, res, body) => {
             config.grantsFile[secName] = extendGrants(specDoc, JSON.parse(body));
