@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 var exports; // eslint-disable-line
 var path = require('path');
 var ZSchema = require("z-schema");
+var MIMEtype = require('whatwg-mimetype');
 var config = require('../configurations'),
   logger = config.logger;
 var validator = new ZSchema({
@@ -79,18 +80,18 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
     acceptTypes.forEach((acceptType) => {
       Object.keys(responseCodeSection.content).forEach((contentType) => {
         if (!resultType) {
-          var acceptSplit = acceptType.split('/');
-          var contentSplit = contentType.split('/');
-          var firstMatch = acceptSplit[0] === contentSplit[0] || acceptSplit[0] === '*';
-          var secondMatch = acceptSplit[1] === contentSplit[1] || acceptSplit[1] === '*';
+          var mimeAccept = new MIMEtype(acceptType);
+          var mimeContent = new MIMEtype(contentType);
+          var firstMatch = mimeAccept.type === mimeContent.type || mimeAccept.type === '*';
+          var secondMatch = mimeAccept.subtype === mimeContent.subtype || mimeAccept.subtype === '*';
           if (firstMatch && secondMatch) {
-            resultType = contentType;
+            resultType = mimeContent;
           }
         }
       });
     });
     if (!resultType && acceptTypes.length === 0) {
-      resultType = 'application/json';
+      resultType = new MIMEtype('application/json');
     } else if (!resultType && acceptTypes.length !== 0) {
       newErr = {
         message: "No acceptable content type.",
@@ -102,9 +103,9 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
       logger.error(content[0]);
       res.status(406);
     } else {
-      res.header("Content-Type", resultType + ";charset=utf-8");
+      res.header("Content-Type", resultType.essence + ";charset=utf-8");
     }
-    if (resultType === 'application/json') {
+    if (resultType && resultType.essence === 'application/json') {
       //if there is no content property for the given response then there is nothing to validate.  
       var validSchema = responseCodeSection.content['application/json'].schema;
       logger.debug("Schema to use for validation: " + validSchema);

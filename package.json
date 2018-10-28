@@ -32,6 +32,7 @@
     "path": "^0.12.7",
     "request": "^2.88.0",
     "validator": "^10.4.0",
+    "whatwg-mimetype": "^2.2.0",
     "winston": "^3.0.0",
     "z-schema": "^3.19.1"
   },
