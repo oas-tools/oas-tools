@@ -293,7 +293,92 @@ Similarly to the `securityFile` variable, you could specify a path or a URL with
 
 ## 3. oasAuth
 
-This is a placeholder text.
+When using JWTs in your API, oas-tools also allows you to automatically manage authorization to a certain degree. This is achieved through simple configuration files, and using the modules [accesscontrol](https://github.com/onury/accesscontrol) and [accesscontrol-middleware](https://github.com/pawangspandey/accesscontrol-middleware).
+
+First, create a security scheme which uses JWTs in your specification file, ensuring that the type is 'http', the scheme is 'bearer' and the bearerFormat is 'JWT':
+
+```yaml
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+```
+
+Then, you need to create an object containing the access restrictions. This object is based on the one used in the module 'accesscontrol', so refer to its GitHub page if you need more information. We will create an example and further explain what it defines below:
+
+```javascript
+var grants = {
+  user: {
+    "$extend": ["anonymous"],
+    "pets/cats": {
+      "update:own": ["*"]
+    },
+    "users": {
+      "read:any": ["*"]
+    }
+  },
+  anonymous: {
+    "pets/cats": {
+      "read:any": ["*"]
+    }
+  }
+};
+```
+
+In this object, we have defined two roles: 'user' and 'anonymous'. 'anonymous' can read any cat in the system. 'user' extends 'anonymous', so it inherits the same access restrictions from its parent. Moreover, a 'user' can update its own cats, and it can also read any user in the system. Now, we will take a closer look at the syntax to see what everything means:
+
+- The '$extend' attribute is a list, that means that a role can extend multiple roles.
+- 'pets/cats' means that the defined restriction will be applied to every endpoint that includes 'pets' and 'cats' in its path, in that same order. For example, 'api/pets/{petstoreId}/cats/{catId}' or simply 'pets/cats' will count.
+- 'update' means that the restriction applies to PUT requests. Similarly, you can use 'read' for GET requests, 'create' for POST, and 'delete' for DELETE.
+- 'own' specifies that the role can only access one cat, based on a parameter that we will explain later. 'any' means that the role can access any cat in the whole API.
+- '\["\*"\]' means that the role can access every resource attribute. oas-tools does not use this, but since you can reuse this restrictions in your controllers along with the 'accesscontrol' module, it may be interesting to take it into account. For example, '\["id", "breed"\]' would mean that the role can only access these two attributes from a cat.
+
+To use this grants object in your API, simply provide it while configuring oas-tools, linking it to a JWT scheme definition:
+
+```javascript
+oasTools.configure({
+  // other configuration variables
+  oasAuth: true,
+  grantsFile: {
+    Bearer: grants
+  }
+});
+```
+
+You can also pass a file path (absolute or relative) or a URL containing a JSON representation of your access restrictions. Additionally, you can specify the restrictions directly in the security scheme definition in your specification file, including the 'x-acl-config' attribute:
+
+```yaml
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-acl-config:
+        anonymous:
+          pets:
+            "read:any":
+              - "*"
+```
+
+You can use a file path or a URL here too. Please note that even if you define 'x-acl-config' here, it will be ignored if the `oasAuth` configuration variable is set to false. Additionally, if a scheme was already linked to a grants object in the `grantsFile` variable, that configuration will take precedence over the one in 'x-acl-config'.
+
+The role of a client will be taken from the provided JWT. This JWT should contain an attribute called 'role'. If this attribute is not defined, oas-tools will assume the default role of 'anonymous'. Moreover, the parameters used to check ownership should also be present in the JWT, and must be named in a specific way. For example, if a request is made to 'api/pets/{petstoreId}/cats/{catId}' and you want to check 'catId' for ownership, there must be a 'catId' attribute in the JWT. If it is not provided and no 'any' restriction was defined, the client will not have access to this resource. However, if you want to match the path 'catId' parameter to another attribute from the JWT, you can do that in the specification file adding a 'x-acl-binding' attribute to the corresponding parameter:
+
+```yaml
+paths:
+  api/pets/{petstoreId}/cats/{catId}:
+    put:
+      parameters:
+        - name: catId
+          in: path
+          x-acl-binding: customAttribute
+    # ...
+```
+
+This example will look for a 'customAttribute' attribute in the JWT.
 
 ## License
 
