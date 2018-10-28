@@ -363,7 +363,7 @@ components:
               - "*"
 ```
 
-You can use a file path or a URL here too.
+You can use a file path or a URL here too. Please note that even if you define 'x-acl-config' here, it will be ignored if the `oasAuth` configuration variable is set to false. Additionally, if a scheme was already linked to a grants object in the `grantsFile` variable, that configuration will take precedence over the one in 'x-acl-config'.
 
 The role of a client will be taken from the provided JWT. This JWT should contain an attribute called 'role'. If this attribute is not defined, oas-tools will assume the default role of 'anonymous'. Moreover, the parameters used to check ownership should also be present in the JWT, and must be named in a specific way. For example, if a request is made to 'api/pets/{petstoreId}/cats/{catId}' and you want to check 'catId' for ownership, there must be a 'catId' attribute in the JWT. If it is not provided and no 'any' restriction was defined, the client will not have access to this resource. However, if you want to match the path 'catId' parameter to another attribute from the JWT, you can do that in the specification file adding a 'x-acl-binding' attribute to the corresponding parameter:
 
