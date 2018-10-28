@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 var exports; // eslint-disable-line
 var path = require('path');
 var ZSchema = require("z-schema");
+var MIMEtype = require('whatwg-mimetype');
 var config = require('../configurations'),
   logger = config.logger;
 var validator = new ZSchema({
@@ -36,6 +37,7 @@ var controllers; // eslint-disable-line
 /**
  * Checks if the data sent as a response for the previous request matches the indicated in the specification file in the responses section for that request.
  * This function is used in the interception of the response sent by the controller to the client that made the request.
+ * @param {object} req - req object of the request.
  * @param {object} res - res object of the request.
  * @param {object} oldSend - res object previous to interception.
  * @param {object} oasDoc - Specification file.
@@ -43,7 +45,7 @@ var controllers; // eslint-disable-line
  * @param {object} requestedSpecPath - Requested path, as shown in the specification file: /resource/{parameter}
  * @param {object} content - Data sent from controller to client.
  */
-function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content) {
+function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, content) {
   var code = res.statusCode;
   var msg = [];
   var data = content[0];
@@ -67,7 +69,43 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
       logger.warning(msg);
       oldSend.apply(res, content);
     }
-  } else if (responseCodeSection.hasOwnProperty('content') && responseCodeSection.content.hasOwnProperty('application/json')) {
+  } else if (responseCodeSection.hasOwnProperty('content')) {
+    var resultType;
+    var acceptTypes = [];
+    if (req.headers.accept) {
+      acceptTypes = req.headers.accept.split(',').map((type) => {
+        return type.trim();
+      });
+    }
+    acceptTypes.forEach((acceptType) => {
+      Object.keys(responseCodeSection.content).forEach((contentType) => {
+        if (!resultType) {
+          var mimeAccept = new MIMEtype(acceptType);
+          var mimeContent = new MIMEtype(contentType);
+          var firstMatch = mimeAccept.type === mimeContent.type || mimeAccept.type === '*';
+          var secondMatch = mimeAccept.subtype === mimeContent.subtype || mimeAccept.subtype === '*';
+          if (firstMatch && secondMatch) {
+            resultType = mimeContent;
+          }
+        }
+      });
+    });
+    if (!resultType && acceptTypes.length === 0) {
+      resultType = new MIMEtype('application/json');
+    } else if (!resultType && acceptTypes.length !== 0) {
+      newErr = {
+        message: "No acceptable content type.",
+        error: "No content type defined in this path satisfies the request Accept header",
+        content: acceptTypes
+      };
+      msg.push(newErr);
+      content[0] = JSON.stringify(msg);
+      logger.error(content[0]);
+      res.status(406);
+    } else {
+      res.header("Content-Type", resultType.essence + ";charset=utf-8");
+    }
+    if (resultType && resultType.essence === 'application/json') {
       //if there is no content property for the given response then there is nothing to validate.  
       var validSchema = responseCodeSection.content['application/json'].schema;
       logger.debug("Schema to use for validation: " + validSchema);
@@ -98,6 +136,9 @@ function checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, content)
     } else {
       oldSend.apply(res, content);
     }
+  } else {
+    oldSend.apply(res, content);
+  }
 }
 
 /**
@@ -163,7 +204,7 @@ module.exports = (controllers) => {
       arguments[0] = JSON.stringify(arguments[0]); // eslint-disable-line
       //Avoids res.send being executed twice: https://stackoverflow.com/questions/41489528/why-is-res-send-being-called-twice
       res.header("Content-Type", "application/json;charset=utf-8");
-      checkResponse(res, oldSend, oasDoc, method, requestedSpecPath, arguments); // eslint-disable-line
+      checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, arguments); // eslint-disable-line
     }
     controller[opID].apply(undefined, [req, res, next]); // execute function by name
   }

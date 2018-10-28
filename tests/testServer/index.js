@@ -13,6 +13,7 @@ app.use(bodyParser.json({
 var oasTools = require('../../src/index.js');
 var jsyaml = require('js-yaml');
 var serverPort = 8080;
+var logger = require('./logger');
 
 var spec = fs.readFileSync(path.join(__dirname, 'api/oai-spec.yaml'), 'utf8'); //this one works
 var oasDoc = jsyaml.safeLoad(spec);
@@ -20,10 +21,19 @@ var oasDoc = jsyaml.safeLoad(spec);
 var options_object = {
   controllers: path.join(__dirname, './controllers'),
   //loglevel: 'debug',
-  loglevel: 'none',
+  //loglevel: 'none',
+  customLogger: logger,
   strict: true,
   router: true,
   validator: true,
+  oasSecurity: true,
+  securityFile: {
+    SecondBearer: './tests/testServer/security.json'
+  },
+  oasAuth: true,
+  grantsFile: {
+    SecondBearer: './tests/testServer/grants.json'
+  },
   ignoreUnknownFormats: true
 };
 

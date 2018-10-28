@@ -1,8 +1,13 @@
 #Should I use here also 'production' and 'development' ?
 loglevel: debug
 logfile: './logs/dev-logs.log'
+customLogger: null
 strict: false
 router: true
 validator: true
 docs: true
+oasSecurity: false
+securityFile: null
+oasAuth: false
+grantsFile: null
 controllers: 'C:\Users\ipelu\OneDrive\Documentos\GitHub\project-oas-tools\example\controllers'

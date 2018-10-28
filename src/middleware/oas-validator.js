@@ -54,6 +54,24 @@ function locationFormat(inProperty) { //TODO: Possible 'in' values: path, query,
   //return (inProperty == "path" ? "params" : inProperty); //TODO: if only 'path' changes then this is the solution!
 }
 
+ /**
+  * Filters path parameters so that method parameters can override them
+  * @param {*} methodParameters - Method-specific parameters
+  * @param {*} pathParameters - Common parameters for every path method
+  */
+function filterParams(methodParameters, pathParameters) {
+  var res = methodParameters;
+  var paramNames = methodParameters.map((param) => {
+    return param.name;
+  });
+  pathParameters.forEach((pathParam) => {
+    if (!paramNames.includes(pathParam.name)) {
+      res.push(pathParam);
+    }
+  });
+  return res;
+}
+
 /**
  * Checks if the data provided in the request is valid acording to what is specified in the oas specification file.
  * @param {object} paths - Paths section of the oasDoc file.
@@ -61,7 +79,7 @@ function locationFormat(inProperty) { //TODO: Possible 'in' values: path, query,
  * @param {string} method - Method requested by the client.
  * @param {string} req - The whole req object from the client request.
  */
-function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
+function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { // eslint-disable-line
   var paths = oasDoc.paths;
   var keepGoing = true;
   //var msg = "";
@@ -95,9 +113,12 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
     }
   }
 
-  if (paths[requestedSpecPath][method].hasOwnProperty('parameters')) {
+  if (paths[requestedSpecPath][method].hasOwnProperty('parameters') || paths[requestedSpecPath].hasOwnProperty('parameters')) {
 
-    var params = paths[requestedSpecPath][method].parameters;
+    var methodParams = paths[requestedSpecPath][method].parameters || [];
+    var pathParams = paths[requestedSpecPath].parameters || [];
+    var params = filterParams(methodParams, pathParams);
+
 
     for (var i = 0; i < params.length; i++) {
 
@@ -356,7 +377,9 @@ module.exports = (oasDoc) => {
       params: {}
     }
 
-    var parameters = oasDoc.paths[requestedSpecPath][method].parameters;
+    var methodParameters = oasDoc.paths[requestedSpecPath][method].parameters || [];
+    var pathParameters = oasDoc.paths[requestedSpecPath].parameters || [];
+    var parameters = filterParams(methodParameters, pathParameters);
     if (parameters != undefined) {
       parameters.forEach((parameter) => { // TODO: para POST y PUT el objeto se define en 'requestBody' y no en 'parameters'
         var pType = getParameterType(parameter);

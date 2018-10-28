@@ -4,6 +4,7 @@
 [![dependencies Status](https://david-dm.org/isa-group/oas-tools/status.svg)](https://david-dm.org/isa-group/oas-tools)
 [![codecov](https://codecov.io/gh/isa-group/oas-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/isa-group/oas-tools)
 [![Known Vulnerabilities](https://snyk.io/test/github/isa-group/oas-tools/badge.svg?targetFile=package.json)](https://snyk.io/test/github/isa-group/oas-tools?targetFile=package.json)
+[![Greenkeeper badge](https://badges.greenkeeper.io/isa-group/oas-tools.svg)](https://greenkeeper.io/)
 
 [![NPM](https://nodei.co/npm/oas-tools.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/oas-tools/)
 
@@ -45,14 +46,19 @@ __It is also possible to set configuration variables, these are them:__
 
 | Name	| Type	| Explanation / Values |
 | ------------- | ------------- | ------------- |
-|`logLevel` | `String` | Possible values from less to more level of verbosity are: error, warning, custom, info and debug. Default is info |
-|`logFile` | `String` | Logs file path |
-|`controllers` | `String` | Controllers location path |
-|`strict`	| `Boolean` | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default |
-|`router`	| `Boolean` | Indicates whether router middleware should be used. True by default |
-|`valdator` | `Boolean` | Indicates whether validator middleware should be used. True by default |
-|`docs` | `Boolean` | Indicates whether API docs (Swagger UI) should be available. True by default |
-|`ignoreUnknownFormats` | `Boolean`	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default |
+|`logLevel` | `String` | Possible values from less to more level of verbosity are: error, warning, custom, info and debug. Ignored if `customLogger` is used. Default is info. |
+|`logFile` | `String` | Logs file path. Ignored if `customLogger` is used. |
+|`customLogger` | `Object` | Replaces the included logger with the one specified here, so that you can reuse your own logger. `logLevel` and `logFile` will be ignored if this variable is used. Null by default. |
+|`controllers` | `String` | Controllers location path. |
+|`strict`	| `Boolean` | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default. |
+|`router`	| `Boolean` | Indicates whether router middleware should be used. True by default. |
+|`validator` | `Boolean` | Indicates whether validator middleware should be used. True by default. |
+|`docs` | `Boolean` | Indicates whether API docs (Swagger UI) should be available. True by default. |
+|`oasSecurity` | `Boolean` | Indicates whether security components defined in the spec file will be handled based on `securityFile` settings. `securityFile` will be ignored if this is set to false. Refer to [oasSecurity](#2-oassecurity) for more information. False by default. |
+|`securityFile` | `Object`| Defines the settings that will be used to handle security. Ignored if `oasSecurity` is set to false. Null by default. |
+|`oasAuth` | `Boolean` | Indicates whether authorization will be automatically handled based on `grantsFile` settings. `grantsFile` will be ignored if this is set to false. Refer to [oasAuth](#3-oasauth) for more information. False by default. |
+|`grantsFile` | `Object` | Defines the settings that will be use to handle automatic authorization. Ignored if `oasAuth` is set to false. Null by default. |
+|`ignoreUnknownFormats` | `Boolean`	| Indicates whether z-schema validator must ignore unknown formats when validating requests and responses. True by default. |
 
 For setting these variables you can use the function configure and pass to it either a JavaScript object or a yaml/json file containing such object.
 
@@ -61,10 +67,19 @@ var options_object = {
   controllers: '/path/to/controllers',
   loglevel: 'info',
   logfile: '/path/to/logs/file',
+  // customLogger: myLogger,
   strict: false,
   router: true,
   validator: true,
   docs: true,
+  oasSecurity: true,
+  securityFile: {
+    // your security settings
+  },
+  oasAuth: true,
+  grantsFile: {
+    // your authorization settings
+  },
   ignoreUnknownFormats: true
 };
 
@@ -84,7 +99,7 @@ oasTools.initialize(oasDoc, app, function() {
 });
 ```
 
-### 1.1. Migrate from swagger-tools to oas-tools
+### 1. Migrate from swagger-tools to oas-tools
 
 Oas-tools works with Express while swagger-tools works with Connect, therefore in order to use your swagger-codegen generated NodeJS server with oas-tools you have to leave connect behind and use express and an openapi version 3 file. This can be easily achievable by following just 4 simple steps:
 
@@ -162,6 +177,208 @@ post:
 
 Once you have done all this, leave the rest the way it is and just run your appliaction with ‘node index.js’ or any other command you have specified at your package.json for running the application.
 
+## 2. oasSecurity
+
+The configuration variables `oasSecurity` and `securityFile` allow the use of handlers to manage authentication. This works similarly to the swagger-security middleware found in [swagger-tools](https://github.com/apigee-127/swagger-tools). In fact, most of our code is reused from that same middleware. We have only adapted it to work with OAS 3.0 and made some changes to allow automatic validation of JWTs (more on that later).
+
+To start using oasSecurity, you should include some [security schemes](https://swagger.io/docs/specification/authentication/) in your specification file. For example, to define a scheme named Bearer that will use JWTs:
+
+```yaml
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+```
+
+Then you need to bind the different schemes to your endpoints. You can bind a scheme to the whole API, or to specific paths and methods. Refer to the previous link for more information.
+
+Now you need to define the handlers that will take care of the validation of the requests made to your API. To do this, simply create a function that takes the express req object, the security scheme, the value that will be validated, and a callback as inputs. Inside this function, perform all the checks and validations that you need, and finally call the callback function. Following the previous example, if we want to validate a JWT signed with the key 'secretKey' and check that the issuer is 'ISA Auth', we would define the following function:
+
+```javascript
+var jwt = require('jsonwebtoken');
+
+function verifyToken(req, secDef, token, next) {
+  const bearerRegex = /^Bearer\s/;
+  
+  if (token && bearerRegex.test(token) {
+    var newToken = token.replace(bearerRegex, '');
+    jwt.verify(newToken, 'secretKey',
+      {
+        issuer: 'ISA Auth'
+      },
+      (error, decoded) => {
+        if (error === null && decoded) {
+          return next();
+        }
+        return next(req.res.sendStatus(403));
+      }
+    );
+  } else {
+    return next(req.res.sendStatus(403));
+  }
+}
+```
+
+Finally, you must link the defined functions to their corresponding security schemes. In order to do that, you need to pass an object to the `securityFile` configuration variable containing these relationships. For example, to specify that our `verifyToken` function should be used to handle our previously defined Bearer scheme:
+
+```javascript
+oasTools.configure({
+  // other configuration variables
+  oasSecurity: true,
+  securityFile: {
+    Bearer: verifyToken
+  }
+});
+```
+
+After following these steps, your validating function will be executed each time a request to any of the endpoints you applied the corresponding security scheme to is made. Please note that any schemes without a linked function will be ignored, except for the ones based on JWTs where configuration is included in the specification file (explained later).
+
+Moreover, since JWT ([JSON Web Token](https://jwt.io/)) validations are almost always the same, oas-tools can do them automatically, that is, you just need to specify some simple parameters instead of a whole function. However, only the issuer, the expiration date and the key are validated, so if you want to check something else, you will need to create a function.
+
+To automatically validate a JWT, first ensure that your security scheme defines that its type is 'http', its scheme is 'bearer' and its bearerFormat is 'JWT'. Then, simply specify the issuer, the supported algorithms (optional, defaults to only HS256) and the key in the `securityFile` configuration variable. In our previous example, this would be:
+
+```javascript
+oasTools.configure({
+  // other configuration variables
+  oasSecurity: true,
+  securityFile: {
+    Bearer: {
+      issuer: 'ISA Auth',
+      algorithms: ['HS256'],
+      key: 'secretKey'
+  }
+});
+```
+
+You can also pass a file path (absolute or relative) or a URL containing the JSON representation of an object containing these parameters. For example, we have this grants.json file:
+```json
+{
+  "issuer": "ISA Auth",
+  "algorithms": ["HS256"],
+  "key": "secretKey"
+}
+```
+
+Our corresponding configuration would be as follows:
+
+```javascript
+oasTools.configure({
+  // other configuration variables
+  oasSecurity: true,
+  securityFile: {
+    Bearer: 'path/to/grants.json'
+  }
+});
+```
+
+You can also include these parameters directly in your specification file. Simply add an additional attribute in your security scheme definition called 'x-bearer-config' containing the parameters to be used during validation. For example:
+
+```yaml
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearer-config:
+        issuer: ISA Auth
+        algorithms:
+          - HS256
+        key: secretKey
+```
+
+Similarly to the `securityFile` variable, you could specify a path or a URL with a JSON representation of an object with these parameters instead. Remember that even if 'x-bearer-config' is defined in a security scheme, it will be ignored if the `oasSecurity` variable is set to false. Moreover, if a security scheme has been configured in the `securityFile` variable, that configuration will take preference over the one included in 'x-bearer-config'.
+
+## 3. oasAuth
+
+When using JWTs in your API, oas-tools also allows you to automatically manage authorization to a certain degree. This is achieved through simple configuration files, and using the modules [accesscontrol](https://github.com/onury/accesscontrol) and [accesscontrol-middleware](https://github.com/pawangspandey/accesscontrol-middleware).
+
+First, create a security scheme which uses JWTs in your specification file, ensuring that the type is 'http', the scheme is 'bearer' and the bearerFormat is 'JWT':
+
+```yaml
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+```
+
+Then, you need to create an object containing the access restrictions. This object is based on the one used in the module 'accesscontrol', so refer to its GitHub page if you need more information. We will create an example and further explain what it defines below:
+
+```javascript
+var grants = {
+  user: {
+    "$extend": ["anonymous"],
+    "pets/cats": {
+      "update:own": ["*"]
+    },
+    "users": {
+      "read:any": ["*"]
+    }
+  },
+  anonymous: {
+    "pets/cats": {
+      "read:any": ["*"]
+    }
+  }
+};
+```
+
+In this object, we have defined two roles: 'user' and 'anonymous'. 'anonymous' can read any cat in the system. 'user' extends 'anonymous', so it inherits the same access restrictions from its parent. Moreover, a 'user' can update its own cats, and it can also read any user in the system. Now, we will take a closer look at the syntax to see what everything means:
+
+- The '$extend' attribute is a list, that means that a role can extend multiple roles.
+- 'pets/cats' means that the defined restriction will be applied to every endpoint that includes 'pets' and 'cats' in its path, in that same order. For example, 'api/pets/{petstoreId}/cats/{catId}' or simply 'pets/cats' will count.
+- 'update' means that the restriction applies to PUT requests. Similarly, you can use 'read' for GET requests, 'create' for POST, and 'delete' for DELETE.
+- 'own' specifies that the role can only access one cat, based on a parameter that we will explain later. 'any' means that the role can access any cat in the whole API.
+- '\["\*"\]' means that the role can access every resource attribute. oas-tools does not use this, but since you can reuse this restrictions in your controllers along with the 'accesscontrol' module, it may be interesting to take it into account. For example, '\["id", "breed"\]' would mean that the role can only access these two attributes from a cat.
+
+To use this grants object in your API, simply provide it while configuring oas-tools, linking it to a JWT scheme definition:
+
+```javascript
+oasTools.configure({
+  // other configuration variables
+  oasAuth: true,
+  grantsFile: {
+    Bearer: grants
+  }
+});
+```
+
+You can also pass a file path (absolute or relative) or a URL containing a JSON representation of your access restrictions. Additionally, you can specify the restrictions directly in the security scheme definition in your specification file, including the 'x-acl-config' attribute:
+
+```yaml
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-acl-config:
+        anonymous:
+          pets:
+            "read:any":
+              - "*"
+```
+
+You can use a file path or a URL here too. Please note that even if you define 'x-acl-config' here, it will be ignored if the `oasAuth` configuration variable is set to false. Additionally, if a scheme was already linked to a grants object in the `grantsFile` variable, that configuration will take precedence over the one in 'x-acl-config'.
+
+The role of a client will be taken from the provided JWT. This JWT should contain an attribute called 'role'. If this attribute is not defined, oas-tools will assume the default role of 'anonymous'. Moreover, the parameters used to check ownership should also be present in the JWT, and must be named in a specific way. For example, if a request is made to 'api/pets/{petstoreId}/cats/{catId}' and you want to check 'catId' for ownership, there must be a 'catId' attribute in the JWT. If it is not provided and no 'any' restriction was defined, the client will not have access to this resource. However, if you want to match the path 'catId' parameter to another attribute from the JWT, you can do that in the specification file adding a 'x-acl-binding' attribute to the corresponding parameter:
+
+```yaml
+paths:
+  api/pets/{petstoreId}/cats/{catId}:
+    put:
+      parameters:
+        - name: catId
+          in: path
+          x-acl-binding: customAttribute
+    # ...
+```
+
+This example will look for a 'customAttribute' attribute in the JWT.
 
 ## License
 
@@ -169,7 +386,7 @@ Copyright 2018, [ISA Group](http://www.isa.us.es), [University of Sevilla](http:
 
 For technical inquiry please contact to [engineering team](./extra/team.md).
 
-[![ISA Group](http://www.isa.us.es/2.0/assets/img/theme/logo2.png)](http://www.isa.us.es) [![Greenkeeper badge](https://badges.greenkeeper.io/isa-group/oas-tools.svg)](https://greenkeeper.io/)
+[![ISA Group](http://www.isa.us.es/2.0/assets/img/theme/logo2.png)](http://www.isa.us.es)
 
 Licensed under the **Apache License, Version 2.0** (the "[License](./LICENSE)"); you may not use this file except in compliance with the License. You may obtain a copy of the License at apache.org/licenses/LICENSE-2.0
 
