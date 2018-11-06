@@ -54,7 +54,7 @@ function removeBasePath(reqRoutePath) {
         .join('');
 }
 
-function verifyToken(req, secDef, token, next) { // eslint-disable-line
+function verifyToken(req, secDef, token, secName, next) { // eslint-disable-line
     const bearerRegex = /^Bearer\s/;
 
     function sendError(statusCode) {
@@ -64,10 +64,10 @@ function verifyToken(req, secDef, token, next) { // eslint-disable-line
     if (token && bearerRegex.test(token)) {
         var newToken = token.replace(bearerRegex, '');
         jwt.verify(
-            newToken, config.securityFile[secDef.name].key,
+            newToken, config.securityFile[secName].key,
             {
-                algorithms: config.securityFile[secDef.name].algorithms || ['HS256'],
-                issuer: config.securityFile[secDef.name].issuer
+                algorithms: config.securityFile[secName].algorithms || ['HS256'],
+                issuer: config.securityFile[secName].issuer
             },
             (error, decoded) => {
                 if (error === null && decoded) {
@@ -98,17 +98,15 @@ module.exports = (specDoc) => {
 
                     async.map(Object.keys(secReq), (name, callback) => { // logical AND - all must allow
                         var secDef = specDoc.components.securitySchemes[name];
-                        secDef.name = name;
                         var handler = handlers[name];
 
                         secName = name;
 
                         if (!handler || !_.isFunction(handler)) {
                             if (secDef.type === 'http' && secDef.scheme === 'bearer' && secDef.bearerFormat === 'JWT') {
-                                handler = verifyToken;
-                            } else {
-                                return callback(new Error('No handler was specified for security scheme ' + name));
+                                return verifyToken(req, secDef, req.headers.authorization, name, callback);
                             }
+                            return callback(new Error('No handler was specified for security scheme ' + name));
                         }
 
                         return handler(req, secDef, getValue(req, secDef, name, secReq), callback);

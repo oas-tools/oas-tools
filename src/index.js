@@ -265,12 +265,12 @@ function initializeSecurityAndAuth(specDoc) {
             config.grantsFile[secName] = extendGrants(specDoc, JSON.parse(body));
           });
         } else if (config.grantsFile[secName].charAt(0) === '/') {
-          config.grantsFile[secName] = require(config.grantsFile[secName]);
+          config.grantsFile[secName] = extendGrants(specDoc, require(config.grantsFile[secName]));
         } else {
-          config.grantsFile[secName] = require(pathModule.join(process.cwd(), config.grantsFile[secName]));
+          config.grantsFile[secName] = extendGrants(specDoc, require(pathModule.join(process.cwd(), config.grantsFile[secName])));
         }
       } else {
-        config.grantsFile[secName] = extendGrants(specDoc, grantsFile[secName]);
+        config.grantsFile[secName] = extendGrants(specDoc, config.grantsFile[secName]);
       }
     });
   }
