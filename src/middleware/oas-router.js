@@ -108,8 +108,8 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
     if (resultType && resultType.essence === 'application/json') {
       //if there is no content property for the given response then there is nothing to validate.  
       var validSchema = responseCodeSection.content['application/json'].schema;
+      content[0] = JSON.stringify(content[0]);
       logger.debug("Schema to use for validation: " + validSchema);
-      data = JSON.parse(data); //Without this everything is string so type validation wouldn't happen
       var err = validator.validate(data, validSchema);
       if (err == false) {
         newErr = {
@@ -201,7 +201,6 @@ module.exports = (controllers) => {
     var oldSend = res.send;
     res.send = function (data) { // eslint-disable-line
       //intercept the response from the controller to check and validate it
-      arguments[0] = JSON.stringify(arguments[0]); // eslint-disable-line
       //Avoids res.send being executed twice: https://stackoverflow.com/questions/41489528/why-is-res-send-being-called-twice
       res.header("Content-Type", "application/json;charset=utf-8");
       checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, arguments); // eslint-disable-line
