@@ -52,7 +52,7 @@ function _setConfigurations(options, encoding) { // eslint-disable-line
   } else if (typeof options == 'string') {
     try {
       var configString = fs.readFileSync(options, encoding); // eslint-disable-line
-      var newConfigurations = jsyaml.safeLoad(configString)[process.env.NODE_ENV ? process.env.NODE_ENV : 'development'];
+      var newConfigurations = jsyaml.safeLoad(configString)[process.env.NODE_ENV || 'development'];
     } catch (err) {
       console.log("The specified configuration file wasn't found at " + options + ".  Default configurations will be set"); // eslint-disable-line
       config.setConfigurations(path.join(__dirname, 'configs.yaml'), 'utf8');
