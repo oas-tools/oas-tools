@@ -94,9 +94,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
       resultType = new MIMEtype('application/json');
     } else if (!resultType && acceptTypes.length !== 0) {
       newErr = {
-        message: "No acceptable content type.",
-        error: "No content type defined in this path satisfies the request Accept header",
-        content: acceptTypes
+        message: "No acceptable content type found."
       };
       msg.push(newErr);
       content[0] = JSON.stringify(msg);
