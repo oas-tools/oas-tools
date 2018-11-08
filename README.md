@@ -380,6 +380,87 @@ paths:
 
 This example will look for a 'customAttribute' attribute in the JWT.
 
+## 4. Errors
+
+Since oas-tools reports validation errors with a common structure, we provide a JSON Schema so that you can validate this errors accordingly in your API implementation. You can use [speccy](https://www.npmjs.com/package/speccy) to convert this JSON Schema into an OpenAPI file.
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "message"
+    ],
+    "properties": {
+      "message": {
+        "type": "string",
+        "examples": [
+          "Wrong data in the response."
+        ]
+      },
+      "error": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "code",
+            "params",
+            "message",
+            "path"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "examples": [
+                "INVALID_TYPE"
+              ]
+            },
+            "params": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "examples": [
+                  "array",
+                  "object"
+                ]
+              }
+            },
+            "message": {
+              "type": "string",
+              "examples": [
+                "Expected type array but found type object"
+              ]
+            },
+            "path": {
+              "type": "string",
+              "examples": [
+                "#/"
+              ]
+            }
+          }
+        }
+      },
+      "content": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "examples": [
+              "This is the mockup controller for findPets"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ## License
 
 Copyright 2018, [ISA Group](http://www.isa.us.es), [University of Sevilla](http://www.us.es)
