@@ -476,7 +476,7 @@ function getTests() {
           }
           res.should.have.status(406);
           res.body.should.be.a('array');
-          JSON.stringify(res.body).should.contain("No acceptable content type.");
+          JSON.stringify(res.body).should.contain("No acceptable content type found.");
           done();
         });
     });
