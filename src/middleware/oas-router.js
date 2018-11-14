@@ -51,10 +51,10 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
   var data = content[0];
   logger.debug("Processing at checkResponse:");
   logger.debug("  -code: " + code);
-  logger.debug("  -oasDoc: " + oasDoc);
+  logger.debug("  -oasDoc: " + JSON.stringify(oasDoc));
   logger.debug("  -method: " + method);
   logger.debug("  -requestedSpecPath: " + requestedSpecPath);
-  logger.debug("  -data: " + data);
+  logger.debug("  -data: " + JSON.stringify(data));
   var responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses[code]; //Section of the oasDoc file starting at a response code
   if (responseCodeSection == undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
     var newErr = {
@@ -107,7 +107,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
       //if there is no content property for the given response then there is nothing to validate.  
       var validSchema = responseCodeSection.content['application/json'].schema;
       content[0] = JSON.stringify(content[0]);
-      logger.debug("Schema to use for validation: " + validSchema);
+      logger.debug("Schema to use for validation: " + JSON.stringify(validSchema));
       var err = validator.validate(data, validSchema);
       if (err == false) {
         newErr = {
