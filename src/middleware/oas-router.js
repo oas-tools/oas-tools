@@ -59,7 +59,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
   if (responseCodeSection == undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
     var newErr = {
       message: "Wrong response code: " + code
-    }
+    };
     msg.push(newErr);
     if (config.strict == true) {
       logger.error(msg);
