@@ -382,6 +382,23 @@ paths:
               schema:
                 type: object
       x-router-controller: "petsController"
+  /tokenVerificationTest:
+    get:
+      summary: Token test
+      operationId: tokenVerificationTest
+      security: [
+        FourthBearer: []
+      ]
+      tags:
+        - pets
+      responses:
+        '200':
+          description: A sample response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-router-controller: "petsController"
   /contentTypeTest:
     get:
       summary: Auth config file
@@ -397,6 +414,21 @@ paths:
               schema:
                 type: object
             text/csv:
+              schema:
+                type: object
+      x-router-controller: "petsController"
+  /wrongResponseCode:
+    get:
+      summary: Returns a wrong response code
+      operationId: wrongResponseCode
+      security: []
+      tags:
+        - pets
+      responses:
+        '200':
+          description: A sample object
+          content:
+            application/json:
               schema:
                 type: object
       x-router-controller: "petsController"
@@ -462,6 +494,14 @@ components:
       x-bearer-config: http://localhost:8080/api/v1/securityFile
       x-acl-config: http://localhost:8080/api/v1/grantsFile
     SecondBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ThirdBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    FourthBearer:
       type: http
       scheme: bearer
       bearerFormat: JWT
