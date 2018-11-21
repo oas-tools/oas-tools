@@ -5,7 +5,11 @@ customLogger: null
 strict: false
 router: true
 validator: true
-docs: true
+docs:
+  apiDocs: '/api-docs'
+    apiDocsPrefix: ''
+    swaggerUi: '/docs'
+    swaggerUiPrefix: ''
 oasSecurity: false
 securityFile: null
 oasAuth: false

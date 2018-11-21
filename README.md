@@ -53,7 +53,11 @@ __It is also possible to set configuration variables, these are them:__
 |`strict`	| `Boolean` | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default. |
 |`router`	| `Boolean` | Indicates whether router middleware should be used. True by default. |
 |`validator` | `Boolean` | Indicates whether validator middleware should be used. True by default. |
-|`docs` | `Boolean` | Indicates whether API docs (Swagger UI) should be available. True by default. |
+|`docs` | `Object` | Settings used Swagger UI, detailed in the following four rows. If you do not want to use the default values, you must specify values for all four settings, even if you only want to change one of them. |
+|`docs.apiDocs` | `String` | Indicates the path where the OAS specification will be available. `/api-docs` by default. |
+|`docs.apiDocsPrefix` | `String` | Indicates a prefix to be prepended to `docs.apiDocs`. Empty by default. |
+|`docs.swaggerUi` | `String` | Indicates the path where Swagger UI will be available. Ignored if `docs.apiDocs` is not set. `/docs` by default. |
+|`docs.swaggerUiPrefix` | `String` | Indicates a prefix to be prepended to `docs.swaggerUi`. Empty by default. |
 |`oasSecurity` | `Boolean` | Indicates whether security components defined in the spec file will be handled based on `securityFile` settings. `securityFile` will be ignored if this is set to false. Refer to [oasSecurity](#2-oassecurity) for more information. False by default. |
 |`securityFile` | `Object`| Defines the settings that will be used to handle security. Ignored if `oasSecurity` is set to false. Null by default. |
 |`oasAuth` | `Boolean` | Indicates whether authorization will be automatically handled based on `grantsFile` settings. `grantsFile` will be ignored if this is set to false. Refer to [oasAuth](#3-oasauth) for more information. False by default. |

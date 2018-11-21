@@ -1262,7 +1262,7 @@ function miscTests() {
 
     it('API spec should be available', (done) => {
       chai.request(server)
-        .get('/api')
+        .get('/api-docs')
         .end((err, res) => {
           if (err) {
             done (err);

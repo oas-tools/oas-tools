@@ -18,8 +18,8 @@ var logger = require('./logger');
 var spec = fs.readFileSync(path.join(__dirname, 'api/oai-spec.yaml'), 'utf8'); //this one works
 var oasDoc = jsyaml.safeLoad(spec);
 
-var securityThird = fs.readFileSync(path.join(__dirname, 'security.json'));
-var grantsThird = fs.readFileSync(path.join(__dirname, 'grants.json'));
+var securityThird = require(path.join(__dirname, 'security.json'));
+var grantsThird = require(path.join(__dirname, 'grants.json'));
 
 function verifyToken(req, secDef, token, next) {
   if (token) {
