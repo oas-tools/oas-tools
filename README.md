@@ -75,7 +75,12 @@ var options_object = {
   strict: false,
   router: true,
   validator: true,
-  docs: true,
+  docs: {
+    apiDocs: '/api-docs',
+    apiDocsPrefix: '',
+    swaggerUi: '/docs',
+    swaggerUiPrefix: ''
+  }
   oasSecurity: true,
   securityFile: {
     // your security settings
