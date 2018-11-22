@@ -329,7 +329,7 @@ function registerPaths(specDoc, app) {
         var expressPath = getExpressVersion(path); // TODO: take in account basePath/servers property of the spec doc.
         dictionary[expressPath.toString()] = path;
         logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
-        if (config.router == true) {
+        if (config.router == true && config.checkControllers == true) {
           checkControllers(path, method, paths[path][method], config.controllers);
         }
         expressPath = appendBasePath(specDoc, expressPath);
@@ -348,11 +348,16 @@ function registerPaths(specDoc, app) {
       }
     }
   }
-  app.use('/api', function (req, res) {
-    res.send(specDoc);
-  })
-  if (config.docs) {
-    app.use('/docs', express.static(pathModule.join(__dirname, '../swagger-ui')));
+  if (config.docs && config.docs.apiDocs) {
+    app.use(config.docs.apiDocsPrefix + config.docs.apiDocs, function (req, res) {
+      res.send(specDoc);
+    });
+    if (config.docs.swaggerUi) {
+      var uiHtml = fs.readFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), 'utf8');
+      uiHtml = uiHtml.replace('url: "/api-docs"', 'url: "' + config.docs.apiDocsPrefix + config.docs.apiDocs + '"');
+      fs.writeFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), uiHtml, 'utf8');
+      app.use(config.docs.swaggerUiPrefix + config.docs.swaggerUi, express.static(pathModule.join(__dirname, '../swagger-ui')));
+    }
   }
   config.pathsDict = dictionary;
 }

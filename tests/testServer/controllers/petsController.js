@@ -346,14 +346,26 @@ exports.grantsFile = (req, res) => {
           "*"
         ]
       }
-  },
-  user: {
-    pets: {
-      "read:any": [
+    },
+    user: {
+      pets: {
+        "read:any": [
           "*"
         ]
       }
+    },
+    extendeduser: {
+      "$extend": ["user"]
     }
+  });
+};
+
+/**
+ * Sends a sample object
+ */
+exports.tokenVerificationTest = (req, res) => {
+  res.send({
+    samplestring: "testing"
   });
 };
 
@@ -372,6 +384,15 @@ exports.commonParamTest = (req, res) => {
 exports.contentTypeTest = (req, res) => {
   res.send({
     id: 123
+  });
+};
+
+/**
+ * Sends a sample response with a 400 code
+ */
+exports.wrongResponseCode = (req, res) => {
+  res.status(400).send({
+    message: "This is a test"
   });
 };
 

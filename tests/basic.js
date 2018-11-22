@@ -305,6 +305,33 @@ function getTests() {
     });
     // end of ownership test
 
+    it('it should get a sample response using a verification function', (done) => {
+      chai.request(server)
+        .get('/api/v1/tokenVerificationTest')
+        .set('Authorization', 'Bearer ' + token)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          done();
+        });
+    });
+
+    it('it should get a 403 error informing that no token was provided', (done) => {
+      chai.request(server)
+        .get('/api/v1/tokenVerificationTest')
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(403);
+          res.body.should.be.eql({});
+          done();
+        });
+    });
+
     it('it should get a sample response using a common parameter', (done) => {
       chai.request(server)
         .get('/api/v1/commonParamTest?testParam=123')
@@ -370,7 +397,6 @@ function getTests() {
     it('it should get a sample response in application/json without Accept header', (done) => {
       chai.request(server)
         .get('/api/v1/contentTypeTest')
-        .set('Authorization', 'Bearer ' + token)
         .end((err, res) => {
           if (err) {
             done(err);
@@ -387,7 +413,6 @@ function getTests() {
     it('it should get a sample response in application/json with Accept */* header', (done) => {
       chai.request(server)
         .get('/api/v1/contentTypeTest')
-        .set('Authorization', 'Bearer ' + token)
         .set('Accept', '*/*')
         .end((err, res) => {
           if (err) {
@@ -405,7 +430,6 @@ function getTests() {
     it('it should get a sample response in application/json with Accept application/json header', (done) => {
       chai.request(server)
         .get('/api/v1/contentTypeTest')
-        .set('Authorization', 'Bearer ' + token)
         .set('Accept', 'application/json')
         .end((err, res) => {
           if (err) {
@@ -423,7 +447,6 @@ function getTests() {
     it('it should get a sample response in text/csv with Accept text/csv header', (done) => {
       chai.request(server)
         .get('/api/v1/contentTypeTest')
-        .set('Authorization', 'Bearer ' + token)
         .set('Accept', 'text/csv')
         .end((err, res) => {
           if (err) {
@@ -438,7 +461,6 @@ function getTests() {
     it('it should get a sample response in text/csv with Accept text/* header', (done) => {
       chai.request(server)
         .get('/api/v1/contentTypeTest')
-        .set('Authorization', 'Bearer ' + token)
         .set('Accept', 'text/*')
         .end((err, res) => {
           if (err) {
@@ -453,7 +475,6 @@ function getTests() {
     it('it should get a sample response in text/csv with Accept */csv header', (done) => {
       chai.request(server)
         .get('/api/v1/contentTypeTest')
-        .set('Authorization', 'Bearer ' + token)
         .set('Accept', '*/csv')
         .end((err, res) => {
           if (err) {
@@ -468,7 +489,6 @@ function getTests() {
     it('it should get a 406 error informing that there is no acceptable content type', (done) => {
       chai.request(server)
         .get('/api/v1/contentTypeTest')
-        .set('Authorization', 'Bearer ' + token)
         .set('Accept', 'application/xml')
         .end((err, res) => {
           if (err) {
@@ -477,6 +497,21 @@ function getTests() {
           res.should.have.status(406);
           res.body.should.be.a('array');
           JSON.stringify(res.body).should.contain("No acceptable content type found.");
+          done();
+        });
+    });
+
+    it('it should get a 406 error informing that the response code is wrong', (done) => {
+      chai.request(server)
+        .get('/api/v1/wrongResponseCode')
+        .set('Accept', 'application/xml')
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(400);
+          res.body.should.be.a('array');
+          JSON.stringify(res.body).should.contain("Wrong response code: 400");
           done();
         });
     });
@@ -1227,7 +1262,7 @@ function miscTests() {
 
     it('API spec should be available', (done) => {
       chai.request(server)
-        .get('/api')
+        .get('/api-docs')
         .end((err, res) => {
           if (err) {
             done (err);

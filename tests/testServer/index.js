@@ -18,6 +18,17 @@ var logger = require('./logger');
 var spec = fs.readFileSync(path.join(__dirname, 'api/oai-spec.yaml'), 'utf8'); //this one works
 var oasDoc = jsyaml.safeLoad(spec);
 
+var securityThird = require(path.join(__dirname, 'security.json'));
+var grantsThird = require(path.join(__dirname, 'grants.json'));
+
+function verifyToken(req, secDef, token, next) {
+  if (token) {
+    next();
+  } else {
+    next(req.res.sendStatus(403));
+  }
+}
+
 var options_object = {
   controllers: path.join(__dirname, './controllers'),
   //loglevel: 'debug',
@@ -28,11 +39,14 @@ var options_object = {
   validator: true,
   oasSecurity: true,
   securityFile: {
-    SecondBearer: './tests/testServer/security.json'
+    SecondBearer: './tests/testServer/security.json',
+    ThirdBearer: securityThird,
+    FourthBearer: verifyToken
   },
   oasAuth: true,
   grantsFile: {
-    SecondBearer: './tests/testServer/grants.json'
+    SecondBearer: './tests/testServer/grants.json',
+    ThirdBearer: grantsThird
   },
   ignoreUnknownFormats: true
 };

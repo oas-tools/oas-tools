@@ -50,10 +50,15 @@ __It is also possible to set configuration variables, these are them:__
 |`logFile` | `String` | Logs file path. Ignored if `customLogger` is used. |
 |`customLogger` | `Object` | Replaces the included logger with the one specified here, so that you can reuse your own logger. `logLevel` and `logFile` will be ignored if this variable is used. Null by default. |
 |`controllers` | `String` | Controllers location path. |
+|`checkControllers` | `Boolean` | Checks if controllers exist for all specified methods. True by default. |
 |`strict`	| `Boolean` | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default. |
 |`router`	| `Boolean` | Indicates whether router middleware should be used. True by default. |
 |`validator` | `Boolean` | Indicates whether validator middleware should be used. True by default. |
-|`docs` | `Boolean` | Indicates whether API docs (Swagger UI) should be available. True by default. |
+|`docs` | `Object` | Settings used for Swagger UI, detailed in the following four rows. If you do not want to use the default values, you must specify values for all four settings, even if you only want to change one of them. |
+|`docs.apiDocs` | `String` | Indicates the path where the OAS specification will be available. `/api-docs` by default. |
+|`docs.apiDocsPrefix` | `String` | Indicates a prefix to be prepended to `docs.apiDocs`. Empty by default. |
+|`docs.swaggerUi` | `String` | Indicates the path where Swagger UI will be available. Ignored if `docs.apiDocs` is not set. `/docs` by default. |
+|`docs.swaggerUiPrefix` | `String` | Indicates a prefix to be prepended to `docs.swaggerUi`. Empty by default. |
 |`oasSecurity` | `Boolean` | Indicates whether security components defined in the spec file will be handled based on `securityFile` settings. `securityFile` will be ignored if this is set to false. Refer to [oasSecurity](#2-oassecurity) for more information. False by default. |
 |`securityFile` | `Object`| Defines the settings that will be used to handle security. Ignored if `oasSecurity` is set to false. Null by default. |
 |`oasAuth` | `Boolean` | Indicates whether authorization will be automatically handled based on `grantsFile` settings. `grantsFile` will be ignored if this is set to false. Refer to [oasAuth](#3-oasauth) for more information. False by default. |
@@ -65,13 +70,19 @@ For setting these variables you can use the function configure and pass to it ei
 ```javascript
 var options_object = {
   controllers: '/path/to/controllers',
+  checkControllers: true,
   loglevel: 'info',
   logfile: '/path/to/logs/file',
   // customLogger: myLogger,
   strict: false,
   router: true,
   validator: true,
-  docs: true,
+  docs: {
+    apiDocs: '/api-docs',
+    apiDocsPrefix: '',
+    swaggerUi: '/docs',
+    swaggerUiPrefix: ''
+  }
   oasSecurity: true,
   securityFile: {
     // your security settings

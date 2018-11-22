@@ -53,7 +53,7 @@ module.exports = (oasDoc) => {
                     return secDef.type === 'http' && secDef.scheme === 'bearer' && secDef.bearerFormat === 'JWT';
                 });
             });
-            if (secName) {
+            if (secName && config.grantsFile[secName]) {
                 const ac = new AccessControl(config.grantsFile[secName]);
                 const accessControlMiddleware = new AccessControlMiddleware(ac);
                 var action;
