@@ -70,6 +70,7 @@ For setting these variables you can use the function configure and pass to it ei
 ```javascript
 var options_object = {
   controllers: '/path/to/controllers',
+  checkControllers: true,
   loglevel: 'info',
   logfile: '/path/to/logs/file',
   // customLogger: myLogger,
