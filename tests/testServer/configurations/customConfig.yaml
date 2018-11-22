@@ -1,4 +1,5 @@
 #Should I use here also 'production' and 'development' ?
+checkControllers: true
 loglevel: debug
 logfile: './logs/dev-logs.log'
 customLogger: null
@@ -7,9 +8,9 @@ router: true
 validator: true
 docs:
   apiDocs: '/api-docs'
-    apiDocsPrefix: ''
-    swaggerUi: '/docs'
-    swaggerUiPrefix: ''
+  apiDocsPrefix: ''
+  swaggerUi: '/docs'
+  swaggerUiPrefix: ''
 oasSecurity: false
 securityFile: null
 oasAuth: false

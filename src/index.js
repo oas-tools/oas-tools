@@ -329,7 +329,7 @@ function registerPaths(specDoc, app) {
         var expressPath = getExpressVersion(path); // TODO: take in account basePath/servers property of the spec doc.
         dictionary[expressPath.toString()] = path;
         logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
-        if (config.router == true) {
+        if (config.router == true && config.checkControllers == true) {
           checkControllers(path, method, paths[path][method], config.controllers);
         }
         expressPath = appendBasePath(specDoc, expressPath);

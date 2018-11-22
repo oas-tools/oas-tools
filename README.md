@@ -50,6 +50,7 @@ __It is also possible to set configuration variables, these are them:__
 |`logFile` | `String` | Logs file path. Ignored if `customLogger` is used. |
 |`customLogger` | `Object` | Replaces the included logger with the one specified here, so that you can reuse your own logger. `logLevel` and `logFile` will be ignored if this variable is used. Null by default. |
 |`controllers` | `String` | Controllers location path. |
+|`checkControllers` | `Boolean` | Checks if controllers exist for all specified methods. True by default. |
 |`strict`	| `Boolean` | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default. |
 |`router`	| `Boolean` | Indicates whether router middleware should be used. True by default. |
 |`validator` | `Boolean` | Indicates whether validator middleware should be used. True by default. |

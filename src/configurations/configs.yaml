@@ -1,6 +1,7 @@
 #THIS FILE MUST CONTAIN ALL THE CONFIGURATION VARIABLES! as it will be used as the default configs so it must initialize all of them.
 
 production:
+  checkControllers: true
   loglevel: info
   #logfile: './logs/pro-logs.log'
   customLogger: null
@@ -19,6 +20,7 @@ production:
   ignoreUnknownFormats: true
 
 development:
+  checkControllers: true
   loglevel: debug
   #logfile: './dev-logs.log' #if dir is specified before file and that dir doesnt exist: EXCEPTION! winston can create file but not folder
   customLogger: null
