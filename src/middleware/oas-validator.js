@@ -47,7 +47,7 @@ function locationFormat(inProperty) { //TODO: Possible 'in' values: path, query,
   var dict = {
     path: "params",
     query: "query",
-    header: "header",
+    header: "headers",
     cookie: "cookie"
   };
   return dict[inProperty];
@@ -84,7 +84,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
   var keepGoing = true;
   //var msg = "";
   var msg = [];
- 
+
   if (paths[requestedSpecPath][method].hasOwnProperty('requestBody')) {
     var requestBody = paths[requestedSpecPath][method].requestBody;
     if (requestBody.required != undefined && requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
