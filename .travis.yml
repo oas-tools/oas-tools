@@ -6,6 +6,9 @@ sudo: required
 services:
   - docker
 
+install:
+  - npm install
+
 before_script:
   - npm install grunt-cli -g
 
