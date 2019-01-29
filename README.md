@@ -213,7 +213,7 @@ var jwt = require('jsonwebtoken');
 function verifyToken(req, secDef, token, next) {
   const bearerRegex = /^Bearer\s/;
   
-  if (token && bearerRegex.test(token) {
+  if (token && bearerRegex.test(token)) {
     var newToken = token.replace(bearerRegex, '');
     jwt.verify(newToken, 'secretKey',
       {
