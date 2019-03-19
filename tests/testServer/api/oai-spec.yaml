@@ -7,6 +7,51 @@ info:
   license:
     name: MIT
 paths:
+  /multipartFormdata:
+    post:
+      summary: testing a multipart form with upload file and regular parameters
+      operationId: createPetsViaMultipartFormdata
+      security: []
+#      x-router-controller: multipartFormPet
+      x-router-controller: "petsController"
+      tags:
+        - pets
+      requestBody:
+        description: Pet to add to the store via an uploaded file and regular parameters
+        x-name: petViaForm
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - id
+                - name
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: a binary file uploaded via openAPI spec
+                id:
+                  type: integer
+                  format: int64
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Update status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pets"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+          
   /paramTestsQuery:
     get:
       summary: This path is only for tests
