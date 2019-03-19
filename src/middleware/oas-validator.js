@@ -397,12 +397,22 @@ module.exports = (oasDoc) => {
 
     var requestBody = oasDoc.paths[requestedSpecPath][method].requestBody;
     if (requestBody != undefined) {
+      // when and endpoint provides a file upload option and other properties, 
+      // the content type changes to multipart/form-data
+      // other requestBody types such as "image/png" are allowed as well
+      // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#considerations-for-file-uploads
+      const contentType = Object.keys(requestBody.content)[0];
       req.swagger.params[requestBody['x-name']] = {
         path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
-        schema: requestBody.content['application/json'].schema,
+        schema: contentType.schema,
         originalValue: req.body,
         value: req.body
-      };
+      }
+      
+      // inject possible file uploads
+      if(contentType.toLowerCase() === 'multipart/form-data' && req.files && req.files.length > 0) {
+        req.swagger.params[requestBody['x-name']].files = req.files;
+      }
     }
 
     res.locals.requestedSpecPath = requestedSpecPath;
