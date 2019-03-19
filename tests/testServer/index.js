@@ -65,7 +65,7 @@ function init(done) {
   app.get('/info', (req, res) => {
     res.send({
       infoEN: "This is a very simple API that uses the oas-tools Module!",
-      infoDE: "Diese ist eine sehr einfach API die benutzt unsere oas-tools module!"
+      infoDE: "Dies ist eine sehr einfache API, die unser oas-tools Modul benutzt!"
     });
   });
 }
