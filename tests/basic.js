@@ -1276,8 +1276,52 @@ function miscTests() {
 
 function multipartFormTests() {
     describe('/POST multipart-formdata pet', () => {
-        // keep "function" for "this"-scope
-        it('should successfully add a pet vis multipart/form-data', function() { // eslint-disable-line
+        // throughout this block: keep "function" in it-callback for "this"-scope
+        
+        it('should throw 401 for adding a pet via multipart/form-data b/c no JWT was provided', function() { // eslint-disable-line
+            const pet = {
+                id: 4711,
+                name: 'MultipartFormdataRabbit'
+            }
+            const file = path.join(__dirname, 'pet.zip');
+
+            return chai.request(server)
+                .post('/api/v1/multipartFormdata')
+                .field('id', pet.id)
+                .field('name', pet.name)
+                .attach('file', fs.readFileSync(file), 'pet.zip') // eslint-disable-line
+                .then((res) => {
+                    expect(res).to.have.status(401);
+                    expect(res.text).to.contain('Unauthorized');
+                })
+                .catch((err) => {
+                    throw err;
+                })
+        })
+        
+        it('should throw 403 for adding a pet via multipart/form-data b/c provided JWT is not valid', function() { // eslint-disable-line
+            const pet = {
+                id: 4711,
+                name: 'MultipartFormdataRabbit'
+            }
+            const file = path.join(__dirname, 'pet.zip');
+
+            return chai.request(server)
+                .post('/api/v1/multipartFormdata')
+                .set('Authorization', 'Bearer invalidtoken')
+                .field('id', pet.id)
+                .field('name', pet.name)
+                .attach('file', fs.readFileSync(file), 'pet.zip') // eslint-disable-line
+                .then((res) => {
+                    expect(res).to.have.status(403);
+                    expect(res.text).to.contain('Forbidden');
+                })
+                .catch((err) => {
+                    throw err;
+                })
+        })
+
+        it('should successfully add a pet via POST as multipart/form-data', function() { // eslint-disable-line
             const pet = {
                 id: 4711,
                 name: 'MultipartFormdataRabbit'
@@ -1292,6 +1336,21 @@ function multipartFormTests() {
                 .attach('file', fs.readFileSync(file), 'pet.zip') // eslint-disable-line
                 .then((res) => {
                     expect(res).to.have.status(201);
+                })
+                .catch((err) => {
+                    throw err;
+                })
+        })
+
+        it('should not accept a pet POST as multipart/form-data w/o a pet in the body', function() { // eslint-disable-line
+
+            return chai.request(server)
+                .post('/api/v1/multipartFormdata')
+                .set('Authorization', 'Bearer ' + token)
+                .then((res) => {
+                    expect(res).to.have.status(400);
+                    expect(res.body).to.be.a('array');
+                    expect(res.text).to.have.string("Missing object in the request body.");
                 })
                 .catch((err) => {
                     throw err;

@@ -73,6 +73,24 @@ function filterParams(methodParameters, pathParameters) {
 }
 
 /**
+ * transfer fieldname(s) and filename(s) of an multipart/form-data request to a data object
+ * that is subsequently passed to a validator checking for required properties of a openAPI path operation
+ * 
+ * @param {array} files
+ * @param {object} dataToValidate
+ * @returns {object}
+ */
+function addFilesToJSONPropertyValidation(files, dataToValidate) {
+  const data = dataToValidate;
+  files.forEach((file) => {
+    if (file.fieldname && file.originalname) {
+      data[file.fieldname] = file.originalname;
+    }
+  })
+  return data;
+}
+
+/**
  * Checks if the data provided in the request is valid acording to what is specified in the oas specification file.
  * @param {object} paths - Paths section of the oasDoc file.
  * @param {string} requestedSpecPath - Requested url by the client. If the request had parameters in the query those won't be part of this variable.
@@ -99,6 +117,11 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
         const contentType = Object.keys(requestBody.content)[0]; 
         var validSchema = requestBody.content[contentType].schema;
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
+        // a multipart/form-data request has a "files" property in the request whose
+        // properties need to be passed to evaluating the required parameters in the openAPI spec
+        if (contentType.toLowerCase() === "multipart/form-data" && req.files && req.files.length > 0) {
+          data = addFilesToJSONPropertyValidation(req.files, data);
+        }
         var err = validator.validate(data, validSchema);
         if (err == false) {
           newErr = {

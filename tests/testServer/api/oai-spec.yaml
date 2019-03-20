@@ -15,6 +15,7 @@ paths:
       tags:
         - pets
       requestBody:
+        required: true
         description: Pet to add to the store via an uploaded file and regular parameters
         x-name: petViaForm
         content:
@@ -31,8 +32,7 @@ paths:
                   format: binary
                   description: a binary file uploaded via openAPI spec
                 id:
-                  type: integer
-                  format: int64
+                  type: string #it's a form field, so will always be a string
                 name:
                   type: string
       responses:
