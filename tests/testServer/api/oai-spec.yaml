@@ -11,8 +11,6 @@ paths:
     post:
       summary: testing a multipart form with upload file and regular parameters
       operationId: createPetsViaMultipartFormdata
-      security: []
-#      x-router-controller: multipartFormPet
       x-router-controller: "petsController"
       tags:
         - pets

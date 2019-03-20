@@ -1277,8 +1277,7 @@ function miscTests() {
 function multipartFormTests() {
     describe('/POST multipart-formdata pet', () => {
         // keep "function" for "this"-scope
-        it('should successfully add a pet along with an uploaded binary', function() { // eslint-disable-line
-                       
+        it('should successfully add a pet vis multipart/form-data', function() { // eslint-disable-line
             const pet = {
                 id: 4711,
                 name: 'MultipartFormdataRabbit'
@@ -1287,6 +1286,7 @@ function multipartFormTests() {
 
             return chai.request(server)
                 .post('/api/v1/multipartFormdata')
+                .set('Authorization', 'Bearer ' + token)
                 .field('id', pet.id)
                 .field('name', pet.name)
                 .attach('file', fs.readFileSync(file), 'pet.zip') // eslint-disable-line

@@ -359,6 +359,20 @@ exports.grantsFile = (req, res) => {
         "delete:any": [
           "*"
         ]
+      },
+      multipartFormdata: {
+        "create:any": [
+          "*"
+        ],
+        "read:any": [
+          "*"
+        ],
+        "update:any": [
+          "*"
+        ],
+        "delete:any": [
+          "*"
+        ]
       }
     },
     user: {
