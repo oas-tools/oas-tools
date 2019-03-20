@@ -95,7 +95,9 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
         msg.push(newErr);
         keepGoing = false;
       } else {
-        var validSchema = requestBody.content['application/json'].schema;
+        // can be any of "application/json", "multipart/form-data", "image/png", ...
+        const contentType = Object.keys(requestBody.content)[0]; 
+        var validSchema = requestBody.content[contentType].schema;
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
         var err = validator.validate(data, validSchema);
         if (err == false) {
@@ -404,7 +406,7 @@ module.exports = (oasDoc) => {
       const contentType = Object.keys(requestBody.content)[0];
       req.swagger.params[requestBody['x-name']] = {
         path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
-        schema: contentType.schema,
+        schema: requestBody.content[contentType].schema,
         originalValue: req.body,
         value: req.body
       }
