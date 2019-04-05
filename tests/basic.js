@@ -501,7 +501,7 @@ function getTests() {
                 });
         });
 
-        it('it should get a 406 error informing that the response code is wrong', (done) => {
+        it('it should get a 400 error informing that the response code is wrong', (done) => {
             chai.request(server)
                 .get('/api/v1/wrongResponseCode')
                 .set('Accept', 'application/xml')
@@ -512,6 +512,20 @@ function getTests() {
                     res.should.have.status(400);
                     res.body.should.be.a('array');
                     JSON.stringify(res.body).should.contain("Wrong response code: 400");
+                    done();
+                });
+        });
+
+        it('it should get a sample response with a nullable field', (done) => {
+            chai.request(server)
+                .get('/api/v1/nullableResponseTest')
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    JSON.stringify(res.body).should.contain('null');
                     done();
                 });
         });

@@ -526,6 +526,27 @@ paths:
               schema:
                 type: object
       x-router-controller: "petsController"
+  /nullableResponseTest:
+    get:
+      summary: Nullable test
+      operationId: nullableResponse
+      security: []
+      tags:
+        - pets
+      responses:
+        '200':
+          description: A sample response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  text:
+                    type: string
+                    nullable: true
+      x-router-controller: "petsController"
 security:
   - Bearer: []
 components:

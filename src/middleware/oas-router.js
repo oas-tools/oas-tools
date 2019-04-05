@@ -106,6 +106,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
     if (resultType && resultType.essence === 'application/json') {
       //if there is no content property for the given response then there is nothing to validate.  
       var validSchema = responseCodeSection.content['application/json'].schema;
+      fixNullable(validSchema);
       content[0] = JSON.stringify(content[0]);
       logger.debug("Schema to use for validation: " + JSON.stringify(validSchema));
       var err = validator.validate(data, validSchema);
@@ -137,6 +138,16 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
   } else {
     oldSend.apply(res, content);
   }
+}
+
+function fixNullable(schema) {
+  Object.getOwnPropertyNames(schema).forEach(property => {
+    if (typeof schema[property] === 'object') {
+      fixNullable(schema[property]);
+    } else if (property === 'type' && typeof schema[property] === 'string' && schema['nullable'] === true) {
+      schema['type'] = [schema['type'], "null"];
+    }
+  });
 }
 
 /**

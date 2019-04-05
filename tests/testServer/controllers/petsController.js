@@ -424,6 +424,13 @@ exports.wrongResponseCode = (req, res) => {
   });
 };
 
+exports.nullableResponse = (req, res) => {
+  res.send({
+    status: 123,
+    text: null
+  });
+};
+
 exports.pets = pets;
 exports.corruptPets = corruptPets;
 exports.setCorrectPets = setCorrectPets;
