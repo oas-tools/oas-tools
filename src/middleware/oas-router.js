@@ -33,6 +33,15 @@ var validator = new ZSchema({
 var utils = require("../lib/utils.js");
 var controllers; // eslint-disable-line
 
+function fixNullable(schema) {
+  Object.getOwnPropertyNames(schema).forEach((property) => {
+    if (typeof schema[property] === 'object') {
+      fixNullable(schema[property]);
+    } else if (property === 'type' && typeof schema[property] === 'string' && schema.nullable === true) {
+      schema.type = [schema.type, "null"];
+    }
+  });
+}
 
 /**
  * Checks if the data sent as a response for the previous request matches the indicated in the specification file in the responses section for that request.
@@ -138,16 +147,6 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
   } else {
     oldSend.apply(res, content);
   }
-}
-
-function fixNullable(schema) {
-  Object.getOwnPropertyNames(schema).forEach(property => {
-    if (typeof schema[property] === 'object') {
-      fixNullable(schema[property]);
-    } else if (property === 'type' && typeof schema[property] === 'string' && schema['nullable'] === true) {
-      schema['type'] = [schema['type'], "null"];
-    }
-  });
 }
 
 /**
