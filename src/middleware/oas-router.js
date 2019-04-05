@@ -33,6 +33,15 @@ var validator = new ZSchema({
 var utils = require("../lib/utils.js");
 var controllers; // eslint-disable-line
 
+function fixNullable(schema) {
+  Object.getOwnPropertyNames(schema).forEach((property) => {
+    if (typeof schema[property] === 'object') {
+      fixNullable(schema[property]);
+    } else if (property === 'type' && typeof schema[property] === 'string' && schema.nullable === true) {
+      schema.type = [schema.type, "null"];
+    }
+  });
+}
 
 /**
  * Checks if the data sent as a response for the previous request matches the indicated in the specification file in the responses section for that request.
@@ -56,17 +65,20 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
   logger.debug("  -requestedSpecPath: " + requestedSpecPath);
   logger.debug("  -data: " + JSON.stringify(data));
   var responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses[code]; //Section of the oasDoc file starting at a response code
+  if (responseCodeSection == undefined && oasDoc.paths[requestedSpecPath][method].responses.default != undefined) {
+    responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses.default;
+  }
   if (responseCodeSection == undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
     var newErr = {
       message: "Wrong response code: " + code
     };
     msg.push(newErr);
     if (config.strict == true) {
-      logger.error(msg);
+      logger.error(JSON.stringify(msg));
       content[0] = JSON.stringify(msg);
       oldSend.apply(res, content);
     } else {
-      logger.warning(msg);
+      logger.warning(JSON.stringify(msg));
       oldSend.apply(res, content);
     }
   } else if (responseCodeSection.hasOwnProperty('content')) {
@@ -106,6 +118,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
     if (resultType && resultType.essence === 'application/json') {
       //if there is no content property for the given response then there is nothing to validate.  
       var validSchema = responseCodeSection.content['application/json'].schema;
+      fixNullable(validSchema);
       content[0] = JSON.stringify(content[0]);
       logger.debug("Schema to use for validation: " + JSON.stringify(validSchema));
       var err = validator.validate(data, validSchema);
@@ -122,7 +135,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
           res.status(400);
           oldSend.apply(res, content);
         } else {
-          logger.warning(msg + JSON.stringify(validator.getLastErrors()));
+          logger.warning(JSON.stringify(msg) + JSON.stringify(validator.getLastErrors()));
           if (content[0].substr(0, 46) === '{"message":"This is the mockup controller for ') {
             logger.warning('The used controller might not have been implemented');
           }

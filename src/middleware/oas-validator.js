@@ -189,11 +189,11 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
     }
   }
   if (keepGoing == false && config.strict == true) {
-    logger.error(msg);
-    res.status(400).send(msg)
+    logger.error(JSON.stringify(msg));
+    res.status(400).send(msg);
   } else {
     if (msg.length != 0) {
-      logger.warning(msg);
+      logger.warning(JSON.stringify(msg));
     }
     res.locals.oasDoc = oasDoc;
     next();
