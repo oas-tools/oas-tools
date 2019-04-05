@@ -102,7 +102,7 @@ module.exports = (specDoc) => {
 
                         secName = name;
 
-                        if (!handler || !_.isFunction(handler)) {
+                        if (!handler || typeof handler !== 'function') {
                             if (secDef.type === 'http' && secDef.scheme === 'bearer' && secDef.bearerFormat === 'JWT') {
                                 return verifyToken(req, secDef, req.headers.authorization, name, callback);
                             }
