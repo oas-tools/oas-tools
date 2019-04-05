@@ -71,11 +71,11 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
     };
     msg.push(newErr);
     if (config.strict == true) {
-      logger.error(msg);
+      logger.error(JSON.stringify(msg));
       content[0] = JSON.stringify(msg);
       oldSend.apply(res, content);
     } else {
-      logger.warning(msg);
+      logger.warning(JSON.stringify(msg));
       oldSend.apply(res, content);
     }
   } else if (responseCodeSection.hasOwnProperty('content')) {
@@ -132,7 +132,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
           res.status(400);
           oldSend.apply(res, content);
         } else {
-          logger.warning(msg + JSON.stringify(validator.getLastErrors()));
+          logger.warning(JSON.stringify(msg) + JSON.stringify(validator.getLastErrors()));
           if (content[0].substr(0, 46) === '{"message":"This is the mockup controller for ') {
             logger.warning('The used controller might not have been implemented');
           }
