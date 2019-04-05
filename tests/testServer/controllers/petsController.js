@@ -172,6 +172,20 @@ exports.createPets = (args, res) => {
 }
 
 /**
+ *  Creates a pet with associated binary file upload
+ */
+exports.createPetsViaMultipartFormdata = (args, res) => {
+  const pet = {
+    id: Number(args.body.id), // form fields arrive always as strings
+    name: args.body.name,
+    tag: 'not important'
+  }
+  pets.push(pet); 
+  exports.pets = pets;
+  res.status(201).send(pets);
+}
+
+/**
  *  Retrieves the whole pets collection
  */
 exports.listPets = (args, res) => {
@@ -333,6 +347,20 @@ exports.grantsFile = (req, res) => {
         ]
       },
       pets: {
+        "create:any": [
+          "*"
+        ],
+        "read:any": [
+          "*"
+        ],
+        "update:any": [
+          "*"
+        ],
+        "delete:any": [
+          "*"
+        ]
+      },
+      multipartFormdata: {
         "create:any": [
           "*"
         ],

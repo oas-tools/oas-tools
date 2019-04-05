@@ -186,6 +186,48 @@ post:
           $ref: '#/components/schemas/Pet'
 ```
 
+__6.	(optional) use `multer` for binary uploads:__
+
+The default middleware for handling file uploads in `express` via `multipart/form-data` is [`multer`](https://github.com/expressjs/multer). Use it in addition to the json body parser when initializing the server:
+```js 
+const bodyParser = require('body-parser');
+const multer = require('multer');
+const upload = multer();
+
+const app = express();
+app.use(bodyParser.json({
+  strict: false
+}));
+app.use(upload.any());
+``` 
+
+Also make sure that the application consuming the openAPI server sends the file input form name according to the openAPI spec:
+```yaml
+/endPoint:
+    post:
+      requestBody:
+        required: true
+        x-name: endPointPost
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - id
+                - name
+              properties:
+                file: # <- this is the form field name that needs to be present in the POST payload
+                  type: string
+                  format: binary
+                  description: a binary file uploaded via openAPI spec
+                id:
+                  type: string # it's a form field, so will always be a string
+                name:
+                  type: string
+```
+
+
 Once you have done all this, leave the rest the way it is and just run your appliaction with ‘node index.js’ or any other command you have specified at your package.json for running the application.
 
 ## 2. oasSecurity
@@ -213,7 +255,7 @@ var jwt = require('jsonwebtoken');
 function verifyToken(req, secDef, token, next) {
   const bearerRegex = /^Bearer\s/;
   
-  if (token && bearerRegex.test(token) {
+  if (token && bearerRegex.test(token)) {
     var newToken = token.replace(bearerRegex, '');
     jwt.verify(newToken, 'secretKey',
       {

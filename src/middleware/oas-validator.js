@@ -73,6 +73,24 @@ function filterParams(methodParameters, pathParameters) {
 }
 
 /**
+ * transfer fieldname(s) and filename(s) of an multipart/form-data request to a data object
+ * that is subsequently passed to a validator checking for required properties of a openAPI path operation
+ * 
+ * @param {array} files
+ * @param {object} dataToValidate
+ * @returns {object}
+ */
+function addFilesToJSONPropertyValidation(files, dataToValidate) {
+  const data = dataToValidate;
+  files.forEach((file) => {
+    if (file.fieldname && file.originalname) {
+      data[file.fieldname] = file.originalname;
+    }
+  })
+  return data;
+}
+
+/**
  * Checks if the data provided in the request is valid acording to what is specified in the oas specification file.
  * @param {object} paths - Paths section of the oasDoc file.
  * @param {string} requestedSpecPath - Requested url by the client. If the request had parameters in the query those won't be part of this variable.
@@ -95,8 +113,15 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
         msg.push(newErr);
         keepGoing = false;
       } else {
-        var validSchema = requestBody.content['application/json'].schema;
+        // can be any of "application/json", "multipart/form-data", "image/png", ...
+        const contentType = Object.keys(requestBody.content)[0]; 
+        var validSchema = requestBody.content[contentType].schema;
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
+        // a multipart/form-data request has a "files" property in the request whose
+        // properties need to be passed to evaluating the required parameters in the openAPI spec
+        if (contentType.toLowerCase() === "multipart/form-data" && req.files && req.files.length > 0) {
+          data = addFilesToJSONPropertyValidation(req.files, data);
+        }
         var err = validator.validate(data, validSchema);
         if (err == false) {
           newErr = {
@@ -397,12 +422,22 @@ module.exports = (oasDoc) => {
 
     var requestBody = oasDoc.paths[requestedSpecPath][method].requestBody;
     if (requestBody != undefined) {
+      // when and endpoint provides a file upload option and other properties, 
+      // the content type changes to multipart/form-data
+      // other requestBody types such as "image/png" are allowed as well
+      // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#considerations-for-file-uploads
+      const contentType = Object.keys(requestBody.content)[0];
       req.swagger.params[requestBody['x-name']] = {
         path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
-        schema: requestBody.content['application/json'].schema,
+        schema: requestBody.content[contentType].schema,
         originalValue: req.body,
         value: req.body
-      };
+      }
+      
+      // inject possible file uploads
+      if(contentType.toLowerCase() === 'multipart/form-data' && req.files && req.files.length > 0) {
+        req.swagger.params[requestBody['x-name']].files = req.files;
+      }
     }
 
     res.locals.requestedSpecPath = requestedSpecPath;
