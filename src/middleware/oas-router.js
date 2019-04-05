@@ -65,6 +65,9 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
   logger.debug("  -requestedSpecPath: " + requestedSpecPath);
   logger.debug("  -data: " + JSON.stringify(data));
   var responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses[code]; //Section of the oasDoc file starting at a response code
+  if (responseCodeSection == undefined && oasDoc.paths[requestedSpecPath][method].responses.default != undefined) {
+    responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses.default;
+  }
   if (responseCodeSection == undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
     var newErr = {
       message: "Wrong response code: " + code

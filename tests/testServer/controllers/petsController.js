@@ -424,10 +424,22 @@ exports.wrongResponseCode = (req, res) => {
   });
 };
 
+/**
+ * Sends a sample response with a null field
+ */
 exports.nullableResponse = (req, res) => {
   res.send({
-    status: 123,
+    id: 123,
     text: null
+  });
+};
+
+/**
+ * Sends a sample response for c
+ */
+exports.defaultResponseCode = (req, res) => {
+  res.send({
+    id: 123
   });
 };
 

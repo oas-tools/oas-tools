@@ -547,6 +547,21 @@ paths:
                     type: string
                     nullable: true
       x-router-controller: "petsController"
+  /defaultResponseCode:
+    get:
+      summary: Returns a default response code
+      operationId: defaultResponseCode
+      security: []
+      tags:
+        - pets
+      responses:
+        default:
+          description: A sample object
+          content:
+            application/json:
+              schema:
+                type: object
+      x-router-controller: "petsController"
 security:
   - Bearer: []
 components:

@@ -516,6 +516,19 @@ function getTests() {
                 });
         });
 
+        it('it should get a sampler response using a default response code', (done) => {
+            chai.request(server)
+                .get('/api/v1/defaultResponseCode')
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    done();
+                });
+        });
+
         it('it should get a sample response with a nullable field', (done) => {
             chai.request(server)
                 .get('/api/v1/nullableResponseTest')
