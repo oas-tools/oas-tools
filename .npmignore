@@ -1,2 +1,3 @@
-# Ignore git folder for npm packaging
-.git
+# Ignore npm packaging
+.git/
+node_modules/**/*.git
