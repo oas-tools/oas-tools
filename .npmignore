@@ -1,0 +1,2 @@
+# Ignore git folder for npm packaging
+.git
