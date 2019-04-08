@@ -24,7 +24,7 @@
     "accesscontrol-middleware": "^1.0.3",
     "body-parser": "^1.18.3",
     "fs": "0.0.2",
-    "js-yaml": "^3.13.0",
+    "js-yaml": "^3.13.1",
     "json-schema-deref": "^0.5.0",
     "json-schema-deref-sync": "^0.10.0",
     "jsonwebtoken": "^8.5.1",
