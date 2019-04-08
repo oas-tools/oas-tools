@@ -45,7 +45,7 @@
     "express": "^4.16.4",
     "http": "0.0.0",
     "jsdoc": "^3.5.5",
-    "mocha": "^6.0.2",
+    "mocha": "^6.1.0",
     "mongoose": "^5.4.22",
     "nyc": "^13.3.0",
     "publish-please": "^5.4.3",
