@@ -48,8 +48,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-        
-          
+
+
   /paramTestsQuery:
     get:
       summary: This path is only for tests
@@ -146,6 +146,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Pets"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      x-router-controller: "petsController"
+      #x-router-controller: "Default"
+  /operationTests:
+    get:
+      summary: This path is only for tests
+      operationId: operationTests
+      tags:
+        - pets
+      security: [
+        FourthBearer: []
+      ]
+      responses:
+        '200':
+          description: The operation
+          content:
+            application/json:
+              schema:
+                type: object
         default:
           description: unexpected error
           content:

@@ -77,6 +77,21 @@ function getTests() {
                 });
         });
 
+        /* testing of operation property */
+        it('it should return the operation part of the spec via req.swagger.operation', (done) => {
+            chai.request(server)
+                .get('/api/v1/operationTests')
+                .set('Authorization', 'Bearer ' + token)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    res.body.operation.operationId.should.equal('operationTests')
+                    done();
+                });
+        });
+
         /* testing of parameters in query */
         it('it should get an error informing of missing required parameters in query', (done) => {
             chai.request(server)
@@ -1304,7 +1319,7 @@ function miscTests() {
 function multipartFormTests() {
     describe('/POST multipart-formdata pet', () => {
         // throughout this block: keep "function" in it-callback for "this"-scope
-        
+
         it('should throw 401 for adding a pet via multipart/form-data b/c no JWT was provided', function() { // eslint-disable-line
             const pet = {
                 id: 4711,
@@ -1325,7 +1340,7 @@ function multipartFormTests() {
                     throw err;
                 })
         })
-        
+
         it('should throw 403 for adding a pet via multipart/form-data b/c provided JWT is not valid', function() { // eslint-disable-line
             const pet = {
                 id: 4711,
