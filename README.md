@@ -49,6 +49,7 @@ __It is also possible to set configuration variables, these are them:__
 |`logLevel` | `String` | Possible values from less to more level of verbosity are: error, warning, custom, info and debug. Ignored if `customLogger` is used. Default is info. |
 |`logFile` | `String` | Logs file path. Ignored if `customLogger` is used. |
 |`customLogger` | `Object` | Replaces the included logger with the one specified here, so that you can reuse your own logger. `logLevel` and `logFile` will be ignored if this variable is used. Null by default. |
+|`customErrorHandling` | `Boolean` | Indicates if there should be a direct response (`false`) or `next()` should be called for custom error handling |
 |`controllers` | `String` | Controllers location path. |
 |`checkControllers` | `Boolean` | Checks if controllers exist for all specified methods. True by default. |
 |`strict`	| `Boolean` | Indicates whether validation must stop the request process if errors were found when validating according to specification file. false by default. |
@@ -513,6 +514,15 @@ Since oas-tools reports validation errors with a common structure, we provide a 
   }
 }
 ```
+
+By default, the errors are returned by a direct HTTP 400 response. If you need custom error handling, you may set the `customErrorHandling` config property to `true`, 
+which causes validation errors to be passed to `next()`. The following properties are set:
+
+| Name	| Type	| Explanation / Values |
+| ------------- | ------------- | ------------- |
+|`failedValidation` | `Boolean` | Property can be used to check if the error comes from the oas validation. |
+|`validationResult` | `Object` | Validation results conforming to the beforementioned schema. |
+ 
 
 ## License
 
