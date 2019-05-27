@@ -75,7 +75,7 @@ function filterParams(methodParameters, pathParameters) {
 /**
  * transfer fieldname(s) and filename(s) of an multipart/form-data request to a data object
  * that is subsequently passed to a validator checking for required properties of a openAPI path operation
- * 
+ *
  * @param {array} files
  * @param {object} dataToValidate
  * @returns {object}
@@ -114,7 +114,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
         keepGoing = false;
       } else {
         // can be any of "application/json", "multipart/form-data", "image/png", ...
-        const contentType = Object.keys(requestBody.content)[0]; 
+        const contentType = Object.keys(requestBody.content)[0];
         var validSchema = requestBody.content[contentType].schema;
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
         // a multipart/form-data request has a "files" property in the request whose
@@ -189,8 +189,17 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
     }
   }
   if (keepGoing == false && config.strict == true) {
-    logger.error(JSON.stringify(msg));
-    res.status(400).send(msg);
+    if (config.customErrorHandling) {
+      var error = new Error('Request validation error')
+      Object.assign(error, {
+        failedValidation: true,
+        validationResult: msg
+      })
+      next(error)
+    } else {
+      logger.error(JSON.stringify(msg));
+      res.status(400).send(msg);
+    }
   } else {
     if (msg.length != 0) {
       logger.warning(JSON.stringify(msg));
@@ -422,7 +431,7 @@ module.exports = (oasDoc) => {
 
     var requestBody = oasDoc.paths[requestedSpecPath][method].requestBody;
     if (requestBody != undefined) {
-      // when and endpoint provides a file upload option and other properties, 
+      // when and endpoint provides a file upload option and other properties,
       // the content type changes to multipart/form-data
       // other requestBody types such as "image/png" are allowed as well
       // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#considerations-for-file-uploads
@@ -433,7 +442,7 @@ module.exports = (oasDoc) => {
         originalValue: req.body,
         value: req.body
       }
-      
+
       // inject possible file uploads
       if(contentType.toLowerCase() === 'multipart/form-data' && req.files && req.files.length > 0) {
         req.swagger.params[requestBody['x-name']].files = req.files;
