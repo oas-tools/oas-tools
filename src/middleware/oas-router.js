@@ -205,8 +205,9 @@ module.exports = (controllers) => {
     try {
       var controller = require(path.join(controllers, controllerName));
     } catch (err) {
-      logger.error("Controller not found: " + path.join(controllers, controllerName));
-      process.exit();
+      var errMsg = "Controller not found: " + path.join(controllers, controllerName);
+      logger.error(errMsg);
+      throw new Error(errMsg);
     }
 
     var oldSend = res.send;
