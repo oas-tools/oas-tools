@@ -24,7 +24,7 @@ var path = require('path');
 var ZSchema = require("z-schema");
 var MIMEtype = require('whatwg-mimetype');
 var config = require('../configurations'),
-  logger = config.logger;
+    logger = config.logger;
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
@@ -41,6 +41,19 @@ function fixNullable(schema) {
       schema.type = [schema.type, "null"];
     }
   });
+}
+
+function getExpectedResponse(responses, code) {
+  // Exact match wins over range definitions (1XX, 2XX, 3XX, 4XX, 5XX)
+  var resp = responses[code];
+  if (resp !== undefined) {
+    return resp;
+  }
+  resp = responses[Math.floor(code / 100) + "XX"];
+  if (resp !== undefined) {
+    return resp;
+  }
+  return responses.default;
 }
 
 /**
@@ -64,16 +77,13 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
   logger.debug("  -method: " + method);
   logger.debug("  -requestedSpecPath: " + requestedSpecPath);
   logger.debug("  -data: " + JSON.stringify(data));
-  var responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses[code]; //Section of the oasDoc file starting at a response code
-  if (responseCodeSection == undefined && oasDoc.paths[requestedSpecPath][method].responses.default != undefined) {
-    responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses.default;
-  }
-  if (responseCodeSection == undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
+  var responseCodeSection = getExpectedResponse(oasDoc.paths[requestedSpecPath][method].responses, code); //Section of the oasDoc file starting at a response code
+  if (responseCodeSection === undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
     var newErr = {
       message: "Wrong response code: " + code
     };
     msg.push(newErr);
-    if (config.strict == true) {
+    if (config.strict === true) {
       logger.error(JSON.stringify(msg));
       content[0] = JSON.stringify(msg);
       oldSend.apply(res, content);
@@ -116,20 +126,20 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
       res.header("Content-Type", resultType.essence + ";charset=utf-8");
     }
     if (resultType && resultType.essence === 'application/json') {
-      //if there is no content property for the given response then there is nothing to validate.  
+      //if there is no content property for the given response then there is nothing to validate.
       var validSchema = responseCodeSection.content['application/json'].schema;
       fixNullable(validSchema);
       content[0] = JSON.stringify(content[0]);
       logger.debug("Schema to use for validation: " + JSON.stringify(validSchema));
       var err = validator.validate(data, validSchema);
-      if (err == false) {
+      if (err === false) {
         newErr = {
           message: "Wrong data in the response. ",
           error: validator.getLastErrors(),
           content: data
         };
         msg.push(newErr);
-        if (config.strict == true) {
+        if (config.strict === true) {
           content[0] = JSON.stringify(msg);
           logger.error(content[0]);
           res.status(400);
