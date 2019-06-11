@@ -411,7 +411,6 @@ module.exports = (oasDoc) => {
         var oVal = getParameterValue(req, parameter);
         var value = convertValue(oVal, parameter.schema == undefined ? parameter : parameter.schema, pType);
 
-        console.log('requestedSpecPath = '+requestedSpecPath)
         req.swagger.params[parameter.name] = {
                                         // pgillis 2019 June 11
 

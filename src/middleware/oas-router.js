@@ -194,12 +194,12 @@ module.exports = (controllers) => {
     // Handle case where the path has an x-swagger-router-controller.
     //logger.debug(requestedSpecPath+ " hasProperty "+  oasDoc.paths[requestedSpecPath].hasOwnProperty('x-swagger-router-controller'));
 
-    if (oasDoc.paths[requestedSpecPath].hasOwnProperty('x-swagger-router-controller')
-            && oasDoc.paths[requestedSpecPath][method].hasOwnProperty('x-swagger-router-controller') === false) {
+    if (oasDoc.paths[requestedSpecPath].hasOwnProperty('x-swagger-router-controller') &&
+            oasDoc.paths[requestedSpecPath][method].hasOwnProperty('x-swagger-router-controller') === false) {
         oasDoc.paths[requestedSpecPath][method] = oasDoc.paths[requestedSpecPath]['x-swagger-router-controller']
     }
-    if (oasDoc.paths[requestedSpecPath].hasOwnProperty('x-router-controller')
-            && oasDoc.paths[requestedSpecPath][method].hasOwnProperty('x-router-controller') === false) {
+    if (oasDoc.paths[requestedSpecPath].hasOwnProperty('x-router-controller') &&
+            oasDoc.paths[requestedSpecPath][method].hasOwnProperty('x-router-controller') === false) {
         oasDoc.paths[requestedSpecPath][method] = oasDoc.paths[requestedSpecPath]['x-router-controller']
     }
     // end pgillis
