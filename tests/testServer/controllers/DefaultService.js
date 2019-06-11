@@ -19,7 +19,7 @@ let pets = [
   {
     id: 10,
     name: "Pig",
-    tag: "Looking for mud"
+    tag: undefined
   },
   {
     id: 28,
@@ -53,7 +53,7 @@ function corruptPets() {
     {
       id: 10,
       name: "Pig",
-      tag: "Looking for mud"
+      tag: undefined
     },
     {
       name: "Bat",
@@ -93,7 +93,7 @@ function setCorrectPets() {
     {
       id: 10,
       name: "Pig",
-      tag: "Looking for mud"
+      tag: undefined
     },
     {
       id: 200,

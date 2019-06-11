@@ -592,8 +592,7 @@ function getTests() {
         it('it should GET a pet by the given id', (done) => {
             var pet = {
                 id: 10,
-                name: "Pig",
-                tag: "Looking for mud"
+                name: "Pig"
             };
             chai.request(server)
                 .get('/api/v1/pets/' + pet.id)
@@ -606,10 +605,9 @@ function getTests() {
                     res.body.should.be.a('object');
                     res.body.should.have.property('id');
                     res.body.should.have.property('name');
-                    res.body.should.have.property('tag');
+                    res.body.should.not.have.property('tag');
                     res.body.should.have.property('id').eql(pet.id);
                     res.body.should.have.property('name').eql(pet.name);
-                    res.body.should.have.property('tag').eql(pet.tag);
                     done();
                 });
         });
