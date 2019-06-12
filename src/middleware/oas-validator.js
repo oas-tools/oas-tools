@@ -189,8 +189,17 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
     }
   }
   if (keepGoing == false && config.strict == true) {
-    logger.error(JSON.stringify(msg));
-    res.status(400).send(msg);
+    if (config.customErrorHandling) {
+      var error = new Error('Request validation error')
+      Object.assign(error, {
+        failedValidation: true,
+        validationResult: msg
+      })
+      next(error)
+    } else {
+      logger.error(JSON.stringify(msg));
+      res.status(400).send(msg);
+    }
   } else {
     if (msg.length != 0) {
       logger.warning(JSON.stringify(msg));
