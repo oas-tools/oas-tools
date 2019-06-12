@@ -132,6 +132,16 @@ exports.ownershipTest = (req, res) => {
 };
 
 /**
+ *  Path for testing operation property
+ */
+exports.operationTests = (req, res) => {
+  res.send({
+    operation: req.swagger.operation
+  });
+};
+
+
+/**
  *  Path for testing ownership with acl binding
  */
 exports.ownershipBindingTest = (req, res) => {
@@ -180,7 +190,7 @@ exports.createPetsViaMultipartFormdata = (args, res) => {
     name: args.body.name,
     tag: 'not important'
   }
-  pets.push(pet); 
+  pets.push(pet);
   exports.pets = pets;
   res.status(201).send(pets);
 }
