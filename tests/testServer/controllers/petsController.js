@@ -19,7 +19,7 @@ var pets = [
   {
     id: 10,
     name: "Pig",
-    tag: "Looking for mud"
+    tag: undefined
   },
   {
     id: 28,
@@ -94,7 +94,7 @@ function setCorrectPets() {
     {
       id: 10,
       name: "Pig",
-      tag: "Looking for mud"
+      tag: undefined
     },
     {
       id: 200,

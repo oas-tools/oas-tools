@@ -44,6 +44,29 @@ function fixNullable(schema) {
 }
 
 /**
+ * When an object carries keys whose values are "undefined" they fail the z-schema validation even though
+ * when those objects are serialized to JSON those keys are never serialized which would effectively make
+ * it pass the schema validation.
+ * This method strips away (recursively) those undefined keys
+ * NOTE: This method modifies the input!
+ * @param data
+ * @param maxDepth limits the recursion to avoid stack overflow when object references itself
+ */
+function stripUndefinedKeys(data, maxDepth = 1024) {
+  if (typeof data !== 'object' || data === null || maxDepth <= 0) {
+    return data;
+  }
+  Object.getOwnPropertyNames(data).forEach((property) => {
+    if (typeof data[property] === 'object') {
+      stripUndefinedKeys(data[property], maxDepth - 1);
+    } else if (data[property] === undefined) {
+      delete data[property];
+    }
+  });
+  return data;
+}
+
+/**
  * Checks if the data sent as a response for the previous request matches the indicated in the specification file in the responses section for that request.
  * This function is used in the interception of the response sent by the controller to the client that made the request.
  * @param {object} req - req object of the request.
@@ -57,7 +80,7 @@ function fixNullable(schema) {
 function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, content) {
   var code = res.statusCode;
   var msg = [];
-  var data = content[0];
+  var data = stripUndefinedKeys(content[0]);
   logger.debug("Processing at checkResponse:");
   logger.debug("  -code: " + code);
   logger.debug("  -oasDoc: " + JSON.stringify(oasDoc));
