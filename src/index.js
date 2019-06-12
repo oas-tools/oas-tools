@@ -30,6 +30,11 @@ var request = require('request');
 var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.yaml'), 'utf8');
 schemaV3 = jsyaml.safeLoad(schemaV3);
 
+function fatalError(msg) {
+  logger.error(msg);
+  throw new Error(msg);
+}
+
 
 /**
  * Checks that specDoc and callback exist and validates specDoc.
@@ -51,8 +56,7 @@ function init_checks(specDoc, callback) {
 
   var err = validator.validate(specDoc, schemaV3);
   if (err == false) {
-    logger.error('Specification file is not valid: ' + JSON.stringify(validator.getLastErrors()));
-    process.exit();
+    fatalError('Specification file is not valid: ' + JSON.stringify(validator.getLastErrors()));
   } else {
     logger.info("Valid specification file");
   }
@@ -91,8 +95,7 @@ function checkOperationId(load, pathName, methodName, methodSection) {
   }
 
   if (load[opId] == undefined) {
-    logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + opId + ")");
-    process.exit();
+    fatalError("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + opId + ")");
   } else {
     logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
   }
@@ -126,8 +129,7 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
       load = require(pathModule.join(controllersLocation, utils.generateName(controller,undefined)));
       checkOperationId(load, pathName, methodName, methodSection);
     } catch (err) {
-      logger.error(err);
-      process.exit();
+      fatalError(err.toString());
     }
   } else {
     controller = utils.generateName(pathName, "controller");
@@ -142,8 +144,7 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
         load = require(pathModule.join(controllersLocation, controller));
         checkOperationId(load, pathName, methodName, methodSection);
       } catch (err) {
-        logger.error("    There is no controller for " + methodName.toUpperCase() + " - " + pathName);
-        process.exit();
+        fatalError("    There is no controller for " + methodName.toUpperCase() + " - " + pathName);
       }
     }
   }
