@@ -423,7 +423,10 @@ module.exports = (oasDoc) => {
         var value = convertValue(oVal, parameter.schema == undefined ? parameter : parameter.schema, pType);
 
         req.swagger.params[parameter.name] = {
-          path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
+                                        // pgillis 2019 June 11
+
+          //path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
+          path: requestedSpecPath,
           schema: parameter,
           originalValue: oVal,
           value: value
@@ -439,7 +442,11 @@ module.exports = (oasDoc) => {
       // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#considerations-for-file-uploads
       const contentType = Object.keys(requestBody.content)[0];
       req.swagger.params[requestBody['x-name']] = {
-        path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
+
+                                        // pgillis 2019 June 11
+
+        //path: "/some/path", //this shows the path to follow on the spec file to get to the parameter but oas-tools doesn't use it!
+        path: requestedSpecPath,
         schema: requestBody.content[contentType].schema,
         originalValue: req.body,
         value: req.body
@@ -452,6 +459,7 @@ module.exports = (oasDoc) => {
     }
 
     res.locals.requestedSpecPath = requestedSpecPath;
+    logger.debug("OASValidator  -res.locals.requestedSpecPath: " + res.locals.requestedSpecPath);
     checkRequestData(oasDoc, requestedSpecPath, method, res, req, next);
   }
 }

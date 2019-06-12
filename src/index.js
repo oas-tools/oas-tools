@@ -124,7 +124,7 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
 
   if (methodSection[router_property] != undefined) {
     controller = methodSection[router_property];
-    logger.debug("    OAS-doc has " + router_property + " property");
+    logger.debug("    OAS-doc has " + router_property + " property " + controller);
     try {
       load = require(pathModule.join(controllersLocation, utils.generateName(controller,undefined)));
       checkOperationId(load, pathName, methodName, methodSection);
@@ -323,10 +323,19 @@ function registerPaths(specDoc, app) {
   }
 
   var paths = specDoc.paths;
+          //  console.log('specDoc.paths ', specDoc.paths)
   var allowedMethods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
   for (var path in paths) {
     for (var method in paths[path]) {
       if (allowedMethods.includes(method)) {
+            // pgillis 2019 June 10
+            var myPathObj = paths[path]
+            //console.log('myPathObj ', myPathObj)
+            //logger.debug('PWG ****: '+myPathObj+ " hasProperty "+  myPathObj.hasOwnProperty('x-swagger-router-controller'));
+            if (myPathObj.hasOwnProperty('x-swagger-router-controller')
+                    && myPathObj[method].hasOwnProperty('x-swagger-router-controller') === false) {
+                myPathObj[method]['x-swagger-router-controller'] = myPathObj['x-swagger-router-controller']
+            }
         var expressPath = getExpressVersion(path); // TODO: take in account basePath/servers property of the spec doc.
         dictionary[expressPath.toString()] = path;
         logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
