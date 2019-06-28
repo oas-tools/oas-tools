@@ -289,7 +289,7 @@ function registerPaths(specDoc, app) {
   };
   var OASValidatorMid = function() {
     var OASValidator = require('./middleware/oas-validator');
-    return OASValidator.call(undefined, specDoc); 
+    return OASValidator.call(undefined, specDoc);
   };
   initializeSecurityAndAuth(specDoc);
   var OASSecurityMid = function() {
@@ -359,6 +359,9 @@ function registerPaths(specDoc, app) {
     }
   }
   if (config.docs && config.docs.apiDocs) {
+    if (!config.docs.apiDocsPrefix) {
+      config.docs.apiDocsPrefix = '';
+    }
     app.use(config.docs.apiDocsPrefix + config.docs.apiDocs, function (req, res) {
       res.send(specDoc);
     });
@@ -366,6 +369,9 @@ function registerPaths(specDoc, app) {
       var uiHtml = fs.readFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), 'utf8');
       uiHtml = uiHtml.replace('url: "/api-docs"', 'url: "' + config.docs.apiDocsPrefix + config.docs.apiDocs + '"');
       fs.writeFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), uiHtml, 'utf8');
+      if (!config.docs.swaggerUiPrefix) {
+        config.docs.swaggerUiPrefix = '';
+      }
       app.use(config.docs.swaggerUiPrefix + config.docs.swaggerUi, express.static(pathModule.join(__dirname, '../swagger-ui')));
     }
   }
