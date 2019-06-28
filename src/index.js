@@ -278,6 +278,38 @@ function initializeSecurityAndAuth(specDoc) {
 }
 
 /**
+ *
+ * @param {{ docs?: { apiDocs?: string, apiDocsPrefix?: string } }} config
+ */
+var computeDocsUrl = function (config) {
+  if (config.docs && config.docs.apiDocs) {
+    var docUrl = config.docs.apiDocsPrefix || '';
+    docUrl += config.docs.apiDocs || '';
+    if (docUrl) {
+      return docUrl;
+    }
+  }
+
+  return '/api-docs';
+};
+
+/**
+ *
+ * @param {{ docs?: { swaggerUiPrefix?: string, swaggerUiPrefix?: string } }} config
+ */
+var computeSwaggerUrl = function (config) {
+  if (config.docs && config.docs.swaggerUiPrefix) {
+    var uiUrl = config.docs.swaggerUiPrefix || '';
+    uiUrl += config.docs.swaggerUi || '';
+    if (uiUrl) {
+      return uiUrl;
+    }
+  }
+
+  return '/swagger-ui';
+};
+
+/**
  * Function to initialize swagger-tools middlewares.
  *@param {object} specDoc - Specification file (dereferenced).
  *@param {function} app - Express application object.
@@ -289,7 +321,7 @@ function registerPaths(specDoc, app) {
   };
   var OASValidatorMid = function() {
     var OASValidator = require('./middleware/oas-validator');
-    return OASValidator.call(undefined, specDoc); 
+    return OASValidator.call(undefined, specDoc);
   };
   initializeSecurityAndAuth(specDoc);
   var OASSecurityMid = function() {
@@ -359,14 +391,20 @@ function registerPaths(specDoc, app) {
     }
   }
   if (config.docs && config.docs.apiDocs) {
-    app.use(config.docs.apiDocsPrefix + config.docs.apiDocs, function (req, res) {
+    var docUrl = computeDocsUrl(config);
+    app.use(docUrl, function (req, res) {
       res.send(specDoc);
     });
     if (config.docs.swaggerUi) {
+      var uiUrl = computeSwaggerUrl(config);
+      global.console.log({
+        docUrl,
+        uiUrl,
+      });
       var uiHtml = fs.readFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), 'utf8');
-      uiHtml = uiHtml.replace('url: "/api-docs"', 'url: "' + config.docs.apiDocsPrefix + config.docs.apiDocs + '"');
+      uiHtml = uiHtml.replace('url: "/api-docs"', 'url: "' + docUrl + '"');
       fs.writeFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), uiHtml, 'utf8');
-      app.use(config.docs.swaggerUiPrefix + config.docs.swaggerUi, express.static(pathModule.join(__dirname, '../swagger-ui')));
+      app.use(uiUrl, express.static(pathModule.join(__dirname, '../swagger-ui')));
     }
   }
   config.pathsDict = dictionary;
