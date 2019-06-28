@@ -367,7 +367,7 @@ function registerPaths(specDoc, app) {
     });
     if (config.docs.swaggerUi) {
       var uiHtml = fs.readFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), 'utf8');
-      uiHtml = uiHtml.replace('url: "/api-docs"', 'url: "' + config.docs.apiDocsPrefix + config.docs.apiDocs + '"');
+      uiHtml = uiHtml.replace(/url: "[^"]*"/, 'url: "' + config.docs.apiDocsPrefix + config.docs.apiDocs + '"');
       fs.writeFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), uiHtml, 'utf8');
       if (!config.docs.swaggerUiPrefix) {
         config.docs.swaggerUiPrefix = '';
