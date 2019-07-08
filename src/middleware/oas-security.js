@@ -98,6 +98,10 @@ module.exports = (specDoc) => {
 
                     async.map(Object.keys(secReq), (name, callback) => { // logical AND - all must allow
                         var secDef = specDoc.components.securitySchemes[name];
+
+                        if (!secDef) {
+                            throw new Error('Undefined "' + name + '" security scheme');
+                        }
                         var handler = handlers[name];
 
                         secName = name;
