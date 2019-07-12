@@ -98,6 +98,20 @@ module.exports = (specDoc) => {
 
                     async.map(Object.keys(secReq), (name, callback) => { // logical AND - all must allow
                         var secDef = specDoc.components.securitySchemes[name];
+                      
+                        if (!secDef) {
+                            throw new Error('Undefined "' + name + '" security scheme');
+                        }
+                        
+                        // #146: extend the secDef with the array of the securityReq
+                        var rolesObj = securityReqs.find((element) => {
+                            if (element[name]) {
+                                return element;
+                            }
+                        });
+                        secDef.rolesArr = rolesObj.hasOwnProperty(name) ? rolesObj[name] : [];
+                        // end of #146
+                      
                         var handler = handlers[name];
 
                         secName = name;
