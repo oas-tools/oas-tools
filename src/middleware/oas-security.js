@@ -103,14 +103,17 @@ module.exports = (specDoc) => {
                             throw new Error('Undefined "' + name + '" security scheme');
                         }
                         
-                        // #146: extend the secDef with the array of the securityReq
-                        var rolesObj = securityReqs.find((element) => {
-                            if (element[name]) {
-                                return element;
-                            }
-                        });
-                        secDef.rolesArr = rolesObj.hasOwnProperty(name) ? rolesObj[name] : [];
-                        // end of #146
+                        // start #146, extend the secDef with the array of the securityReq
+                        var rolesObjArr = [];
+                        for (const i in securityReqs) {
+                          if ( !securityReqs.hasOwnProperty(i) ) { continuem; }
+                          var element = securityReqs[i];
+                          if (element[name]) {
+                            rolesObjArr = element[name]
+                          }
+                        }
+                        secDef.rolesArr = rolesObjArr;
+                        // end #146, of new role adding
                       
                         var handler = handlers[name];
 
