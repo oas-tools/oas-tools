@@ -30,7 +30,8 @@ var ZSchema = require("z-schema");
 // var urlModule = require('url');
 
 var config = require('../configurations'),
-  logger = config.logger;
+  logger = config.logger,
+  utils = require('../lib/utils');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
@@ -115,7 +116,9 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
       } else {
         // can be any of "application/json", "multipart/form-data", "image/png", ...
         const contentType = Object.keys(requestBody.content)[0];
-        var validSchema = requestBody.content[contentType].schema;
+        var validSchema = _.cloneDeep(requestBody.content[contentType].schema)
+        utils.fixNullable(validSchema)
+
         var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
         // a multipart/form-data request has a "files" property in the request whose
         // properties need to be passed to evaluating the required parameters in the openAPI spec
