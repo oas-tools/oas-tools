@@ -106,11 +106,12 @@ module.exports = (specDoc) => {
                         // start #146, extend the secDef with the array of the securityReq
                         var rolesObjArr = [];
                         for (const i in securityReqs) {
-                          if ( !securityReqs.hasOwnProperty(i) ) { continue; }
-                          var element = securityReqs[i];
-                          if (element[name]) {
-                            rolesObjArr = element[name]
-                          }
+                            if (securityReqs.hasOwnProperty(i)) {
+                                var element = securityReqs[i];
+                                if (element[name]) {
+                                    rolesObjArr = element[name];
+                                }
+                            }
                         }
                         secDef.rolesArr = rolesObjArr;
                         // end #146, of new role adding
