@@ -205,7 +205,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
     }
   } else {
     if (msg.length != 0) {
-      logger.warning(JSON.stringify(msg));
+      logger.warn(JSON.stringify(msg));
     }
     res.locals.oasDoc = oasDoc;
     next();
