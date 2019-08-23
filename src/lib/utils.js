@@ -22,6 +22,16 @@ Considerar que:
 
 var validator = require('validator');
 
+var fixNullable = function(schema) {
+  Object.getOwnPropertyNames(schema).forEach((property) => {
+    if (typeof schema[property] === 'object') {
+      fixNullable(schema[property]);
+    } else if (property === 'type' && typeof schema[property] === 'string' && schema.nullable === true) {
+      schema.type = [schema.type, "null"];
+    }
+  });
+}
+
 /**
  * Generates a valid name, according to value of nameFor.
  * @param {string} input - String to generate a name from.
@@ -47,5 +57,6 @@ var generateName = function(input, nameFor) {
 }
 
 module.exports = {
-  generateName: generateName
+  generateName: generateName,
+  fixNullable: fixNullable
 };

@@ -21,10 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 var exports; // eslint-disable-line
 var path = require('path');
+var _ = require('lodash-compat')
 var ZSchema = require("z-schema");
 var MIMEtype = require('whatwg-mimetype');
 var config = require('../configurations'),
-  logger = config.logger;
+    logger = config.logger;
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
@@ -33,14 +34,40 @@ var validator = new ZSchema({
 var utils = require("../lib/utils.js");
 var controllers; // eslint-disable-line
 
-function fixNullable(schema) {
-  Object.getOwnPropertyNames(schema).forEach((property) => {
-    if (typeof schema[property] === 'object') {
-      fixNullable(schema[property]);
-    } else if (property === 'type' && typeof schema[property] === 'string' && schema.nullable === true) {
-      schema.type = [schema.type, "null"];
+function getExpectedResponse(responses, code) {
+  // Exact match wins over range definitions (1XX, 2XX, 3XX, 4XX, 5XX)
+  var resp = responses[code];
+  if (resp !== undefined) {
+    return resp;
+  }
+  resp = responses[Math.floor(code / 100) + "XX"];
+  if (resp !== undefined) {
+    return resp;
+  }
+  return responses.default;
+}
+
+/**
+ * When an object carries keys whose values are "undefined" they fail the z-schema validation even though
+ * when those objects are serialized to JSON those keys are never serialized which would effectively make
+ * it pass the schema validation.
+ * This method strips away (recursively) those undefined keys
+ * NOTE: This method modifies the input!
+ * @param data
+ * @param maxDepth limits the recursion to avoid stack overflow when object references itself
+ */
+function stripUndefinedKeys(data, maxDepth = 1024) {
+  if (typeof data !== 'object' || data === null || maxDepth <= 0) {
+    return data;
+  }
+  Object.getOwnPropertyNames(data).forEach((property) => {
+    if (typeof data[property] === 'object') {
+      stripUndefinedKeys(data[property], maxDepth - 1);
+    } else if (data[property] === undefined) {
+      delete data[property];
     }
   });
+  return data;
 }
 
 /**
@@ -57,28 +84,25 @@ function fixNullable(schema) {
 function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, content) {
   var code = res.statusCode;
   var msg = [];
-  var data = content[0];
+  var data = stripUndefinedKeys(content[0]);
   logger.debug("Processing at checkResponse:");
   logger.debug("  -code: " + code);
   logger.debug("  -oasDoc: " + JSON.stringify(oasDoc));
   logger.debug("  -method: " + method);
   logger.debug("  -requestedSpecPath: " + requestedSpecPath);
   logger.debug("  -data: " + JSON.stringify(data));
-  var responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses[code]; //Section of the oasDoc file starting at a response code
-  if (responseCodeSection == undefined && oasDoc.paths[requestedSpecPath][method].responses.default != undefined) {
-    responseCodeSection = oasDoc.paths[requestedSpecPath][method].responses.default;
-  }
-  if (responseCodeSection == undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
+  var responseCodeSection = getExpectedResponse(oasDoc.paths[requestedSpecPath][method].responses, code); //Section of the oasDoc file starting at a response code
+  if (responseCodeSection === undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
     var newErr = {
       message: "Wrong response code: " + code
     };
     msg.push(newErr);
-    if (config.strict == true) {
+    if (config.strict === true) {
       logger.error(JSON.stringify(msg));
       content[0] = JSON.stringify(msg);
       oldSend.apply(res, content);
     } else {
-      logger.warning(JSON.stringify(msg));
+      logger.warn(JSON.stringify(msg));
       oldSend.apply(res, content);
     }
   } else if (responseCodeSection.hasOwnProperty('content')) {
@@ -116,28 +140,29 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
       res.header("Content-Type", resultType.essence + ";charset=utf-8");
     }
     if (resultType && resultType.essence === 'application/json') {
-      //if there is no content property for the given response then there is nothing to validate.  
-      var validSchema = responseCodeSection.content['application/json'].schema;
-      fixNullable(validSchema);
+      //if there is no content property for the given response then there is nothing to validate.
+      var validSchema = _.cloneDeep(responseCodeSection.content['application/json'].schema);
+      utils.fixNullable(validSchema)
+
       content[0] = JSON.stringify(content[0]);
       logger.debug("Schema to use for validation: " + JSON.stringify(validSchema));
       var err = validator.validate(data, validSchema);
-      if (err == false) {
+      if (err === false) {
         newErr = {
           message: "Wrong data in the response. ",
           error: validator.getLastErrors(),
           content: data
         };
         msg.push(newErr);
-        if (config.strict == true) {
+        if (config.strict === true) {
           content[0] = JSON.stringify(msg);
           logger.error(content[0]);
           res.status(400);
           oldSend.apply(res, content);
         } else {
-          logger.warning(JSON.stringify(msg) + JSON.stringify(validator.getLastErrors()));
+          logger.warn(JSON.stringify(msg) + JSON.stringify(validator.getLastErrors()));
           if (content[0].substr(0, 46) === '{"message":"This is the mockup controller for ') {
-            logger.warning('The used controller might not have been implemented');
+            logger.warn('The used controller might not have been implemented');
           }
           oldSend.apply(res, content);
         }
@@ -190,6 +215,20 @@ module.exports = (controllers) => {
     var method = req.method.toLowerCase();
     var controllerName;
 
+    // pgillis 2019 Jun 10
+    // Handle case where the path has an x-swagger-router-controller.
+    //logger.debug(requestedSpecPath+ " hasProperty "+  oasDoc.paths[requestedSpecPath].hasOwnProperty('x-swagger-router-controller'));
+
+    if (oasDoc.paths[requestedSpecPath].hasOwnProperty('x-swagger-router-controller') &&
+            oasDoc.paths[requestedSpecPath][method].hasOwnProperty('x-swagger-router-controller') === false) {
+        oasDoc.paths[requestedSpecPath][method] = oasDoc.paths[requestedSpecPath]['x-swagger-router-controller']
+    }
+    if (oasDoc.paths[requestedSpecPath].hasOwnProperty('x-router-controller') &&
+            oasDoc.paths[requestedSpecPath][method].hasOwnProperty('x-router-controller') === false) {
+        oasDoc.paths[requestedSpecPath][method] = oasDoc.paths[requestedSpecPath]['x-router-controller']
+    }
+    // end pgillis
+
     if (oasDoc.paths[requestedSpecPath][method].hasOwnProperty('x-swagger-router-controller')) { //oasDoc file has router_property: use the controller specified there
       controllerName = oasDoc.paths[requestedSpecPath][method]['x-swagger-router-controller'];
     } else if (oasDoc.paths[requestedSpecPath][method].hasOwnProperty('x-router-controller')) { //oasDoc file has router_property: use the controller specified there
@@ -205,8 +244,9 @@ module.exports = (controllers) => {
     try {
       var controller = require(path.join(controllers, controllerName));
     } catch (err) {
-      logger.error("Controller not found: " + path.join(controllers, controllerName));
-      process.exit();
+      var errMsg = "Controller not found: " + path.join(controllers, controllerName);
+      logger.error(errMsg);
+      throw new Error(errMsg);
     }
 
     var oldSend = res.send;

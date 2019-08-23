@@ -30,6 +30,11 @@ var request = require('request');
 var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.yaml'), 'utf8');
 schemaV3 = jsyaml.safeLoad(schemaV3);
 
+function fatalError(msg) {
+  logger.error(msg);
+  throw new Error(msg);
+}
+
 
 /**
  * Checks that specDoc and callback exist and validates specDoc.
@@ -51,8 +56,7 @@ function init_checks(specDoc, callback) {
 
   var err = validator.validate(specDoc, schemaV3);
   if (err == false) {
-    logger.error('Specification file is not valid: ' + JSON.stringify(validator.getLastErrors()));
-    process.exit();
+    fatalError('Specification file is not valid: ' + JSON.stringify(validator.getLastErrors()));
   } else {
     logger.info("Valid specification file");
   }
@@ -91,8 +95,7 @@ function checkOperationId(load, pathName, methodName, methodSection) {
   }
 
   if (load[opId] == undefined) {
-    logger.error("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + opId + ")");
-    process.exit();
+    fatalError("      There is no function in the controller for " + methodName.toUpperCase() + " - " + pathName + " (operationId: " + opId + ")");
   } else {
     logger.debug("      Controller for " + methodName.toUpperCase() + " - " + pathName + ": OK");
   }
@@ -121,13 +124,12 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
 
   if (methodSection[router_property] != undefined) {
     controller = methodSection[router_property];
-    logger.debug("    OAS-doc has " + router_property + " property");
+    logger.debug("    OAS-doc has " + router_property + " property " + controller);
     try {
       load = require(pathModule.join(controllersLocation, utils.generateName(controller,undefined)));
       checkOperationId(load, pathName, methodName, methodSection);
     } catch (err) {
-      logger.error(err);
-      process.exit();
+      fatalError(err.toString());
     }
   } else {
     controller = utils.generateName(pathName, "controller");
@@ -142,8 +144,7 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
         load = require(pathModule.join(controllersLocation, controller));
         checkOperationId(load, pathName, methodName, methodSection);
       } catch (err) {
-        logger.error("    There is no controller for " + methodName.toUpperCase() + " - " + pathName);
-        process.exit();
+        fatalError("    There is no controller for " + methodName.toUpperCase() + " - " + pathName);
       }
     }
   }
@@ -288,7 +289,7 @@ function registerPaths(specDoc, app) {
   };
   var OASValidatorMid = function() {
     var OASValidator = require('./middleware/oas-validator');
-    return OASValidator.call(undefined, specDoc); 
+    return OASValidator.call(undefined, specDoc);
   };
   initializeSecurityAndAuth(specDoc);
   var OASSecurityMid = function() {
@@ -322,10 +323,19 @@ function registerPaths(specDoc, app) {
   }
 
   var paths = specDoc.paths;
+          //  console.log('specDoc.paths ', specDoc.paths)
   var allowedMethods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
   for (var path in paths) {
     for (var method in paths[path]) {
       if (allowedMethods.includes(method)) {
+            // pgillis 2019 June 10
+            var myPathObj = paths[path]
+            //console.log('myPathObj ', myPathObj)
+            //logger.debug('PWG ****: '+myPathObj+ " hasProperty "+  myPathObj.hasOwnProperty('x-swagger-router-controller'));
+            if (myPathObj.hasOwnProperty('x-swagger-router-controller')
+                    && myPathObj[method].hasOwnProperty('x-swagger-router-controller') === false) {
+                myPathObj[method]['x-swagger-router-controller'] = myPathObj['x-swagger-router-controller']
+            }
         var expressPath = getExpressVersion(path); // TODO: take in account basePath/servers property of the spec doc.
         dictionary[expressPath.toString()] = path;
         logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
@@ -349,13 +359,19 @@ function registerPaths(specDoc, app) {
     }
   }
   if (config.docs && config.docs.apiDocs) {
+    if (!config.docs.apiDocsPrefix) {
+      config.docs.apiDocsPrefix = '';
+    }
     app.use(config.docs.apiDocsPrefix + config.docs.apiDocs, function (req, res) {
       res.send(specDoc);
     });
     if (config.docs.swaggerUi) {
       var uiHtml = fs.readFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), 'utf8');
-      uiHtml = uiHtml.replace('url: "/api-docs"', 'url: "' + config.docs.apiDocsPrefix + config.docs.apiDocs + '"');
+      uiHtml = uiHtml.replace(/url: "[^"]*"/, 'url: "' + config.docs.apiDocsPrefix + config.docs.apiDocs + '"');
       fs.writeFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), uiHtml, 'utf8');
+      if (!config.docs.swaggerUiPrefix) {
+        config.docs.swaggerUiPrefix = '';
+      }
       app.use(config.docs.swaggerUiPrefix + config.docs.swaggerUi, express.static(pathModule.join(__dirname, '../swagger-ui')));
     }
   }

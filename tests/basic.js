@@ -77,6 +77,21 @@ function getTests() {
                 });
         });
 
+        /* testing of operation property */
+        it('it should return the operation part of the spec via req.swagger.operation', (done) => {
+            chai.request(server)
+                .get('/api/v1/operationTests')
+                .set('Authorization', 'Bearer ' + token)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    res.body.operation.operationId.should.equal('operationTests')
+                    done();
+                });
+        });
+
         /* testing of parameters in query */
         it('it should get an error informing of missing required parameters in query', (done) => {
             chai.request(server)
@@ -592,8 +607,7 @@ function getTests() {
         it('it should GET a pet by the given id', (done) => {
             var pet = {
                 id: 10,
-                name: "Pig",
-                tag: "Looking for mud"
+                name: "Pig"
             };
             chai.request(server)
                 .get('/api/v1/pets/' + pet.id)
@@ -606,10 +620,9 @@ function getTests() {
                     res.body.should.be.a('object');
                     res.body.should.have.property('id');
                     res.body.should.have.property('name');
-                    res.body.should.have.property('tag');
+                    res.body.should.not.have.property('tag');
                     res.body.should.have.property('id').eql(pet.id);
                     res.body.should.have.property('name').eql(pet.name);
-                    res.body.should.have.property('tag').eql(pet.tag);
                     done();
                 });
         });
@@ -1304,7 +1317,7 @@ function miscTests() {
 function multipartFormTests() {
     describe('/POST multipart-formdata pet', () => {
         // throughout this block: keep "function" in it-callback for "this"-scope
-        
+
         it('should throw 401 for adding a pet via multipart/form-data b/c no JWT was provided', function() { // eslint-disable-line
             const pet = {
                 id: 4711,
@@ -1325,7 +1338,7 @@ function multipartFormTests() {
                     throw err;
                 })
         })
-        
+
         it('should throw 403 for adding a pet via multipart/form-data b/c provided JWT is not valid', function() { // eslint-disable-line
             const pet = {
                 id: 4711,
