@@ -102,7 +102,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
       content[0] = JSON.stringify(msg);
       oldSend.apply(res, content);
     } else {
-      logger.warning(JSON.stringify(msg));
+      logger.warn(JSON.stringify(msg));
       oldSend.apply(res, content);
     }
   } else if (responseCodeSection.hasOwnProperty('content')) {
@@ -160,9 +160,9 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
           res.status(400);
           oldSend.apply(res, content);
         } else {
-          logger.warning(JSON.stringify(msg) + JSON.stringify(validator.getLastErrors()));
+          logger.warn(JSON.stringify(msg) + JSON.stringify(validator.getLastErrors()));
           if (content[0].substr(0, 46) === '{"message":"This is the mockup controller for ') {
-            logger.warning('The used controller might not have been implemented');
+            logger.warn('The used controller might not have been implemented');
           }
           oldSend.apply(res, content);
         }
