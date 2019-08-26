@@ -167,7 +167,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
           keepGoing = false;
         } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
           try { // eslint-disable-line
-            if (schema.type !== 'string') {
+            if (schema.type !== 'string') { // eslint-disable-line
               value = JSON.parse(req[location][name]);
             } else {
               value = String(req[location][name]);
