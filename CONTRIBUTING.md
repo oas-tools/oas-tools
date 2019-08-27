@@ -43,3 +43,4 @@ If you fix a bug or implement a suggestion, we greatly appreciate any pull reque
   * If the **Travis CI** build fails, please check the report on its website. Note that the build might fail because either **the tests are failing**, **there are linting errors**, or **the build fails to start**. In any case, **try to fix the problem and check if the build passes**. We can assist you if you need any help.
   * If **Codecov** (code coverage) fails, you might have added or modified some functionality without enough testing. **If the coverage drop is about 1% or greater, please add new tests**. We can also create new tests if you need help.
   * If **Snyk** fails, **we will check the problem** because it is probably on our side. We will add a comment in the pull request if we need further action from you.
+* If all checks are passing, **we will merge the pull request and its content will be available in the next version**.
