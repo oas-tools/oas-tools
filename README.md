@@ -235,7 +235,7 @@ __Known limitations and differences with swagger-tools:__
 
 Thanks to community contributions, we are aware of some limitations and differences that oas-tools currently has:
 
-* The `res.json()` function from Express is not working properly ([#71](https://github.com/isa-group/oas-tools/issues/71)).
+* The `res.json` function from Express is not working properly ([#71](https://github.com/isa-group/oas-tools/issues/71)).
 * Multiple APIs per Node.js instance do not work ([#115](https://github.com/isa-group/oas-tools/issues/115)).
 * Response validation is done inside the router middleware ([#119](https://github.com/isa-group/oas-tools/issues/119)).
 * Middlewares returned by the `initializeMiddleware` function are now no-ops, and our middlewares are initialized beforehand.
