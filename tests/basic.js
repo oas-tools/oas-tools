@@ -138,20 +138,6 @@ function getTests() {
                     done();
                 });
         });
-        it('it should get an error informing the required parameter stringParam was not of the right type', (done) => {
-            chai.request(server)
-                .get('/api/v1/paramTestsQuery?integerParam=9&booleanParam=false&stringParam=89&doubleParam=1.9')
-                .set('Authorization', 'Bearer ' + token)
-                .end((err, res) => {
-                    if (err) {
-                        done(err);
-                    }
-                    res.should.have.status(400);
-                    res.body.should.be.a('array');
-                    JSON.stringify(res.body).should.contain("Wrong parameter stringParam in query");
-                    done();
-                });
-        });
         it('it should get an error informing the required parameter doubleParam was not of the right type', (done) => {
             chai.request(server)
                 .get('/api/v1/paramTestsQuery?integerParam=9&booleanParam=false&stringParam=okay&doubleParam=wrong')
@@ -194,20 +180,6 @@ function getTests() {
                     res.should.have.status(400);
                     res.body.should.be.a('array');
                     JSON.stringify(res.body).should.contain("Wrong parameter booleanParam in params");
-                    done();
-                });
-        });
-        it('it should get an error informing the required parameter stringParam was not of the right type', (done) => {
-            chai.request(server)
-                .get('/api/v1/paramTestsPath/21/false/90/1.9')
-                .set('Authorization', 'Bearer ' + token)
-                .end((err, res) => {
-                    if (err) {
-                        done(err);
-                    }
-                    res.should.have.status(400);
-                    res.body.should.be.a('array');
-                    JSON.stringify(res.body).should.contain("Wrong parameter stringParam in params");
                     done();
                 });
         });

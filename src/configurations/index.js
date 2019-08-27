@@ -115,14 +115,14 @@ function createNewLogger(){
   var customLevels = {
     levels: {
       error: 7,
-      warning: 8,
+      warn: 8,
       custom: 9,
       info: 10,
       debug: 11
     },
     colors: {
       error: 'red',
-      warning: 'yellow',
+      warn: 'yellow',
       custom: 'magenta',
       info: 'white',
       debug: 'blue'
