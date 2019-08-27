@@ -231,6 +231,17 @@ Also make sure that the application consuming the openAPI server sends the file 
 
 Once you have done all this, leave the rest the way it is and just run your appliaction with ‘node index.js’ or any other command you have specified at your package.json for running the application.
 
+__Known limitations and differences with swagger-tools:__
+
+Thanks to community contributions, we are aware of some limitations and differences that oas-tools currently has:
+
+* The `res.json()` function from Express is not working properly ([#71](https://github.com/isa-group/oas-tools/issues/71)).
+* Multiple APIs per Node.js instance do not work ([#115](https://github.com/isa-group/oas-tools/issues/115)).
+* Response validation is done inside the router middleware ([#119](https://github.com/isa-group/oas-tools/issues/119)).
+* Middlewares returned by the `initializeMiddleware` function are now no-ops, and our middlewares are initialized beforehand.
+
+If you find any other difference, please create a new issue so that we are aware and can update this list. We will try to minimize the number of differences so that the migration from swagger-tools to oas-tools is as smooth as possible.
+
 ## 2. oasSecurity
 
 The configuration variables `oasSecurity` and `securityFile` allow the use of handlers to manage authentication. This works similarly to the swagger-security middleware found in [swagger-tools](https://github.com/apigee-127/swagger-tools). In fact, most of our code is reused from that same middleware. We have only adapted it to work with OAS 3.0 and made some changes to allow automatic validation of JWTs (more on that later).
@@ -523,6 +534,9 @@ which causes validation errors to be passed to `next()`. The following propertie
 |`failedValidation` | `Boolean` | Property can be used to check if the error comes from the oas validation. |
 |`validationResult` | `Object` | Validation results conforming to the beforementioned schema. |
  
+## Contributing
+
+We are open to issues and pull requests. If you want to contribute to this project, please check our [recommended guidelines](contributing.md).
 
 ## License
 
