@@ -536,7 +536,7 @@ which causes validation errors to be passed to `next()`. The following propertie
  
 ## Contributing
 
-We are open to issues and pull requests. If you want to contribute to this project, please check our [recommended guidelines](contributing.md).
+We are open to issues and pull requests. If you want to contribute to this project, please check our [recommended guidelines](CONTRIBUTING.md).
 
 ## License
 
