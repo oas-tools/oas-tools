@@ -730,6 +730,41 @@ function postTests() { //this one calls putTests()
                     done();
                 });
         });
+        it('it should fail optional request body validation with invalid request body', (done) => {
+            var invalidBody = {
+                invalidParameter: 'invalidParameter'
+            }
+            chai.request(server)
+                .post('/api/v1/requestBodyTest')
+                .set('Authorization', 'Bearer ' + token)
+                .send(invalidBody)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(400);
+                    res.body.should.be.a('array');
+                    JSON.stringify(res.body).should.contain("Wrong data in the body of the request.");
+                    done();
+                });
+        });
+        it('it should pass optional request body validation without request body', (done) => {
+            var pet = {
+                id: 1,
+                name: 'Test'
+            }
+            chai.request(server)
+                .post('/api/v1/requestBodyTest')
+                .set('Authorization', 'Bearer ' + token)
+                .send(pet)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(201);
+                    done();
+                });
+        });
         it('it should not POST a pet whose id is of type string instead of integer', (done) => {
             var pet = {
                 id: "20",
