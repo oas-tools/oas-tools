@@ -106,13 +106,14 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
 
   if (paths[requestedSpecPath][method].hasOwnProperty('requestBody')) {
     var requestBody = paths[requestedSpecPath][method].requestBody;
-    if (req.body == undefined || JSON.stringify(req.body) == '{}') {
+    const emptyBody = req.body == undefined || JSON.stringify(req.body) == '{}';
+    if (requestBody.required && emptyBody) {
       var newErr = {
         message: "Missing object in the request body. "
       };
       msg.push(newErr);
       keepGoing = false;
-    } else {
+    } else if (requestBody.required || !emptyBody) {
       // can be any of "application/json", "multipart/form-data", "image/png", ...
       const contentType = Object.keys(requestBody.content)[0];
       var validSchema = _.cloneDeep(requestBody.content[contentType].schema)
