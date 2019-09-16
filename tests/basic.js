@@ -748,7 +748,7 @@ function postTests() { //this one calls putTests()
                     done();
                 });
         });
-        it('it should pass optional request body validation without request body', (done) => {
+        it('it should pass optional request body validation with valid request body', (done) => {
             var pet = {
                 id: 1,
                 name: 'Test'
@@ -757,6 +757,18 @@ function postTests() { //this one calls putTests()
                 .post('/api/v1/requestBodyTest')
                 .set('Authorization', 'Bearer ' + token)
                 .send(pet)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(201);
+                    done();
+                });
+        });
+        it('it should pass optional request body validation without request body', (done) => {
+            chai.request(server)
+                .post('/api/v1/requestBodyTest')
+                .set('Authorization', 'Bearer ' + token)
                 .end((err, res) => {
                     if (err) {
                         done(err);
