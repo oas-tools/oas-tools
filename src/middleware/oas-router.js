@@ -241,13 +241,7 @@ module.exports = (controllers) => {
 
     var opID = getOpId(oasDoc, requestedSpecPath, method);
 
-    try {
-      var controller = require(path.join(controllers, controllerName));
-    } catch (err) {
-      var errMsg = "Controller not found: " + path.join(controllers, controllerName);
-      logger.error(errMsg);
-      throw new Error(errMsg);
-    }
+    var controller = require(path.join(controllers, controllerName));
 
     var oldSend = res.send;
     res.send = function (data) { // eslint-disable-line

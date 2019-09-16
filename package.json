@@ -1,6 +1,6 @@
 {
   "name": "oas-tools",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "",
   "main": "src/index.js",
   "scripts": {
@@ -42,12 +42,12 @@
     "chai": "^4.2.0",
     "chai-http": "^4.2.1",
     "codecov": "^3.3.0",
-    "eslint": "^6.0.0",
+    "eslint": "^6.2.2",
     "express": "^4.16.4",
     "http": "0.0.0",
     "jsdoc": "^3.6.3",
     "mocha": "^6.1.4",
-    "mongoose": "^5.6.1",
+    "mongoose": "^5.6.11",
     "nyc": "^14.0.0",
     "publish-please": "^5.5.1"
   },
