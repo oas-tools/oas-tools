@@ -225,6 +225,13 @@ exports.showPetById = (args, res) => {
 }
 
 /**
+ * Retrieves headers for pet
+ */
+exports.getPetHeaders = (args, res) => {
+  res.status(200).send();
+}
+
+/**
  *  Deletes a single pet from the collection
  */
 exports.deletePet = (args, res) => {
@@ -392,6 +399,7 @@ exports.grantsFile = (req, res) => {
         ]
       }
     },
+    userWithoutPermissions: {},
     extendeduser: {
       "$extend": ["user"]
     }

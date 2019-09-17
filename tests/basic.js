@@ -22,6 +22,10 @@ var tokenError = jwt.sign({
 var tokenNoParam = jwt.sign({
     iss: 'ISA Auth'
 }, 'test');
+var userWithoutPermissions = jwt.sign({
+    iss: 'ISA Auth',
+    role: 'userWithoutPermissions'
+}, 'test');
 const serverProto = require('./testServer');
 let server = require('./testServer');
 const indexFile = require('./../src/index');
@@ -595,6 +599,40 @@ function getTests() {
                     res.body.should.not.have.property('tag');
                     res.body.should.have.property('id').eql(pet.id);
                     res.body.should.have.property('name').eql(pet.name);
+                    done();
+                });
+        });
+
+        it('it should authenticate with appropriate token using HEAD', (done) => {
+            var pet = {
+                id: 10,
+                name: "Pig"
+            };
+            chai.request(server)
+                .head('/api/v1/pets/' + pet.id)
+                .set('Authorization', 'Bearer ' + token)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    done();
+                });
+        });
+
+        it('it should fail authorization with wrong token using HEAD', (done) => {
+            var pet = {
+                id: 10,
+                name: "Pig"
+            };
+            chai.request(server)
+                .head('/api/v1/pets/' + pet.id)
+                .set('Authorization', 'Bearer ' + userWithoutPermissions)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(403);
                     done();
                 });
         });

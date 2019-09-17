@@ -359,6 +359,22 @@ paths:
                 $ref: "#/components/schemas/Error"
       #x-router-controller: "petsController"
       #x-router-controller: "Default"
+    head:
+      summary: Get only headers
+      operationId: getPetHeaders
+      x-router-controller: "petsController"
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
     put:
       description: updates a pet based on its petId
       operationId: updatePet
