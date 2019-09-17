@@ -285,6 +285,28 @@ exports.updatePet = (args, res) => {
   exports.pets = pets;
 }
 
+/**
+ * Updates a tag of a pet
+ */
+exports.updateTag = (args, res) => {
+  var present = false;
+  for (var i = 0; i < pets.length; i++) {
+    if (pets[i].id == args.params.petId) {
+      present = true;
+      pets[i].tag = args.body.tag;
+      res.status(200).send({
+        message: "Updated pet"
+      });
+    }
+  }
+  if (!present) {
+    res.status(404).send({
+      message: "There is no pet with id " + args.params.petId
+    });
+  }
+  exports.pets = pets;
+};
+
  /**
   * Sends a security config file
   */

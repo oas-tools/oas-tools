@@ -430,6 +430,37 @@ paths:
                 $ref: '#/components/schemas/Error'
       #x-router-controller: "petsController"
       #x-router-controller: "Default"
+  /pets/{petId}/tag:
+    patch:
+      description: Updates a tag of a pet
+      operationId: updateTag
+      x-router-controller: "petsController"
+      parameters:
+          - name: petId
+            in: path
+            description: ID of pet to update
+            required: true
+            schema:
+              type: integer
+              format: int64
+      requestBody:
+        description: Updated tag
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+          '200':
+            description: Tag updated
+          '404':
+            description: Pet not found
+          default:
+            description: unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
   /securityFile:
     get:
       summary: Security config file
@@ -669,4 +700,10 @@ components:
           type: integer
           format: int32
         message:
+          type: string
+    Tag:
+      required:
+        - tag
+      properties:
+        tag:
           type: string
