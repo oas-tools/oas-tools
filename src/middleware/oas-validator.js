@@ -106,37 +106,36 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
 
   if (paths[requestedSpecPath][method].hasOwnProperty('requestBody')) {
     var requestBody = paths[requestedSpecPath][method].requestBody;
-    if (requestBody.required != undefined && requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
-      if (req.body == undefined || JSON.stringify(req.body) == '{}') {
-        var newErr = {
-          message: "Missing object in the request body. "
+    const emptyBody = req.body == undefined || JSON.stringify(req.body) == '{}';
+    if (requestBody.required && emptyBody) {
+      var newErr = {
+        message: "Missing object in the request body. "
+      };
+      msg.push(newErr);
+      keepGoing = false;
+    } else if (requestBody.required || !emptyBody) {
+      // can be any of "application/json", "multipart/form-data", "image/png", ...
+      const contentType = Object.keys(requestBody.content)[0];
+      var validSchema = _.cloneDeep(requestBody.content[contentType].schema)
+      utils.fixNullable(validSchema)
+
+      var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
+      // a multipart/form-data request has a "files" property in the request whose
+      // properties need to be passed to evaluating the required parameters in the openAPI spec
+      if (contentType.toLowerCase() === "multipart/form-data" && req.files && req.files.length > 0) {
+        data = addFilesToJSONPropertyValidation(req.files, data);
+      }
+      var err = validator.validate(data, validSchema);
+      if (err == false) {
+        newErr = {
+          message: "Wrong data in the body of the request. ",
+          error: validator.getLastErrors(),
+          content: data
         };
         msg.push(newErr);
         keepGoing = false;
       } else {
-        // can be any of "application/json", "multipart/form-data", "image/png", ...
-        const contentType = Object.keys(requestBody.content)[0];
-        var validSchema = _.cloneDeep(requestBody.content[contentType].schema)
-        utils.fixNullable(validSchema)
-
-        var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
-        // a multipart/form-data request has a "files" property in the request whose
-        // properties need to be passed to evaluating the required parameters in the openAPI spec
-        if (contentType.toLowerCase() === "multipart/form-data" && req.files && req.files.length > 0) {
-          data = addFilesToJSONPropertyValidation(req.files, data);
-        }
-        var err = validator.validate(data, validSchema);
-        if (err == false) {
-          newErr = {
-            message: "Wrong data in the body of the request. ",
-            error: validator.getLastErrors(),
-            content: data
-          };
-          msg.push(newErr);
-          keepGoing = false;
-        } else {
-          logger.info("Valid parameter on request");
-        }
+        logger.info("Valid parameter on request");
       }
     }
   }

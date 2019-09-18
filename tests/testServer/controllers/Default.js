@@ -25,3 +25,7 @@ module.exports.deletePet = function deletePet (req, res, next) {
 module.exports.deletePets = function deletePets (req, res, next) {
   Default.deletePets(req.swagger.params, res, next);
 };
+
+module.exports.testRequestBody = function testRequestBody (req, res, next) {
+  res.status(201).send();
+};

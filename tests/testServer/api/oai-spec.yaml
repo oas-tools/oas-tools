@@ -253,6 +253,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/ResponseTest"
       x-router-controller: "petsController"
+  /requestBodyTest:
+    post:
+      summary: Test for optional requestBody
+      operationId: testRequestBody
+      requestBody:
+        description: Optional requestBody
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        '201':
+          description: Success
   /pets:
     get:
       summary: List all pets

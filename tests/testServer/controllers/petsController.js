@@ -383,7 +383,12 @@ exports.grantsFile = (req, res) => {
         "delete:any": [
           "*"
         ]
-      }
+      },
+      requestBodyTest: {
+        "create:any": [
+          "*"
+        ]
+      },
     },
     user: {
       pets: {
