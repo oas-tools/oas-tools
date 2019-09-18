@@ -22,6 +22,10 @@ var tokenError = jwt.sign({
 var tokenNoParam = jwt.sign({
     iss: 'ISA Auth'
 }, 'test');
+var userWithoutPermissions = jwt.sign({
+    iss: 'ISA Auth',
+    role: 'userWithoutPermissions'
+}, 'test');
 const serverProto = require('./testServer');
 let server = require('./testServer');
 const indexFile = require('./../src/index');
@@ -599,6 +603,40 @@ function getTests() {
                 });
         });
 
+        it('it should authenticate with appropriate token using HEAD', (done) => {
+            var pet = {
+                id: 10,
+                name: "Pig"
+            };
+            chai.request(server)
+                .head('/api/v1/pets/' + pet.id)
+                .set('Authorization', 'Bearer ' + token)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    done();
+                });
+        });
+
+        it('it should fail authorization with wrong token using HEAD', (done) => {
+            var pet = {
+                id: 10,
+                name: "Pig"
+            };
+            chai.request(server)
+                .head('/api/v1/pets/' + pet.id)
+                .set('Authorization', 'Bearer ' + userWithoutPermissions)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(403);
+                    done();
+                });
+        });
+
         it('it should not GET a pet by an id of type string instead of integer', (done) => {
             chai.request(server)
                 .get('/api/v1/pets/badId')
@@ -952,6 +990,43 @@ function putTests() { //this one calls deletePets()
                     res.body.should.be.a('object');
                     res.body.should.have.property('message');
                     res.body.message.should.be.eql("Updated pet");
+                    done();
+                });
+        });
+        it('it should update the tag of the pet using PATCH', (done) => {
+            var pet = {
+                id: 10,
+                name: "Pig",
+                tag: "Pet updated by the mocha+chai test"
+            };
+            chai.request(server)
+                .patch('/api/v1/pets/' + pet.id + '/tag')
+                .set('Authorization', 'Bearer ' + token)
+                .send({tag: pet.tag})
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    res.body.should.have.property('message');
+                    res.body.message.should.be.eql("Updated pet");
+                    done();
+                });
+        });
+        it('it should fail authorization with wrong token using PATCH', (done) => {
+            var pet = {
+                tag: "Updated tag"
+            };
+            chai.request(server)
+                .patch('/api/v1/pets/' + pet.id + '/tag')
+                .set('Authorization', 'Bearer ' + userWithoutPermissions)
+                .send(pet)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(403);
                     done();
                 });
         });
