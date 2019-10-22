@@ -30,9 +30,9 @@ var request = require('request');
 var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.yaml'), 'utf8');
 schemaV3 = jsyaml.safeLoad(schemaV3);
 
-function fatalError(msg) {
-  logger.error(msg);
-  throw new Error(msg);
+function fatalError(err) {
+  logger.error(err);
+  throw err;
 }
 
 
@@ -129,7 +129,7 @@ function checkControllers(pathName, methodName, methodSection, controllersLocati
       load = require(pathModule.join(controllersLocation, utils.generateName(controller,undefined)));
       checkOperationId(load, pathName, methodName, methodSection);
     } catch (err) {
-      fatalError(err.toString());
+      fatalError(err);
     }
   } else {
     controller = utils.generateName(pathName, "controller");
@@ -362,8 +362,11 @@ function registerPaths(specDoc, app) {
     if (!config.docs.apiDocsPrefix) {
       config.docs.apiDocsPrefix = '';
     }
+
+    const apiSpecDoc = Object.freeze(_.cloneDeep(specDoc))
+
     app.use(config.docs.apiDocsPrefix + config.docs.apiDocs, function (req, res) {
-      res.send(specDoc);
+      res.send(apiSpecDoc);
     });
     if (config.docs.swaggerUi) {
       var uiHtml = fs.readFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), 'utf8');

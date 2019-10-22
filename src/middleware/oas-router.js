@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 var exports; // eslint-disable-line
 var path = require('path');
-var _ = require('lodash-compat')
 var ZSchema = require("z-schema");
 var MIMEtype = require('whatwg-mimetype');
 var config = require('../configurations'),
@@ -57,7 +56,7 @@ function getExpectedResponse(responses, code) {
  * @param maxDepth limits the recursion to avoid stack overflow when object references itself
  */
 function stripUndefinedKeys(data, maxDepth = 1024) {
-  if (typeof data !== 'object' || data === null || maxDepth <= 0) {
+  if (typeof data !== 'object' || data === null || maxDepth <= 0 || data instanceof Buffer) {
     return data;
   }
   Object.getOwnPropertyNames(data).forEach((property) => {
@@ -141,7 +140,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
     }
     if (resultType && resultType.essence === 'application/json') {
       //if there is no content property for the given response then there is nothing to validate.
-      var validSchema = _.cloneDeep(responseCodeSection.content['application/json'].schema);
+      var validSchema = responseCodeSection.content['application/json'].schema;
       utils.fixNullable(validSchema)
 
       content[0] = JSON.stringify(content[0]);
