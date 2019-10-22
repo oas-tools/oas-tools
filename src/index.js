@@ -362,8 +362,11 @@ function registerPaths(specDoc, app) {
     if (!config.docs.apiDocsPrefix) {
       config.docs.apiDocsPrefix = '';
     }
+
+    const apiSpecDoc = Object.freeze(_.cloneDeep(specDoc))
+
     app.use(config.docs.apiDocsPrefix + config.docs.apiDocs, function (req, res) {
-      res.send(specDoc);
+      res.send(apiSpecDoc);
     });
     if (config.docs.swaggerUi) {
       var uiHtml = fs.readFileSync(pathModule.join(__dirname, '../swagger-ui/index.html'), 'utf8');
