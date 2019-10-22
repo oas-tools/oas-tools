@@ -56,7 +56,7 @@ function getExpectedResponse(responses, code) {
  * @param maxDepth limits the recursion to avoid stack overflow when object references itself
  */
 function stripUndefinedKeys(data, maxDepth = 1024) {
-  if (typeof data !== 'object' || data === null || maxDepth <= 0) {
+  if (typeof data !== 'object' || data === null || maxDepth <= 0 || data instanceof Buffer) {
     return data;
   }
   Object.getOwnPropertyNames(data).forEach((property) => {
