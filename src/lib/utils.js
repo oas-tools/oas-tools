@@ -24,7 +24,9 @@ var validator = require('validator');
 
 var fixNullable = function(schema) {
   Object.getOwnPropertyNames(schema).forEach((property) => {
-    if (typeof schema[property] === 'object') {
+    if (schema[property] === null) {
+      schema.type = [schema.type, "null"];
+    } else if (typeof schema[property] === 'object') {
       fixNullable(schema[property]);
     } else if (property === 'type' && typeof schema[property] === 'string' && schema.nullable === true) {
       schema.type = [schema.type, "null"];
