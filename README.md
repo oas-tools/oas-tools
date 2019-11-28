@@ -46,8 +46,8 @@ __It is also possible to set configuration variables, these are them:__
 
 | Name	| Type	| Explanation / Values |
 | ------------- | ------------- | ------------- |
-|`logLevel` | `String` | Possible values from less to more level of verbosity are: error, warning, custom, info and debug. Ignored if `customLogger` is used. Default is info. |
-|`logFile` | `String` | Logs file path. Ignored if `customLogger` is used. |
+|`loglevel` | `String` | Possible values from less to more level of verbosity are: error, warning, custom, info and debug. Ignored if `customLogger` is used. Default is info. |
+|`logfile` | `String` | Logs file path. Ignored if `customLogger` is used. |
 |`customLogger` | `Object` | Replaces the included logger with the one specified here, so that you can reuse your own logger. `logLevel` and `logFile` will be ignored if this variable is used. Null by default. |
 |`customErrorHandling` | `Boolean` | Indicates if there should be a direct response (`false`) or `next()` should be called for custom error handling |
 |`controllers` | `String` | Controllers location path. |
