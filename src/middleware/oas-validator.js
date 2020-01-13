@@ -166,7 +166,20 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
           keepGoing = false;
         } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
           try { // eslint-disable-line
-            if (schema.type !== 'string') { // eslint-disable-line
+            if (schema.type === 'array') {
+              value = req[location][name];
+              if (!_.isArray(value)) {
+                value = JSON.parse(value);
+                if (!_.isArray(value)) {
+                  if (schema.items && schema.items.type === 'string') {
+                    // Make sure that we don't accedentally convert strings to ingeters
+                    value = [req[location][name]];
+                  } else {
+                    value = [value];
+                  }
+                }
+              }
+            } else if (schema.type !== 'string') { // eslint-disable-line
               value = JSON.parse(req[location][name]);
             } else {
               value = String(req[location][name]);
@@ -305,6 +318,9 @@ function convertValue(value, schema, type) { // eslint-disable-line
       if (_.isString(value)) {
           try {
             value = JSON.parse(value); // eslint-disable-line
+          if (!_.isArray(value)) {
+            value = original;
+          }
           } catch (err) {
             value = original; // eslint-disable-line
           }
