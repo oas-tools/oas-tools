@@ -518,7 +518,8 @@ function getTests() {
 
         it('it should get a sample response with a nullable field', (done) => {
             chai.request(server)
-                .get('/api/v1/nullableResponseTest')
+                .post('/api/v1/nullableResponseTest')
+                .send({id: 123})
                 .end((err, res) => {
                     if (err) {
                         done(err);

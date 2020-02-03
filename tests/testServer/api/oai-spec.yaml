@@ -551,12 +551,70 @@ paths:
                 type: object
       x-router-controller: "petsController"
   /nullableResponseTest:
-    get:
+    post:
       summary: Nullable test
       operationId: nullableResponse
       security: []
       tags:
         - pets
+      requestBody:
+        description: Pet to add to the store
+        x-name: pet
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                lol:
+                  type: integer
+                  example: 444
+                  default: 444
+                aStringNullParam:
+                  description: a nullable string parameter
+                  type: string
+                  nullable: true
+                  default: null
+                  example: null
+                aBooleanNullParam:
+                  description: a nullable boolean parameter
+                  type: boolean
+                  nullable: true
+                  default: null
+                  example: null
+                anIntegerNullParam:
+                  description: a nullable integer parameter
+                  type: integer
+                  nullable: true
+                  default: null
+                  example: null
+                anArrayNullParam:
+                  description: a nullable array parameter
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  default: null
+                  example: null
+                anObjectNullParam:
+                  description: a nullable object parameter
+                  type: object
+                  nullable: true
+                  default: null
+                  example: null
+                anEnumNullParam:
+                  description: a nullable enum parameter
+                  type: string
+                  nullable: true
+                  default: null
+                  example: null
+                  enum:
+                    - open
+                    - closed
+                    - null
       responses:
         '200':
           description: A sample response
@@ -580,6 +638,8 @@ paths:
                     default: null
                   colors:
                     type: array
+                    items:
+                      type: string
                     nullable: true
                   contacts:
                     type: object
