@@ -570,6 +570,8 @@ paths:
                   text:
                     type: string
                     nullable: true
+                    default: null
+                    example: null
       x-router-controller: "petsController"
   /defaultResponseCode:
     get:
