@@ -527,12 +527,6 @@ function getTests() {
                     res.should.have.status(200);
                     res.body.should.be.a('object');
                     should.not.exist(res.body.text);
-                    should.not.exist(res.body.active);
-                    should.not.exist(res.body.previousId);
-                    should.not.exist(res.body.colors);
-                    should.not.exist(res.body.contacts);
-                    should.not.exist(res.body.salary);
-                    should.not.exist(res.body.status);
                     done();
                 });
         });
