@@ -570,8 +570,31 @@ paths:
                   text:
                     type: string
                     nullable: true
-                    default: null
                     example: null
+                  active:
+                    type: boolean
+                    nullable: true
+                  previousId:
+                    type: integer
+                    nullable: true
+                    default: null
+                  colors:
+                    type: array
+                    nullable: true
+                  contacts:
+                    type: object
+                    nullable: true
+                    example: null
+                  salary:
+                    type: number
+                    nullable: true
+                  status:
+                    type: string
+                    nullable: true
+                    enum:
+                      - open
+                      - closed
+                      - null
       x-router-controller: "petsController"
   /defaultResponseCode:
     get:

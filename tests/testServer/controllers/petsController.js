@@ -440,7 +440,13 @@ exports.wrongResponseCode = (req, res) => {
 exports.nullableResponse = (req, res) => {
   res.send({
     id: 123,
-    text: null
+    text: null,
+    active: null,
+    previousId: null,
+    colors: null,
+    contacts: null,
+    salary: null,
+    status: null
   });
 };
 

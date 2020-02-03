@@ -26,7 +26,7 @@ const serverProto = require('./testServer');
 let server = require('./testServer');
 const indexFile = require('./../src/index');
 const utilsFile = require('./../src/lib/utils');
-chai.should();
+const should = chai.should();
 chai.use(chaiHttp);
 var expect = chai.expect;
 const auxRequire = require('./testServer/controllers/petsController');
@@ -525,7 +525,13 @@ function getTests() {
                     }
                     res.should.have.status(200);
                     res.body.should.be.a('object');
-                    JSON.stringify(res.body).should.contain('null');
+                    should.not.exist(res.body.text);
+                    should.not.exist(res.body.active);
+                    should.not.exist(res.body.previousId);
+                    should.not.exist(res.body.colors);
+                    should.not.exist(res.body.contacts);
+                    should.not.exist(res.body.salary);
+                    should.not.exist(res.body.status);
                     done();
                 });
         });
