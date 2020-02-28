@@ -292,6 +292,13 @@ paths:
       operationId: createPets
       tags:
         - pets
+      parameters:
+        - name: Authorization
+          schema:
+            type: string
+          in: header
+          description: "Authorization header paramter must be set using the form Bearer [token]."
+          required: True
       requestBody:
         description: Pet to add to the store
         x-name: pet
