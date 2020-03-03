@@ -297,7 +297,7 @@ paths:
           schema:
             type: string
           in: header
-          description: "Authorization header paramter must be set using the form Bearer [token]."
+          description: "Authorization header parameter must be set using the form Bearer [token]."
           required: True
       requestBody:
         description: Pet to add to the store
