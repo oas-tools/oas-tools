@@ -122,19 +122,19 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
       var mimeAccept = new MIMEtype(acceptType);
       Object.keys(responseCodeSection.content).forEach((contentType) => {
         if (!resultType) {
+          var firstMatch, secondMatch;
           var mimeContent = new MIMEtype(contentType);
+
           if (explicitType) {
-            var firstMatch = explicitType.type === mimeContent.type && (mimeAccept.type === mimeContent.type || mimeAccept.type === '*');
-            var secondMatch = explicitType.subtype === mimeContent.subtype && (mimeAccept.subtype === mimeContent.subtype || mimeAccept.subtype === '*');
-            if (firstMatch && secondMatch) {
-              resultType = explicitType;
-            }
+            firstMatch = explicitType.type === mimeContent.type && (mimeAccept.type === mimeContent.type || mimeAccept.type === '*');
+            secondMatch = explicitType.subtype === mimeContent.subtype && (mimeAccept.subtype === mimeContent.subtype || mimeAccept.subtype === '*');
           } else {
-            var firstMatch = mimeAccept.type === mimeContent.type || mimeAccept.type === '*';
-            var secondMatch = mimeAccept.subtype === mimeContent.subtype || mimeAccept.subtype === '*';
-            if (firstMatch && secondMatch) {
-              resultType = mimeContent;
-            }
+            firstMatch = mimeAccept.type === mimeContent.type || mimeAccept.type === '*';
+            secondMatch = mimeAccept.subtype === mimeContent.subtype || mimeAccept.subtype === '*';
+          }
+
+          if (firstMatch && secondMatch) {
+            resultType = mimeContent;
           }
         }
       });
