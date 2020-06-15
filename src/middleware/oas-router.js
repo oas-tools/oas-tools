@@ -82,6 +82,7 @@ function stripUndefinedKeys(data, maxDepth = 1024) {
  */
 function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, content) {
   var code = res.statusCode;
+  var explicitType;
   var msg = [];
   var data = stripUndefinedKeys(content[0]);
   logger.debug("Processing at checkResponse:");
@@ -91,6 +92,11 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
   logger.debug("  -requestedSpecPath: " + requestedSpecPath);
   logger.debug("  -data: " + JSON.stringify(data));
   var responseCodeSection = getExpectedResponse(oasDoc.paths[requestedSpecPath][method].responses, code); //Section of the oasDoc file starting at a response code
+  if (res.get('content-type') === undefined) {
+    res.header("Content-Type", "application/json;charset=utf-8");
+  } else {
+    explicitType = new MIMEtype(res.get('content-type'));
+  }
   if (responseCodeSection === undefined) { //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
     var newErr = {
       message: "Wrong response code: " + code
@@ -113,14 +119,22 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
       });
     }
     acceptTypes.forEach((acceptType) => {
+      var mimeAccept = new MIMEtype(acceptType);
       Object.keys(responseCodeSection.content).forEach((contentType) => {
         if (!resultType) {
-          var mimeAccept = new MIMEtype(acceptType);
           var mimeContent = new MIMEtype(contentType);
-          var firstMatch = mimeAccept.type === mimeContent.type || mimeAccept.type === '*';
-          var secondMatch = mimeAccept.subtype === mimeContent.subtype || mimeAccept.subtype === '*';
-          if (firstMatch && secondMatch) {
-            resultType = mimeContent;
+          if (explicitType) {
+            var firstMatch = explicitType.type === mimeContent.type && (mimeAccept.type === mimeContent.type || mimeAccept.type === '*');
+            var secondMatch = explicitType.subtype === mimeContent.subtype && (mimeAccept.subtype === mimeContent.subtype || mimeAccept.subtype === '*');
+            if (firstMatch && secondMatch) {
+              resultType = explicitType;
+            }
+          } else {
+            var firstMatch = mimeAccept.type === mimeContent.type || mimeAccept.type === '*';
+            var secondMatch = mimeAccept.subtype === mimeContent.subtype || mimeAccept.subtype === '*';
+            if (firstMatch && secondMatch) {
+              resultType = mimeContent;
+            }
           }
         }
       });
@@ -246,7 +260,6 @@ module.exports = (controllers) => {
     res.send = function (data) { // eslint-disable-line
       //intercept the response from the controller to check and validate it
       //Avoids res.send being executed twice: https://stackoverflow.com/questions/41489528/why-is-res-send-being-called-twice
-      res.header("Content-Type", "application/json;charset=utf-8");
       checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, arguments); // eslint-disable-line
     }
     controller[opID].apply(undefined, [req, res, next]); // execute function by name
