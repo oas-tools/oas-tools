@@ -266,4 +266,4 @@ module.exports = (controllers) => {
   }
 }
 
-exports = module.exports;
+exports = module.exports; //eslint-disable-line

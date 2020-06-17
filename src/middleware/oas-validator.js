@@ -469,6 +469,4 @@ module.exports = (oasDoc) => {
   }
 }
 
-exports = module.exports;
-
-
+exports = module.exports; //eslint-disable-line
