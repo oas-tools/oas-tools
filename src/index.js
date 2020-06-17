@@ -424,8 +424,8 @@ var initializeMiddleware = function initializeMiddleware(specDoc, app, callback)
     swaggerUi: require('./middleware/empty_middleware'),
     swaggerSecurity: require('./middleware/empty_middleware')
   };
-  callback(middleware);
   registerPaths(fullSchema, app);
+  callback(middleware);
 };
 
 module.exports = {
