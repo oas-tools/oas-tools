@@ -66,4 +66,4 @@ patch:
         patched: '2019-10-03T21:48:08.091Z'
   SNYK-JS-TREEKILL-536781:
     - snyk > snyk-sbt-plugin > tree-kill:
-        patched: '2019-12-11T21:48:22.140Z'
+        patched: '2019-12-13T03:15:59.477Z'
