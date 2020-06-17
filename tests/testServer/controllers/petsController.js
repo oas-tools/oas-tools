@@ -451,6 +451,16 @@ exports.commonParamTest = (req, res) => {
   });
 };
 
+
+/**
+ * Echos the first elemet from the param
+ */
+exports.arrayWithStringsTest = (req, res) => {
+  res.send({
+    value: req.swagger.params.listTestParam.value[0]
+  });
+};
+
 /**
  * Sends a sample response for content type tests
  */

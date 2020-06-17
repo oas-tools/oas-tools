@@ -646,6 +646,30 @@ paths:
               schema:
                 type: object
       x-router-controller: "petsController"
+  /arrayWithStringsTest:
+    get:
+      summary: Test that we don't convert strings to integers if they are specified as an array
+      operationId: arrayWithStringsTest
+      security: []
+      tags:
+        - pets
+      parameters:
+        - name: listTestParam
+          in: query
+          description: Test parameter
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: A sample response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-router-controller: "petsController"
 security:
   - Bearer: []
 components:

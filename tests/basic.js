@@ -239,6 +239,21 @@ function getTests() {
                 });
         });
 
+        /* testing of parameters in query */
+        it('it should return a string (and not a number) when the param is a array of strings', (done) => {
+            chai.request(server)
+                .get('/api/v1/arrayWithStringsTest?listTestParam=6363')
+                .set('Authorization', 'Bearer ' + token)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    res.body.value.should.be.a('string');
+                    done();
+                });
+        });
+
         it('it should get a 403 error because the user role does not have access', (done) => {
             chai.request(server)
                 .get('/api/v1/ownershipTest/prueba')

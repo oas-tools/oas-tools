@@ -165,15 +165,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
           msg.push(newErr);
           keepGoing = false;
         } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
-          try { // eslint-disable-line
-            if (schema.type !== 'string') { // eslint-disable-line
-              value = JSON.parse(req[location][name]);
-            } else {
-              value = String(req[location][name]);
-            }
-          } catch (err) {
-            value = String(req[location][name]);
-          }
+          value = convertValue(req[location][name], schema); // eslint-disable-line
           err = validator.validate(value, schema);
           if (err == false) {  // eslint-disable-line
             keepGoing = false;
@@ -305,6 +297,9 @@ function convertValue(value, schema, type) { // eslint-disable-line
       if (_.isString(value)) {
           try {
             value = JSON.parse(value); // eslint-disable-line
+          if (!_.isArray(value)) {
+            value = original; // eslint-disable-line
+          }
           } catch (err) {
             value = original; // eslint-disable-line
           }
