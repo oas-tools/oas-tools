@@ -61,10 +61,16 @@ module.exports = (oasDoc) => {
                     case 'get':
                         action = 'read';
                         break;
+                    case 'head':
+                        action = 'read';
+                        break;
                     case 'post':
                         action = 'create';
                         break;
                     case 'put':
+                        action = 'update';
+                        break;
+                    case 'patch':
                         action = 'update';
                         break;
                     case 'delete':

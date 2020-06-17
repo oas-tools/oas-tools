@@ -253,6 +253,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/ResponseTest"
       x-router-controller: "petsController"
+  /requestBodyTest:
+    post:
+      summary: Test for optional requestBody
+      operationId: testRequestBody
+      requestBody:
+        description: Optional requestBody
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        '201':
+          description: Success
   /pets:
     get:
       summary: List all pets
@@ -366,6 +379,22 @@ paths:
                 $ref: "#/components/schemas/Error"
       #x-router-controller: "petsController"
       #x-router-controller: "Default"
+    head:
+      summary: Get only headers
+      operationId: getPetHeaders
+      x-router-controller: "petsController"
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
     put:
       description: updates a pet based on its petId
       operationId: updatePet
@@ -421,6 +450,37 @@ paths:
                 $ref: '#/components/schemas/Error'
       #x-router-controller: "petsController"
       #x-router-controller: "Default"
+  /pets/{petId}/tag:
+    patch:
+      description: Updates a tag of a pet
+      operationId: updateTag
+      x-router-controller: "petsController"
+      parameters:
+          - name: petId
+            in: path
+            description: ID of pet to update
+            required: true
+            schema:
+              type: integer
+              format: int64
+      requestBody:
+        description: Updated tag
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+          '200':
+            description: Tag updated
+          '404':
+            description: Pet not found
+          default:
+            description: unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
   /securityFile:
     get:
       summary: Security config file
@@ -678,6 +738,30 @@ paths:
               schema:
                 type: object
       x-router-controller: "petsController"
+  /arrayWithStringsTest:
+    get:
+      summary: Test that we don't convert strings to integers if they are specified as an array
+      operationId: arrayWithStringsTest
+      security: []
+      tags:
+        - pets
+      parameters:
+        - name: listTestParam
+          in: query
+          description: Test parameter
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: A sample response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-router-controller: "petsController"
 security:
   - Bearer: []
 components:
@@ -745,4 +829,10 @@ components:
           type: integer
           format: int32
         message:
+          type: string
+    Tag:
+      required:
+        - tag
+      properties:
+        tag:
           type: string

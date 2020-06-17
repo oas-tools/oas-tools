@@ -106,37 +106,36 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
 
   if (paths[requestedSpecPath][method].hasOwnProperty('requestBody')) {
     var requestBody = paths[requestedSpecPath][method].requestBody;
-    if (requestBody.required != undefined && requestBody.required.toString() == 'true') { //TODO: in case it is not required...there is no validation?
-      if (req.body == undefined || JSON.stringify(req.body) == '{}') {
-        var newErr = {
-          message: "Missing object in the request body. "
+    const emptyBody = req.body == undefined || JSON.stringify(req.body) == '{}';
+    if (requestBody.required && emptyBody) {
+      var newErr = {
+        message: "Missing object in the request body. "
+      };
+      msg.push(newErr);
+      keepGoing = false;
+    } else if (requestBody.required || !emptyBody) {
+      // can be any of "application/json", "multipart/form-data", "image/png", ...
+      const contentType = Object.keys(requestBody.content)[0];
+      var validSchema = _.cloneDeep(requestBody.content[contentType].schema)
+      utils.fixNullable(validSchema)
+
+      var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
+      // a multipart/form-data request has a "files" property in the request whose
+      // properties need to be passed to evaluating the required parameters in the openAPI spec
+      if (contentType.toLowerCase() === "multipart/form-data" && req.files && req.files.length > 0) {
+        data = addFilesToJSONPropertyValidation(req.files, data);
+      }
+      var err = validator.validate(data, validSchema);
+      if (err == false) {
+        newErr = {
+          message: "Wrong data in the body of the request. ",
+          error: validator.getLastErrors(),
+          content: data
         };
         msg.push(newErr);
         keepGoing = false;
       } else {
-        // can be any of "application/json", "multipart/form-data", "image/png", ...
-        const contentType = Object.keys(requestBody.content)[0];
-        var validSchema = _.cloneDeep(requestBody.content[contentType].schema)
-        utils.fixNullable(validSchema)
-
-        var data = req.body; //JSON.parse(req.body); //Without this everything is string so type validation wouldn't happen TODO: why is it commented?
-        // a multipart/form-data request has a "files" property in the request whose
-        // properties need to be passed to evaluating the required parameters in the openAPI spec
-        if (contentType.toLowerCase() === "multipart/form-data" && req.files && req.files.length > 0) {
-          data = addFilesToJSONPropertyValidation(req.files, data);
-        }
-        var err = validator.validate(data, validSchema);
-        if (err == false) {
-          newErr = {
-            message: "Wrong data in the body of the request. ",
-            error: validator.getLastErrors(),
-            content: data
-          };
-          msg.push(newErr);
-          keepGoing = false;
-        } else {
-          logger.info("Valid parameter on request");
-        }
+        logger.info("Valid parameter on request");
       }
     }
   }
@@ -170,15 +169,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
           msg.push(newErr);
           keepGoing = false;
         } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
-          try { // eslint-disable-line
-            if (schema.type !== 'string') { // eslint-disable-line
-              value = JSON.parse(req[location][name]);
-            } else {
-              value = String(req[location][name]);
-            }
-          } catch (err) {
-            value = String(req[location][name]);
-          }
+          value = convertValue(req[location][name], schema); // eslint-disable-line
           err = validator.validate(value, schema);
           if (err == false) {  // eslint-disable-line
             keepGoing = false;
@@ -310,6 +301,9 @@ function convertValue(value, schema, type) { // eslint-disable-line
       if (_.isString(value)) {
           try {
             value = JSON.parse(value); // eslint-disable-line
+          if (!_.isArray(value)) {
+            value = original; // eslint-disable-line
+          }
           } catch (err) {
             value = original; // eslint-disable-line
           }
