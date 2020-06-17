@@ -24,10 +24,10 @@ var validator = require('validator');
 
 var fixNullable = function(schema) {
   Object.getOwnPropertyNames(schema).forEach((property) => {
-    if (typeof schema[property] === 'object') {
-      fixNullable(schema[property]);
-    } else if (property === 'type' && typeof schema[property] === 'string' && schema.nullable === true) {
+    if (property === 'type' && schema.nullable === true) {
       schema.type = [schema.type, "null"];
+    } else if (typeof schema[property] === 'object' && schema[property] !== null) {
+      fixNullable(schema[property]);
     }
   });
 }
@@ -38,7 +38,7 @@ var fixNullable = function(schema) {
  * @param {string} nameFor - possible values are controller, function, variable.
  */
 var generateName = function(input, nameFor) {
-  var chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789';
+  var chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789.';
   var name = validator.whitelist(input, chars)
   switch (nameFor) {
     case "controller":
