@@ -158,6 +158,10 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { /
         var value;
 
         location = locationFormat(location);
+        if (location === "headers") {
+            name = name.toLowerCase(); // Allows OpenAPI Spec header params to be handled as case-insensitive.
+        }
+
         if (req[location][name] == undefined) { //if the request is missing a required parameter acording to the oasDoc: warning
           newErr = {
             message: "Missing parameter " + name + " in " + location + ". "

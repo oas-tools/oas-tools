@@ -30,7 +30,7 @@ const serverProto = require('./testServer');
 let server = require('./testServer');
 const indexFile = require('./../src/index');
 const utilsFile = require('./../src/lib/utils');
-chai.should();
+const should = chai.should();
 chai.use(chaiHttp);
 var expect = chai.expect;
 const auxRequire = require('./testServer/controllers/petsController');
@@ -537,14 +537,15 @@ function getTests() {
 
         it('it should get a sample response with a nullable field', (done) => {
             chai.request(server)
-                .get('/api/v1/nullableResponseTest')
+                .post('/api/v1/nullableResponseTest')
+                .send({id: 123})
                 .end((err, res) => {
                     if (err) {
                         done(err);
                     }
                     res.should.have.status(200);
                     res.body.should.be.a('object');
-                    JSON.stringify(res.body).should.contain('null');
+                    should.equal(res.body.text, null);
                     done();
                 });
         });
