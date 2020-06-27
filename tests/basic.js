@@ -22,11 +22,15 @@ var tokenError = jwt.sign({
 var tokenNoParam = jwt.sign({
     iss: 'ISA Auth'
 }, 'test');
+var userWithoutPermissions = jwt.sign({
+    iss: 'ISA Auth',
+    role: 'userWithoutPermissions'
+}, 'test');
 const serverProto = require('./testServer');
 let server = require('./testServer');
 const indexFile = require('./../src/index');
 const utilsFile = require('./../src/lib/utils');
-chai.should();
+const should = chai.should();
 chai.use(chaiHttp);
 var expect = chai.expect;
 const auxRequire = require('./testServer/controllers/petsController');
@@ -231,6 +235,21 @@ function getTests() {
                     }
                     res.should.have.status(200);
                     res.body.should.be.a('object');
+                    done();
+                });
+        });
+
+        /* testing of parameters in query */
+        it('it should return a string (and not a number) when the param is a array of strings', (done) => {
+            chai.request(server)
+                .get('/api/v1/arrayWithStringsTest?listTestParam=6363')
+                .set('Authorization', 'Bearer ' + token)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    res.body.value.should.be.a('string');
                     done();
                 });
         });
@@ -518,14 +537,15 @@ function getTests() {
 
         it('it should get a sample response with a nullable field', (done) => {
             chai.request(server)
-                .get('/api/v1/nullableResponseTest')
+                .post('/api/v1/nullableResponseTest')
+                .send({id: 123})
                 .end((err, res) => {
                     if (err) {
                         done(err);
                     }
                     res.should.have.status(200);
                     res.body.should.be.a('object');
-                    JSON.stringify(res.body).should.contain('null');
+                    should.equal(res.body.text, null);
                     done();
                 });
         });
@@ -595,6 +615,40 @@ function getTests() {
                     res.body.should.not.have.property('tag');
                     res.body.should.have.property('id').eql(pet.id);
                     res.body.should.have.property('name').eql(pet.name);
+                    done();
+                });
+        });
+
+        it('it should authenticate with appropriate token using HEAD', (done) => {
+            var pet = {
+                id: 10,
+                name: "Pig"
+            };
+            chai.request(server)
+                .head('/api/v1/pets/' + pet.id)
+                .set('Authorization', 'Bearer ' + token)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    done();
+                });
+        });
+
+        it('it should fail authorization with wrong token using HEAD', (done) => {
+            var pet = {
+                id: 10,
+                name: "Pig"
+            };
+            chai.request(server)
+                .head('/api/v1/pets/' + pet.id)
+                .set('Authorization', 'Bearer ' + userWithoutPermissions)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(403);
                     done();
                 });
         });
@@ -727,6 +781,53 @@ function postTests() { //this one calls putTests()
                     res.should.have.status(400);
                     res.body.should.be.a('array');
                     JSON.stringify(res.body).should.contain("Missing object in the request body. ");
+                    done();
+                });
+        });
+        it('it should fail optional request body validation with invalid request body', (done) => {
+            var invalidBody = {
+                invalidParameter: 'invalidParameter'
+            }
+            chai.request(server)
+                .post('/api/v1/requestBodyTest')
+                .set('Authorization', 'Bearer ' + token)
+                .send(invalidBody)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(400);
+                    res.body.should.be.a('array');
+                    JSON.stringify(res.body).should.contain("Wrong data in the body of the request.");
+                    done();
+                });
+        });
+        it('it should pass optional request body validation with valid request body', (done) => {
+            var pet = {
+                id: 1,
+                name: 'Test'
+            }
+            chai.request(server)
+                .post('/api/v1/requestBodyTest')
+                .set('Authorization', 'Bearer ' + token)
+                .send(pet)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(201);
+                    done();
+                });
+        });
+        it('it should pass optional request body validation without request body', (done) => {
+            chai.request(server)
+                .post('/api/v1/requestBodyTest')
+                .set('Authorization', 'Bearer ' + token)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(201);
                     done();
                 });
         });
@@ -905,6 +1006,43 @@ function putTests() { //this one calls deletePets()
                     res.body.should.be.a('object');
                     res.body.should.have.property('message');
                     res.body.message.should.be.eql("Updated pet");
+                    done();
+                });
+        });
+        it('it should update the tag of the pet using PATCH', (done) => {
+            var pet = {
+                id: 10,
+                name: "Pig",
+                tag: "Pet updated by the mocha+chai test"
+            };
+            chai.request(server)
+                .patch('/api/v1/pets/' + pet.id + '/tag')
+                .set('Authorization', 'Bearer ' + token)
+                .send({tag: pet.tag})
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    res.body.should.have.property('message');
+                    res.body.message.should.be.eql("Updated pet");
+                    done();
+                });
+        });
+        it('it should fail authorization with wrong token using PATCH', (done) => {
+            var pet = {
+                tag: "Updated tag"
+            };
+            chai.request(server)
+                .patch('/api/v1/pets/' + pet.id + '/tag')
+                .set('Authorization', 'Bearer ' + userWithoutPermissions)
+                .send(pet)
+                .end((err, res) => {
+                    if (err) {
+                        done(err);
+                    }
+                    res.should.have.status(403);
                     done();
                 });
         });

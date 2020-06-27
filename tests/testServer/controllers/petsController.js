@@ -225,6 +225,13 @@ exports.showPetById = (args, res) => {
 }
 
 /**
+ * Retrieves headers for pet
+ */
+exports.getPetHeaders = (args, res) => {
+  res.status(200).send();
+}
+
+/**
  *  Deletes a single pet from the collection
  */
 exports.deletePet = (args, res) => {
@@ -277,6 +284,28 @@ exports.updatePet = (args, res) => {
   }
   exports.pets = pets;
 }
+
+/**
+ * Updates a tag of a pet
+ */
+exports.updateTag = (args, res) => {
+  var present = false;
+  for (var i = 0; i < pets.length; i++) {
+    if (pets[i].id == args.params.petId) {
+      present = true;
+      pets[i].tag = args.body.tag;
+      res.status(200).send({
+        message: "Updated pet"
+      });
+    }
+  }
+  if (!present) {
+    res.status(404).send({
+      message: "There is no pet with id " + args.params.petId
+    });
+  }
+  exports.pets = pets;
+};
 
  /**
   * Sends a security config file
@@ -383,7 +412,12 @@ exports.grantsFile = (req, res) => {
         "delete:any": [
           "*"
         ]
-      }
+      },
+      requestBodyTest: {
+        "create:any": [
+          "*"
+        ]
+      },
     },
     user: {
       pets: {
@@ -392,6 +426,7 @@ exports.grantsFile = (req, res) => {
         ]
       }
     },
+    userWithoutPermissions: {},
     extendeduser: {
       "$extend": ["user"]
     }
@@ -413,6 +448,16 @@ exports.tokenVerificationTest = (req, res) => {
 exports.commonParamTest = (req, res) => {
   res.send({
     id: parseInt(req.query.testParam)
+  });
+};
+
+
+/**
+ * Echos the first elemet from the param
+ */
+exports.arrayWithStringsTest = (req, res) => {
+  res.send({
+    value: req.swagger.params.listTestParam.value[0]
   });
 };
 

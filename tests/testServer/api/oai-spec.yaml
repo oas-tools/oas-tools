@@ -253,6 +253,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/ResponseTest"
       x-router-controller: "petsController"
+  /requestBodyTest:
+    post:
+      summary: Test for optional requestBody
+      operationId: testRequestBody
+      requestBody:
+        description: Optional requestBody
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        '201':
+          description: Success
   /pets:
     get:
       summary: List all pets
@@ -292,6 +305,13 @@ paths:
       operationId: createPets
       tags:
         - pets
+      parameters:
+        - name: Authorization
+          schema:
+            type: string
+          in: header
+          description: "Authorization header parameter must be set using the form Bearer [token]."
+          required: True
       requestBody:
         description: Pet to add to the store
         x-name: pet
@@ -359,6 +379,22 @@ paths:
                 $ref: "#/components/schemas/Error"
       #x-router-controller: "petsController"
       #x-router-controller: "Default"
+    head:
+      summary: Get only headers
+      operationId: getPetHeaders
+      x-router-controller: "petsController"
+      tags:
+        - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
     put:
       description: updates a pet based on its petId
       operationId: updatePet
@@ -414,6 +450,37 @@ paths:
                 $ref: '#/components/schemas/Error'
       #x-router-controller: "petsController"
       #x-router-controller: "Default"
+  /pets/{petId}/tag:
+    patch:
+      description: Updates a tag of a pet
+      operationId: updateTag
+      x-router-controller: "petsController"
+      parameters:
+          - name: petId
+            in: path
+            description: ID of pet to update
+            required: true
+            schema:
+              type: integer
+              format: int64
+      requestBody:
+        description: Updated tag
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+          '200':
+            description: Tag updated
+          '404':
+            description: Pet not found
+          default:
+            description: unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
   /securityFile:
     get:
       summary: Security config file
@@ -551,12 +618,70 @@ paths:
                 type: object
       x-router-controller: "petsController"
   /nullableResponseTest:
-    get:
+    post:
       summary: Nullable test
       operationId: nullableResponse
       security: []
       tags:
         - pets
+      requestBody:
+        description: Pet to add to the store
+        x-name: pet
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                lol:
+                  type: integer
+                  example: 444
+                  default: 444
+                aStringNullParam:
+                  description: a nullable string parameter
+                  type: string
+                  nullable: true
+                  default: null
+                  example: null
+                aBooleanNullParam:
+                  description: a nullable boolean parameter
+                  type: boolean
+                  nullable: true
+                  default: null
+                  example: null
+                anIntegerNullParam:
+                  description: a nullable integer parameter
+                  type: integer
+                  nullable: true
+                  default: null
+                  example: null
+                anArrayNullParam:
+                  description: a nullable array parameter
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                  default: null
+                  example: null
+                anObjectNullParam:
+                  description: a nullable object parameter
+                  type: object
+                  nullable: true
+                  default: null
+                  example: null
+                anEnumNullParam:
+                  description: a nullable enum parameter
+                  type: string
+                  nullable: true
+                  default: null
+                  example: null
+                  enum:
+                    - open
+                    - closed
+                    - null
       responses:
         '200':
           description: A sample response
@@ -570,6 +695,33 @@ paths:
                   text:
                     type: string
                     nullable: true
+                    example: null
+                  active:
+                    type: boolean
+                    nullable: true
+                  previousId:
+                    type: integer
+                    nullable: true
+                    default: null
+                  colors:
+                    type: array
+                    items:
+                      type: string
+                    nullable: true
+                  contacts:
+                    type: object
+                    nullable: true
+                    example: null
+                  salary:
+                    type: number
+                    nullable: true
+                  status:
+                    type: string
+                    nullable: true
+                    enum:
+                      - open
+                      - closed
+                      - null
       x-router-controller: "petsController"
   /defaultResponseCode:
     get:
@@ -581,6 +733,30 @@ paths:
       responses:
         default:
           description: A sample object
+          content:
+            application/json:
+              schema:
+                type: object
+      x-router-controller: "petsController"
+  /arrayWithStringsTest:
+    get:
+      summary: Test that we don't convert strings to integers if they are specified as an array
+      operationId: arrayWithStringsTest
+      security: []
+      tags:
+        - pets
+      parameters:
+        - name: listTestParam
+          in: query
+          description: Test parameter
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: A sample response
           content:
             application/json:
               schema:
@@ -653,4 +829,10 @@ components:
           type: integer
           format: int32
         message:
+          type: string
+    Tag:
+      required:
+        - tag
+      properties:
+        tag:
           type: string
