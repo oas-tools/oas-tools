@@ -150,7 +150,7 @@ var swaggerTools = require('oas-tools');
 As you may know oas-tools works only with the version 3 of the specification, therefore you should update you specification file.
 Use [this tool](https://mermade.org.uk/openapi-converter) to do so. Once you get the translation simply copy-past it to you former specification file.
 
-[Note: Minor adjustment on the translated specification may be required. Validate it using [swagger validator](https://editor.swagger.io//?_ga=2.51587887.728712022.1527179832-1439038723.1495297764#/) ]
+[Note: Minor adjustment on the translated specification may be required. Validate it using [swagger validator](https://editor.swagger.io//?_ga=2.51587887.728712022.1527179832-1439038723.1495297764#/) 
 
  __4.	Provide express server object to initialize method:__
 
