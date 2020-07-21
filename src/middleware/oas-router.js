@@ -31,6 +31,7 @@ var validator = new ZSchema({
   breakOnFirstError: false
 });
 var utils = require("../lib/utils.js");
+var _ = require('lodash-compat');
 var controllers; // eslint-disable-line
 
 function getExpectedResponse(responses, code) {
@@ -154,7 +155,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
     }
     if (resultType && resultType.essence === 'application/json') {
       //if there is no content property for the given response then there is nothing to validate.
-      var validSchema = responseCodeSection.content['application/json'].schema;
+      var validSchema = _.cloneDeep(responseCodeSection.content['application/json'].schema);
       utils.fixNullable(validSchema)
 
       content[0] = JSON.stringify(content[0]);
