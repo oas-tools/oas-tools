@@ -327,7 +327,7 @@ function convertValue(value, schema, type) { // eslint-disable-line
         if (['false', 'true'].indexOf(value) === -1) {
           value = original; // eslint-disable-line
         } else {
-          value = value === 'true' || value; // eslint-disable-line
+          value = value === 'true'; // eslint-disable-line
         }
       }
 
