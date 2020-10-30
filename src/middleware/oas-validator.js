@@ -128,40 +128,30 @@ async function checkRequestData(oasDoc, requestedSpecPath, method, res, req, nex
         data = addFilesToJSONPropertyValidation(req.files, data);
       }
 
-
-      var thereMayBeMissingReferences = true
-      var err;
-      if (thereMayBeMissingReferences) {
-        err = validator.validate(data, validSchema);
+      var err = validator.validate(data, validSchema);
+      if (config.validatorRetrieveRemoteSchemaReferences) {
         var missingReferences = validator.getMissingRemoteReferences();
         if (missingReferences.length > 0) {
           logger.info("OASValidator Found " + missingReferences.length + " missing/remote reference(s) in the OpenAPI Spec")
-          var finished = 0;
           for (let url of missingReferences) {
             logger.info("OASValidator Getting remote reference '" + url +"'")
-            const response = await fetch(url)
-            const body = await response.text()
-            if (body[0] == "o") { // openapi yaml
-              await validator.setRemoteReference(url, yaml.safeLoad(body));
-            } else if (body[0] == "{") {
-              await validator.setRemoteReference(url, JSON.parse(body));
-            } else {
-              logger.info("OASValidator Error: downloaded reference was neither YAML ('o...') nor JSON ('{...'). First character was '" + body[0] + "'")
-            }
-            finished++;
-            logger.info("OASValidator Resolved " + finished + " missing reference(s).")
-            if (finished === missingReferences.length) {
-              thereMayBeMissingReferences = false;   // validate();
+            try {
+              const response = await fetch(url)
+              const body = await response.text()
+              if (body[0] == "o") { // openapi yaml
+                await validator.setRemoteReference(url, yaml.safeLoad(body));
+              } else if (body[0] == "{") {
+                await validator.setRemoteReference(url, JSON.parse(body));
+              } else {
+                logger.info("OASValidator Error: Content from " + url + " did not start with YAML ('o[penapi]') nor JSON ('{...'). First character was '" + body[0] + "'")
+              }
+            } catch(e) {
+                logger.info("OASValidator Error: " + e)
             }
           }
         }
-      } else {
-        thereMayBeMissingReferences = false
+        err = validator.validate(data, validSchema); //Validate one more time after resolving references.
       }
-
-
-      err = validator.validate(data, validSchema); //Validate one more time after resolving references.
-
 
       if (err == false) {
         newErr = {
@@ -208,40 +198,30 @@ async function checkRequestData(oasDoc, requestedSpecPath, method, res, req, nex
         } else { // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
           value = convertValue(req[location][name], schema); // eslint-disable-line
 
-
-        var thereMayBeMissingReferences = true
-        var err;
-        if (thereMayBeMissingReferences) {
-          err = validator.validate(value, schema);
-          var missingReferences = validator.getMissingRemoteReferences();
-          if (missingReferences.length > 0) {
-            logger.info("OASValidator Found " + missingReferences.length + " missing/remote reference(s) in the OpenAPI Spec")
-            var finished = 0;
-            for (let url of missingReferences) {    //.forEach(async function (url) {
-              logger.info("OASValidator Getting remote reference '" + url +"'")
-              const response = await fetch(url)
-              const body = await response.text()
-              if (body[0] == "o") { // openapi yaml
-                await validator.setRemoteReference(url, yaml.safeLoad(body));
-              } else if (body[0] == "{") {
-                await validator.setRemoteReference(url, JSON.parse(body));
-              } else {
-                logger.info("OASValidator Error: downloaded reference was neither YAML ('o...') nor JSON ('{...'). First character was '" + body[0] + "'")
-              }
-              finished++;
-              logger.info("OASValidator Resolved " + finished + " missing reference(s).")
-              if (finished === missingReferences.length) {
-                thereMayBeMissingReferences = false;   // validate();
+          var err = validator.validate(value, schema);
+          if (config.validatorRetrieveRemoteSchemaReferences) {
+            var missingReferences = validator.getMissingRemoteReferences();
+            if (missingReferences.length > 0) {
+              logger.info("OASValidator Found " + missingReferences.length + " missing/remote reference(s) in the OpenAPI Spec")
+              for (let url of missingReferences) {
+                logger.info("OASValidator Getting remote reference '" + url +"'")
+                try {
+                  const response = await fetch(url)
+                  const body = await response.text()
+                  if (body[0] == "o") { // openapi yaml
+                    await validator.setRemoteReference(url, yaml.safeLoad(body));
+                  } else if (body[0] == "{") {
+                    await validator.setRemoteReference(url, JSON.parse(body));
+                  } else {
+                    logger.info("OASValidator Error: Content from " + url + " did not start with YAML ('o[penapi]') nor JSON ('{...'). First character was '" + body[0] + "'")
+                  }
+                } catch(e) {
+                    logger.info("OASValidator Error: " + e)
+                }
               }
             }
+            err = validator.validate(value, schema); //Validate one more time after resolving references.
           }
-        } else {
-          thereMayBeMissingReferences = false
-        }
-
-
-        err = validator.validate(data, validSchema); //Validate one more time after resolving references.
-
 
           if (err == false) {  // eslint-disable-line
             keepGoing = false;
