@@ -100,7 +100,7 @@ function addFilesToJSONPropertyValidation(files, dataToValidate) {
  * @param {string} method - Method requested by the client.
  * @param {string} req - The whole req object from the client request.
  */
-async function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { // eslint-disable-line
+function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) { // eslint-disable-line
   var paths = oasDoc.paths;
   var keepGoing = true;
   //var msg = "";
@@ -136,7 +136,12 @@ async function checkRequestData(oasDoc, requestedSpecPath, method, res, req, nex
           for (let url of missingReferences) {
             logger.info("OASValidator Getting remote reference '" + url +"'")
             try {
-              const response = await fetch(url)
+              fetch(url).then(response =>
+                response.text().then(body => {
+
+                })
+              )
+
               const body = await response.text()
               if (body[0] == "o") { // openapi yaml
                 await validator.setRemoteReference(url, yaml.safeLoad(body));
