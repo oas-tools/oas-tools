@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 var exports;  // eslint-disable-line
 var ZSchema = require("z-schema");
 var fetch = require('node-fetch');
+var fs = require('fs');
 
 var yaml = require('js-yaml');
 // unused: review
@@ -134,10 +135,17 @@ async function checkRequestData(oasDoc, requestedSpecPath, method, res, req, nex
         if (missingReferences.length > 0) {
           logger.info("OASValidator Found " + missingReferences.length + " missing/remote reference(s) in the OpenAPI Spec")
           for (let url of missingReferences) {
-            logger.info("OASValidator Getting remote reference '" + url +"'")
             try {
-              const response = await fetch(url)
-              const body = await response.text()
+              let body
+              if (url.startsWith("./") || url.startsWith("../") || url.startsWith("file://")) {
+                logger.info("OASValidator Getting local/relative reference '" + url +"'")
+                body = fs.readFileSync(url, {encoding:'utf8', flag:'r'})
+              } else {
+                logger.info("OASValidator Getting remote reference '" + url +"'")
+                const response = await fetch(url)
+                body = await response.text()
+              }
+
               if (body[0] == "o") { // openapi yaml
                 await validator.setRemoteReference(url, yaml.safeLoad(body));
               } else if (body[0] == "{") {
@@ -206,7 +214,16 @@ async function checkRequestData(oasDoc, requestedSpecPath, method, res, req, nex
               for (let url of missingReferences) {
                 logger.info("OASValidator Getting remote reference '" + url +"'")
                 try {
-                  const response = await fetch(url)
+                  let body
+                  if (url.startsWith("./") || url.startsWith("../") || url.startsWith("file://")) {
+                    logger.info("OASValidator Getting local/relative reference '" + url +"'")
+                    body = fs.readFileSync(url, {encoding:'utf8', flag:'r'})
+                  } else {
+                    logger.info("OASValidator Getting remote reference '" + url +"'")
+                    const response = await fetch(url)
+                    body = await response.text()
+                  }
+
                   const body = await response.text()
                   if (body[0] == "o") { // openapi yaml
                     await validator.setRemoteReference(url, yaml.safeLoad(body));
