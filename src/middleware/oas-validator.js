@@ -224,7 +224,6 @@ async function checkRequestData(oasDoc, requestedSpecPath, method, res, req, nex
                     body = await response.text()
                   }
 
-                  const body = await response.text()
                   if (body[0] == "o") { // openapi yaml
                     await validator.setRemoteReference(url, yaml.safeLoad(body));
                   } else if (body[0] == "{") {
