@@ -47,7 +47,7 @@
     "http": "0.0.0",
     "jsdoc": "^3.6.3",
     "mocha": "^7.0.1",
-    "mongoose": "^5.7.5",
+    "mongoose": "^5.11.7",
     "nyc": "^15.0.0",
     "publish-please": "^5.5.1"
   },
