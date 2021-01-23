@@ -1,3 +1,3 @@
-FROM node:6.9
+FROM node:12.20.0-alpine
 
 EXPOSE 80 8080
