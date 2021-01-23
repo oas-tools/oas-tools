@@ -1,27 +1,28 @@
-"use strict";
-
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 //book schema definition
-const PetSchema = new Schema({
-  id: {
-    type: Number,
-    required: true
+const PetSchema = new Schema(
+  {
+    id: {
+      type: Number,
+      required: true,
+    },
+    tag: {
+      type: String,
+      required: false,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
   },
-  tag: {
-    type: String,
-    required: false
-  },
-  name: {
-    type: String,
-    required: true
-  },
-}, {
-  versionKey: false
-});
+  {
+    versionKey: false,
+  }
+);
 
-PetSchema.pre('save', (next) => {
+PetSchema.pre("save", (next) => {
   const now = new Date();
   if (!this.createdAt) {
     this.createdAt = now;
@@ -30,4 +31,4 @@ PetSchema.pre('save', (next) => {
 });
 
 //Exports the BookSchema for use elsewhere.
-module.exports = mongoose.model('pet', PetSchema);
+module.exports = mongoose.model("pet", PetSchema);

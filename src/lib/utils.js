@@ -18,28 +18,35 @@ Considerar que:
 -OperationId será usado únicamente como nombre de función
 */
 
-'use strict';
+var validator = require("validator");
 
-var validator = require('validator');
-
-var fixNullable = function(schema) {
+var fixNullable = function (schema) {
   Object.getOwnPropertyNames(schema).forEach((property) => {
-    if (property === 'type' && schema.nullable === true && schema.type !== "null" && !Array.isArray(schema.type) && schema.type.indexOf("null") === -1) {
+    if (
+      property === "type" &&
+      schema.nullable === true &&
+      schema.type !== "null" &&
+      !Array.isArray(schema.type) &&
+      schema.type.indexOf("null") === -1
+    ) {
       schema.type = [schema.type, "null"];
-    } else if (typeof schema[property] === 'object' && schema[property] !== null) {
+    } else if (
+      typeof schema[property] === "object" &&
+      schema[property] !== null
+    ) {
       fixNullable(schema[property]);
     }
   });
-}
+};
 
 /**
  * Generates a valid name, according to value of nameFor.
  * @param {string} input - String to generate a name from.
  * @param {string} nameFor - possible values are controller, function, variable.
  */
-var generateName = function(input, nameFor) {
-  var chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789.';
-  var name = validator.whitelist(input, chars)
+var generateName = function (input, nameFor) {
+  var chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789.";
+  var name = validator.whitelist(input, chars);
   switch (nameFor) {
     case "controller":
       name += "Controller";
@@ -54,9 +61,9 @@ var generateName = function(input, nameFor) {
       break;
   }
   return name;
-}
+};
 
 module.exports = {
   generateName: generateName,
-  fixNullable: fixNullable
+  fixNullable: fixNullable,
 };
