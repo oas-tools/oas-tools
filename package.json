@@ -2,7 +2,12 @@
   "name": "oas-tools",
   "version": "2.1.8",
   "description": "",
-  "main": "src/index.js",
+  "files": [
+    "src",
+    "lib",
+    "swagger-ui",
+    "schemas"
+  ],
   "scripts": {
     "build": "babel src -d lib",
     "test": "mocha ./tests/basic.js",
