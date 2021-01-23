@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha ./tests/basic.js",
     "test:tdd": "mocha ./tests/basic.js -w",
-    "lint": "eslint src/**/*.js Gruntfile.js tests/**/*.js",
+    "lint": "eslint src Gruntfile.js tests",
+    "format": "npm run lint -- --fix",
     "coverage": "nyc mocha ./tests/basic.js",
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect",
@@ -42,7 +43,7 @@
     "chai": "^4.2.0",
     "chai-http": "^4.2.1",
     "codecov": "^3.7.1",
-    "eslint": "^6.2.2",
+    "eslint": "^7.18.0",
     "express": "^4.16.4",
     "http": "0.0.0",
     "jsdoc": "^3.6.3",
