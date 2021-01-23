@@ -4,6 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
+    "build": "babel src -d lib",
     "test": "mocha ./tests/basic.js",
     "test:tdd": "mocha ./tests/basic.js -w",
     "lint": "eslint src Gruntfile.js tests",
@@ -40,6 +41,8 @@
     "snyk": "^1.342.2"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "chai": "^4.2.0",
     "chai-http": "^4.2.1",
     "codecov": "^3.7.1",
