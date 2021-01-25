@@ -156,7 +156,6 @@ function checkParameter(req, params) {
       }
     } else {
       // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
-      // eslint-disable-next-line no-use-before-define
       const value = convertValue(
         req[location][name],
         schema,
@@ -164,8 +163,8 @@ function checkParameter(req, params) {
         currentParameter
       );
       const err = validator.validate(value, schema);
-        if (err == false) {  // eslint-disable-line
-          if (err.code == "UNKNOWN_FORMAT") { // eslint-disable-line
+      if (err == false) {
+        if (err.code == "UNKNOWN_FORMAT") {
           var registeredFormats = ZSchema.getRegisteredFormats();
           logger.error("UNKNOWN_FORMAT error - Registered Formats: ");
           logger.error(registeredFormats);
