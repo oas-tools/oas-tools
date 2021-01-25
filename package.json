@@ -2,20 +2,20 @@
   "name": "oas-tools",
   "version": "2.1.8",
   "description": "",
-  "type": "module",
-  "main": "./lib/index.js",
+  "type": "commonjs",
+  "main": "./common/index.js",
   "exports": {
     ".": {
-      "require": "./lib/index.js",
-      "default": "./src/index.js"
+      "require": "./common/index.js",
+      "default": "./lib/index.mjs"
     }
   },
-  "module": "./src/index.js",
+  "module": "./lib/index.mjs",
   "engines": {
     "node": ">=12"
   },
   "files": [
-    "src",
+    "common",
     "lib",
     "swagger-ui",
     "schemas"
