@@ -762,6 +762,29 @@ paths:
               schema:
                 type: object
       x-router-controller: "petsController"
+  /noAdditionalPropertiesTest:
+    post:
+      summary: Test that in case of additionalProperties false, an error is returned if the request contains additional properties
+      operationId: anyResponse
+      security: []
+      tags:
+        - pets
+      requestBody:
+        description: Pet where no additional properties are allowed
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Pet"
+              additionalProperties: false
+      responses:
+        "201":
+          description: Any sample response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-router-controller: "petsController"
 security:
   - Bearer: []
 components:
