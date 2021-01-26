@@ -1,3 +1,33 @@
 {
-  "presets": ["env"]
+  "env": {
+    "commonjs": {
+      "presets": [
+        [
+          "babel-preset-env",
+          {
+            "targets": {
+              "node": "6.10"
+            },
+            "modules": "cjs"
+          }
+        ]
+      ]
+      // "plugins": ["transform-object-rest-spread", "transform-class-properties"]
+    },
+    "module": {
+      "presets": [
+        [
+          "babel-preset-env",
+          {
+            "targets": {
+              "node": "12.20"
+            },
+            "modules": false
+          }
+        ]
+      ]
+      // "plugins": ["transform-object-rest-spread", "transform-class-properties"]
+    }
+  },
+  "sourceMaps": true
 }

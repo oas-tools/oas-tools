@@ -11,17 +11,17 @@
     }
   },
   "module": "./lib/index.mjs",
-  "engines": {
-    "node": ">=12"
-  },
   "files": [
+    "src",
     "common",
     "lib",
     "swagger-ui",
     "schemas"
   ],
   "scripts": {
-    "build": "babel src -d lib",
+    "build": "npm run build-module && npm run build-commonjs",
+    "build-commonjs": "cross-env BABEL_ENV=commonjs babel ./src --out-dir common --source-maps --copy-files",
+    "build-module": "cross-env BABEL_ENV=module babel ./src --out-dir lib --source-maps --copy-files --keep-file-extension",
     "test": "mocha ./tests/basic.js",
     "test:tdd": "mocha ./tests/basic.js -w",
     "lint": "eslint src Gruntfile.js tests",
@@ -63,6 +63,7 @@
     "chai": "^4.2.0",
     "chai-http": "^4.2.1",
     "codecov": "^3.7.1",
+    "cross-env": "^7.0.3",
     "eslint": "^7.18.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",
