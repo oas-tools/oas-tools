@@ -1,8 +1,7 @@
-var _ = require('lodash-compat');
-var async = require('async');
-var jwt = require('jsonwebtoken');
-var config = require('../configurations'),
-  logger = config.logger;
+import * as _ from 'lodash-compat';
+import * as async from 'async';
+import { config, logger } from '../configurations';
+import jwt from 'jsonwebtoken';
 
 var getValue = (req, secDef, secName, secReq) => {
   var propName = secDef.name;
@@ -82,7 +81,7 @@ function verifyToken(req, secDef, token, secName, next) {
   }
 }
 
-module.exports = (specDoc) => {
+export default (specDoc) => {
   return function OASSecurity(req, res, next) {
     var handlers = config.securityFile;
     var operation = config.pathsDict[removeBasePath(req.route.path)];
@@ -194,5 +193,3 @@ module.exports = (specDoc) => {
     }
   };
 };
-
-exports = module.exports;

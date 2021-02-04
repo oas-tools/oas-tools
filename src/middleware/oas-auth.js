@@ -1,8 +1,7 @@
-var config = require('../configurations'),
-  logger = config.logger;
-var jwt = require('jsonwebtoken');
-const AccessControl = require('accesscontrol');
-const AccessControlMiddleware = require('accesscontrol-middleware');
+import { config, logger } from '../configurations';
+import AccessControl from 'accesscontrol';
+import AccessControlMiddleware from 'accesscontrol-middleware';
+import jwt from 'jsonwebtoken';
 
 function removeBasePath(reqRoutePath) {
   return reqRoutePath
@@ -36,7 +35,7 @@ function filterParams(methodParameters, pathParameters) {
   return res;
 }
 
-module.exports = (oasDoc) => {
+export default (oasDoc) => {
   return function OASAuth(req, res, next) {
     const usedPath = config.pathsDict[removeBasePath(req.route.path)];
     const method = req.method.toLowerCase();
@@ -140,5 +139,3 @@ module.exports = (oasDoc) => {
     }
   };
 };
-
-exports = module.exports;

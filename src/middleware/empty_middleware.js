@@ -1,7 +1,6 @@
-const config = require('../configurations'),
-  logger = config.logger;
+import { config, logger } from '../configurations';
 
-module.exports = (options) => {
+export default (options) => {
   return (req, res, next) => {
     if (options != undefined) {
       logger.debug(

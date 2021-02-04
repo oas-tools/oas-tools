@@ -16,18 +16,16 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-
-var path = require('path');
-var ZSchema = require('z-schema');
-var MIMEtype = require('whatwg-mimetype');
-var config = require('../configurations'),
-  logger = config.logger;
-var validator = new ZSchema({
+import * as MIMEtype from 'whatwg-mimetype';
+import * as utils from './lib/utils.js';
+import { config, logger } from './configurations';
+import ZSchema from 'z-schema';
+import path from 'path';
+const validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
   breakOnFirstError: false,
 });
-var utils = require('../lib/utils.js');
 
 function getExpectedResponse(responses, code) {
   // Exact match wins over range definitions (1XX, 2XX, 3XX, 4XX, 5XX)
@@ -256,7 +254,7 @@ function getOpId(oasDoc, requestedSpecPath, method) {
   );
 }
 
-module.exports = (controllers) => {
+export default (controllers) => {
   return function OASRouter(req, res, next) {
     var oasDoc = res.locals.oasDoc;
     var requestedSpecPath = res.locals.requestedSpecPath; //requested path version on the oasDoc file of the requested url

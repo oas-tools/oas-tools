@@ -20,15 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 /**
  * Module dependecies.
  * */
-var jsyaml = require('js-yaml');
-var fs = require('fs');
-var path = require('path');
-var winston = require('winston');
+import * as jsyaml from 'js-yaml';
+import * as winston from 'winston';
+import fs from 'fs';
+import path from 'path';
 
 /*
  * Export functions and Objects
  */
-var config = {
+export const config = {
   setConfigurations: function setConfigurations(options, encoding) {
     if (!options) {
       throw new Error('Configurations parameter is required');
@@ -75,37 +75,14 @@ var config = {
   },
 };
 
-module.exports = config;
-
-module.exports.setProperty = function setProperty(propertyName, newValue) {
+export function setProperty(propertyName, newValue) {
   this[propertyName] = newValue;
-};
+}
 
 /**
  * Setup default configurations
  */
 config.setConfigurations(path.join(__dirname, 'configs.yaml'), 'utf8');
-
-function consoleLogger(customLevels, customFormat) {
-  module.exports.logger = winston.createLogger({
-    levels: customLevels.levels,
-    transports: [
-      new winston.transports.Console({
-        level: config.loglevel,
-        handleExceptions: true,
-        json: false,
-        format: winston.format.combine(
-          winston.format.colorize(),
-          winston.format.timestamp(),
-          winston.format.splat(),
-          customFormat
-        ),
-      }),
-    ],
-    exitOnError: false,
-  });
-}
-
 function createNewLogger() {
   var customFormat = winston.format.printf(
     (info) => `${info.timestamp} ${info.level}: ${info.message}`
@@ -131,39 +108,40 @@ function createNewLogger() {
     },
   };
 
-  if (config.logfile != undefined) {
-    module.exports.logger = winston.createLogger({
-      levels: customLevels.levels,
-      transports: [
-        new winston.transports.File({
-          level: config.loglevel,
-          filename: config.logfile,
-          handleExceptions: true,
-          maxsize: 5242880, //5MB
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.splat(),
-            customFormat
-          ),
-        }),
-        new winston.transports.Console({
-          level: config.loglevel,
-          handleExceptions: true,
-          json: false,
-          format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.timestamp(),
-            winston.format.splat(),
-            customFormat
-          ),
-        }),
-      ],
-      exitOnError: false,
-    });
-  } else {
-    consoleLogger(customLevels, customFormat);
-  }
   winston.addColors(customLevels.colors);
+  const transports = [
+    new winston.transports.Console({
+      level: config.loglevel,
+      handleExceptions: true,
+      json: false,
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.timestamp(),
+        winston.format.splat(),
+        customFormat
+      ),
+    }),
+  ];
+  if (config.logfile != undefined) {
+    transports.push(
+      new winston.transports.File({
+        level: config.loglevel,
+        filename: config.logfile,
+        handleExceptions: true,
+        maxsize: 5242880, //5MB
+        format: winston.format.combine(
+          winston.format.timestamp(),
+          winston.format.splat(),
+          customFormat
+        ),
+      })
+    );
+  }
+  return winston.createLogger({
+    levels: customLevels.levels,
+    transports,
+    exitOnError: false,
+  });
 }
 
-createNewLogger();
+export const logger = createNewLogger();

@@ -5,31 +5,32 @@ https://github.com/ignpelloz
 https://github.com/isa-group/project-oas-tools
 */
 
-var _ = require('lodash-compat');
-var fs = require('fs');
-var pathModule = require('path');
-var jsyaml = require('js-yaml');
-var config = require('./configurations'),
-  logger = config.logger;
-var ZSchema = require('z-schema');
-var deref = require('json-schema-deref-sync');
-var validator = new ZSchema({
+import * as _ from 'lodash-compat';
+import * as deref from 'json-schema-deref-sync';
+import * as express from 'express';
+import * as request from 'request';
+import * as utils from './lib/utils.js';
+import { config, logger as defaultLogger } from './configurations';
+import EmptyMiddleware from './middleware/empty_middleware';
+import OASAuth from './middleware/oas-auth';
+import OASRouter from './middleware/oas-router';
+import OASSecurity from './middleware/oas-security';
+import OASValidator from './middleware/oas-validator';
+import ZSchema from 'z-schema';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import jsyaml from 'js-yaml';
+import path from 'path';
+
+const validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
   breakOnFirstError: false,
 });
-var utils = require('./lib/utils.js');
-var express = require('express');
-var request = require('request');
-
-// var controllers;
-// var customConfigurations = false;
-
-var schemaV3 = fs.readFileSync(
-  pathModule.join(__dirname, './schemas/openapi-3.0.yaml'),
-  'utf8'
+let logger = defaultLogger;
+const schemaV3 = jsyaml.safeLoad(
+  fs.readFileSync(path.join(__dirname, './schemas/openapi-3.0.yaml'), 'utf8')
 );
-schemaV3 = jsyaml.safeLoad(schemaV3);
 
 function fatalError(err) {
   logger.error(err);
@@ -157,7 +158,7 @@ function checkControllers(
       '    OAS-doc has ' + router_property + ' property ' + controller
     );
     try {
-      load = require(pathModule.join(
+      load = require(path.join(
         controllersLocation,
         utils.generateName(controller, undefined)
       ));
@@ -172,7 +173,7 @@ function checkControllers(
         controller
     );
     try {
-      load = require(pathModule.join(controllersLocation, controller));
+      load = require(path.join(controllersLocation, controller));
       checkOperationId(load, pathName, methodName, methodSection);
     } catch (err) {
       logger.debug(
@@ -180,7 +181,7 @@ function checkControllers(
       );
       try {
         controller = 'Default'; //try to load default one
-        load = require(pathModule.join(controllersLocation, controller));
+        load = require(path.join(controllersLocation, controller));
         checkOperationId(load, pathName, methodName, methodSection);
       } catch (err) {
         fatalError(
@@ -309,7 +310,7 @@ function initializeSecurityAndAuth(specDoc) {
         } else if (config.securityFile[secName].charAt(0) === '/') {
           config.securityFile[secName] = require(config.securityFile[secName]);
         } else {
-          config.securityFile[secName] = require(pathModule.join(
+          config.securityFile[secName] = require(path.join(
             process.cwd(),
             config.securityFile[secName]
           ));
@@ -336,7 +337,7 @@ function initializeSecurityAndAuth(specDoc) {
         } else {
           config.grantsFile[secName] = extendGrants(
             specDoc,
-            require(pathModule.join(process.cwd(), config.grantsFile[secName]))
+            require(path.join(process.cwd(), config.grantsFile[secName]))
           );
         }
       } else {
@@ -356,20 +357,16 @@ function initializeSecurityAndAuth(specDoc) {
  */
 function registerPaths(specDoc, app) {
   var OASRouterMid = function () {
-    var OASRouter = require('./middleware/oas-router');
     return OASRouter.call(undefined, config.controllers);
   };
   var OASValidatorMid = function () {
-    var OASValidator = require('./middleware/oas-validator');
     return OASValidator.call(undefined, specDoc);
   };
   initializeSecurityAndAuth(specDoc);
   var OASSecurityMid = function () {
-    var OASSecurity = require('./middleware/oas-security');
     return OASSecurity.call(undefined, specDoc);
   };
   var OASAuthMid = function () {
-    var OASAuth = require('./middleware/oas-auth');
     return OASAuth.call(undefined, specDoc);
   };
 
@@ -468,7 +465,7 @@ function registerPaths(specDoc, app) {
     });
     if (config.docs.swaggerUi) {
       var uiHtml = fs.readFileSync(
-        pathModule.join(__dirname, '../swagger-ui/index.html'),
+        path.join(__dirname, '../swagger-ui/index.html'),
         'utf8'
       );
       uiHtml = uiHtml.replace(
@@ -476,7 +473,7 @@ function registerPaths(specDoc, app) {
         'url: "' + config.docs.apiDocsPrefix + config.docs.apiDocs + '"'
       );
       fs.writeFileSync(
-        pathModule.join(__dirname, '../swagger-ui/index.html'),
+        path.join(__dirname, '../swagger-ui/index.html'),
         uiHtml,
         'utf8'
       );
@@ -485,7 +482,7 @@ function registerPaths(specDoc, app) {
       }
       app.use(
         config.docs.swaggerUiPrefix + config.docs.swaggerUi,
-        express.static(pathModule.join(__dirname, '../swagger-ui'))
+        express.static(path.join(__dirname, '../swagger-ui'))
       );
     }
   }
@@ -520,7 +517,6 @@ var initializeMiddleware = function initializeMiddleware(
   app,
   callback
 ) {
-  var bodyParser = require('body-parser');
   app.use(
     bodyParser.json({
       strict: false,
@@ -533,11 +529,11 @@ var initializeMiddleware = function initializeMiddleware(
   logger.info('Specification file dereferenced');
 
   var middleware = {
-    swaggerValidator: require('./middleware/empty_middleware'),
-    swaggerRouter: require('./middleware/empty_middleware'),
-    swaggerMetadata: require('./middleware/empty_middleware'),
-    swaggerUi: require('./middleware/empty_middleware'),
-    swaggerSecurity: require('./middleware/empty_middleware'),
+    swaggerValidator: EmptyMiddleware,
+    swaggerRouter: EmptyMiddleware,
+    swaggerMetadata: EmptyMiddleware,
+    swaggerUi: EmptyMiddleware,
+    swaggerSecurity: EmptyMiddleware,
   };
   registerPaths(fullSchema, app);
   callback(middleware);

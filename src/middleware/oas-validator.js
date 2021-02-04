@@ -17,24 +17,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-var ZSchema = require('z-schema');
-
-// unused: review
-// var yaml = require('js-yaml');
-// var fs = require('fs');
-// var path = require('path');
-// var http = require('http');
-// var urlModule = require('url');
-
-var config = require('../configurations'),
-  logger = config.logger,
-  utils = require('../lib/utils');
-var validator = new ZSchema({
+import * as _ from 'lodash-compat';
+import * as utils from './lib/utils.js';
+import { config, logger } from './configurations';
+import ZSchema from 'z-schema';
+const validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
   breakOnFirstError: false,
 });
-var _ = require('lodash-compat');
 
 /**
  * Returns the Express version of the OAS name for location.
@@ -429,7 +420,7 @@ function removeBasePath(reqRoutePath) {
     .join('');
 }
 
-module.exports = (oasDoc) => {
+export default (oasDoc) => {
   return function OASValidator(req, res, next) {
     var method = req.method.toLowerCase();
 

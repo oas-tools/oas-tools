@@ -18,9 +18,9 @@ Considerar que:
 -OperationId será usado únicamente como nombre de función
 */
 
-var validator = require('validator');
+import * as validator from 'validator';
 
-var fixNullable = function (schema) {
+export function fixNullable(schema) {
   Object.getOwnPropertyNames(schema).forEach((property) => {
     if (
       property === 'type' &&
@@ -37,14 +37,14 @@ var fixNullable = function (schema) {
       fixNullable(schema[property]);
     }
   });
-};
+}
 
 /**
  * Generates a valid name, according to value of nameFor.
  * @param {string} input - String to generate a name from.
  * @param {string} nameFor - possible values are controller, function, variable.
  */
-var generateName = function (input, nameFor) {
+export function generateName(input, nameFor) {
   var chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789.';
   var name = validator.whitelist(input, chars);
   switch (nameFor) {
@@ -61,9 +61,4 @@ var generateName = function (input, nameFor) {
       break;
   }
   return name;
-};
-
-module.exports = {
-  generateName: generateName,
-  fixNullable: fixNullable,
-};
+}
