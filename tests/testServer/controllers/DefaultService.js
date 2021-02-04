@@ -1,66 +1,66 @@
 let pets = [
   {
     id: 1,
-    name: "Wolf",
-    tag: "Barks at the moon",
+    name: 'Wolf',
+    tag: 'Barks at the moon',
   },
   {
     id: 2,
-    name: "Cat",
-    tag: "Boring animal",
+    name: 'Cat',
+    tag: 'Boring animal',
   },
   {
     id: 3,
-    name: "Rabbit",
-    tag: "Eats carrots",
+    name: 'Rabbit',
+    tag: 'Eats carrots',
   },
   {
     id: 10,
-    name: "Pig",
+    name: 'Pig',
     tag: undefined,
   },
   {
     id: 28,
-    name: "Bat",
-    tag: "At night",
+    name: 'Bat',
+    tag: 'At night',
   },
   {
     id: 200,
-    name: "AnimalZ",
-    tag: "This is an object",
+    name: 'AnimalZ',
+    tag: 'This is an object',
   },
 ];
 
 function corruptPets() {
   pets = [
     {
-      id: "1",
-      name: "Wolf",
-      tag: "Barks at the moon",
+      id: '1',
+      name: 'Wolf',
+      tag: 'Barks at the moon',
     },
     {
       id: 2,
-      name: "Cat",
-      tag: "Boring animal",
+      name: 'Cat',
+      tag: 'Boring animal',
     },
     {
       id: 3,
-      name: "Rabbit",
-      tag: "Eats carrots",
+      name: 'Rabbit',
+      tag: 'Eats carrots',
     },
     {
       id: 10,
-      name: "Pig",
+      name: 'Pig',
       tag: undefined,
     },
     {
-      name: "Bat",
-      tag: "At night",
+      name: 'Bat',
+      tag: 'At night',
     },
     {
       id: 200,
-      name: "AnimalZ",
-      tag: "This is supposed to be a wrong object",
+      name: 'AnimalZ',
+      tag: 'This is supposed to be a wrong object',
     },
   ];
   exports.pets = pets;
@@ -70,33 +70,33 @@ function setCorrectPets() {
   pets = [
     {
       id: 1,
-      name: "Wolf",
-      tag: "Barks at the moon",
+      name: 'Wolf',
+      tag: 'Barks at the moon',
     },
     {
       id: 2,
-      name: "Cat",
-      tag: "Boring animal",
+      name: 'Cat',
+      tag: 'Boring animal',
     },
     {
       id: 3,
-      name: "Rabbit",
-      tag: "Eats carrots",
+      name: 'Rabbit',
+      tag: 'Eats carrots',
     },
     {
       id: 4,
-      name: "Bat",
+      name: 'Bat',
       tag: "Ozzy's breakfast",
     },
     {
       id: 10,
-      name: "Pig",
+      name: 'Pig',
       tag: undefined,
     },
     {
       id: 200,
-      name: "AnimalZ",
-      tag: "It is not wrong anymore",
+      name: 'AnimalZ',
+      tag: 'It is not wrong anymore',
     },
   ];
 }
@@ -134,7 +134,7 @@ exports.showPetById = (args, res) => {
   }
   if (res_pet == undefined) {
     res.status(404).send({
-      message: "There is no pet with id " + args.petId.value,
+      message: 'There is no pet with id ' + args.petId.value,
     });
   } else {
     res.status(200).send(res_pet);
@@ -153,7 +153,7 @@ exports.deletePet = (args, res) => {
   }
   if (index == -1) {
     res.status(404).send({
-      message: "There is no pet with id " + args.petId.value + " to be deleted",
+      message: 'There is no pet with id ' + args.petId.value + ' to be deleted',
     });
   } else {
     pets.splice(index, 1);
@@ -182,13 +182,13 @@ exports.updatePet = (args, res) => {
       present = true;
       pets[i] = args.pet.value;
       res.status(200).send({
-        message: "Updated pet",
+        message: 'Updated pet',
       });
     }
   }
   if (present == false) {
     res.status(404).send({
-      message: "There is no pet with id " + args.petId.value,
+      message: 'There is no pet with id ' + args.petId.value,
     });
   }
   exports.pets = pets;

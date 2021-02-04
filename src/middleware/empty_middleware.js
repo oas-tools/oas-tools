@@ -1,15 +1,15 @@
-const config = require("../configurations"),
+const config = require('../configurations'),
   logger = config.logger;
 
 module.exports = (options) => {
   return (req, res, next) => {
     if (options != undefined) {
       logger.debug(
-        "<empty_middleware> Router middleware: " + options.controllers
+        '<empty_middleware> Router middleware: ' + options.controllers
       );
       config.controllers = options.controllers;
     } else {
-      logger.debug("<empty_middleware> This does nothing actually.");
+      logger.debug('<empty_middleware> This does nothing actually.');
     }
     next();
   };

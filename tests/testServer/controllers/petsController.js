@@ -1,67 +1,67 @@
 var pets = [
   {
     id: 1,
-    name: "Wolf",
-    tag: "Barks at the moon",
+    name: 'Wolf',
+    tag: 'Barks at the moon',
   },
   {
     id: 2,
-    name: "Cat",
-    tag: "Boring animal",
+    name: 'Cat',
+    tag: 'Boring animal',
   },
   {
     id: 3,
-    name: "Rabbit",
-    tag: "Eats carrots",
+    name: 'Rabbit',
+    tag: 'Eats carrots',
   },
   {
     id: 10,
-    name: "Pig",
+    name: 'Pig',
     tag: undefined,
   },
   {
     id: 28,
-    name: "Bat",
-    tag: "At night",
+    name: 'Bat',
+    tag: 'At night',
   },
   {
     id: 200,
-    name: "AnimalZ",
-    tag: "This is an object",
+    name: 'AnimalZ',
+    tag: 'This is an object',
   },
 ];
 
 function corruptPets() {
   pets = [
     {
-      id: "1",
-      name: "Wolf",
-      tag: "Barks at the moon",
+      id: '1',
+      name: 'Wolf',
+      tag: 'Barks at the moon',
     },
     {
       id: 2,
-      name: "Cat",
-      tag: "Boring animal",
+      name: 'Cat',
+      tag: 'Boring animal',
     },
     {
       id: 3,
-      name: "Rabbit",
-      tag: "Eats carrots",
+      name: 'Rabbit',
+      tag: 'Eats carrots',
     },
     {
       id: 10,
-      name: "Pig",
-      tag: "Looking for mud",
+      name: 'Pig',
+      tag: 'Looking for mud',
     },
     {
-      name: "Bat",
-      tag: "At night",
+      name: 'Bat',
+      tag: 'At night',
     },
     {
       id: 200,
-      name: "AnimalZ",
-      tag: "This is supposed to be a wrong object",
-      extraProperty: "Extra property, wrong!",
+      name: 'AnimalZ',
+      tag: 'This is supposed to be a wrong object',
+      extraProperty: 'Extra property, wrong!',
     },
   ];
   exports.pets = pets;
@@ -71,33 +71,33 @@ function setCorrectPets() {
   pets = [
     {
       id: 1,
-      name: "Wolf",
-      tag: "Barks at the moon",
+      name: 'Wolf',
+      tag: 'Barks at the moon',
     },
     {
       id: 2,
-      name: "Cat",
-      tag: "Boring animal",
+      name: 'Cat',
+      tag: 'Boring animal',
     },
     {
       id: 3,
-      name: "Rabbit",
-      tag: "Eats carrots",
+      name: 'Rabbit',
+      tag: 'Eats carrots',
     },
     {
       id: 4,
-      name: "Bat",
+      name: 'Bat',
       tag: "Ozzy's breakfast",
     },
     {
       id: 10,
-      name: "Pig",
+      name: 'Pig',
       tag: undefined,
     },
     {
       id: 200,
-      name: "AnimalZ",
-      tag: "It is not wrong anymore",
+      name: 'AnimalZ',
+      tag: 'It is not wrong anymore',
     },
   ];
 }
@@ -108,7 +108,7 @@ function setCorrectPets() {
 exports.paramTestsPath = (req, res) => {
   res.send({
     message:
-      "Path for path parameters tests was requested, this it its controller response",
+      'Path for path parameters tests was requested, this it its controller response',
   });
 };
 
@@ -118,7 +118,7 @@ exports.paramTestsPath = (req, res) => {
 exports.paramTestsQuery = (req, res) => {
   res.send({
     message:
-      "Path for query parameters tests was requested, this it its controller response",
+      'Path for query parameters tests was requested, this it its controller response',
   });
 };
 
@@ -128,7 +128,7 @@ exports.paramTestsQuery = (req, res) => {
 exports.ownershipTest = (req, res) => {
   res.send({
     message:
-      "Path for ownership tests was requested, this is its controller response",
+      'Path for ownership tests was requested, this is its controller response',
   });
 };
 
@@ -147,7 +147,7 @@ exports.operationTests = (req, res) => {
 exports.ownershipBindingTest = (req, res) => {
   res.send({
     message:
-      "Path for ownership with acl binding tests was requested, this is its controller response",
+      'Path for ownership with acl binding tests was requested, this is its controller response',
   });
 };
 
@@ -159,11 +159,11 @@ exports.responseBodyTest = (req, res) => {
   var okay = {
     integerProperty: 2,
     booleanProperty: true,
-    stringProperty: "okay",
+    stringProperty: 'okay',
     doubleProperty: 2.8,
   };
   var wrong = {
-    integerProperty: "wrong",
+    integerProperty: 'wrong',
     booleanProperty: 23,
     stringProperty: 6.8,
     doubleProperty: false,
@@ -189,7 +189,7 @@ exports.createPetsViaMultipartFormdata = (args, res) => {
   const pet = {
     id: Number(args.body.id), // form fields arrive always as strings
     name: args.body.name,
-    tag: "not important",
+    tag: 'not important',
   };
   pets.push(pet);
   exports.pets = pets;
@@ -218,7 +218,7 @@ exports.showPetById = (args, res) => {
   }
   if (res_pet == undefined) {
     res.status(404).send({
-      message: "There is no pet with id " + args.params.petId,
+      message: 'There is no pet with id ' + args.params.petId,
     });
   } else {
     res.status(200).send(res_pet);
@@ -245,7 +245,7 @@ exports.deletePet = (args, res) => {
   if (index == -1) {
     res.status(404).send({
       message:
-        "There is no pet with id " + args.params.petId + " to be deleted",
+        'There is no pet with id ' + args.params.petId + ' to be deleted',
     });
   } else {
     pets.splice(index, 1);
@@ -274,13 +274,13 @@ exports.updatePet = (args, res) => {
       present = true;
       pets[i] = args.body;
       res.status(200).send({
-        message: "Updated pet",
+        message: 'Updated pet',
       });
     }
   }
   if (present == false) {
     res.status(404).send({
-      message: "There is no pet with id " + args.params.petId,
+      message: 'There is no pet with id ' + args.params.petId,
     });
   }
   exports.pets = pets;
@@ -296,13 +296,13 @@ exports.updateTag = (args, res) => {
       present = true;
       pets[i].tag = args.body.tag;
       res.status(200).send({
-        message: "Updated pet",
+        message: 'Updated pet',
       });
     }
   }
   if (!present) {
     res.status(404).send({
-      message: "There is no pet with id " + args.params.petId,
+      message: 'There is no pet with id ' + args.params.petId,
     });
   }
   exports.pets = pets;
@@ -313,8 +313,8 @@ exports.updateTag = (args, res) => {
  */
 exports.securityFile = (req, res) => {
   res.send({
-    issuer: "ISA Auth",
-    key: "test",
+    issuer: 'ISA Auth',
+    key: 'test',
   });
 };
 
@@ -325,59 +325,59 @@ exports.grantsFile = (req, res) => {
   res.send({
     anonymous: {
       paramTestsQuery: {
-        "create:any": ["*"],
-        "read:any": ["*"],
-        "update:any": ["*"],
-        "delete:any": ["*"],
+        'create:any': ['*'],
+        'read:any': ['*'],
+        'update:any': ['*'],
+        'delete:any': ['*'],
       },
       paramTestsPath: {
-        "create:any": ["*"],
-        "read:any": ["*"],
-        "update:any": ["*"],
-        "delete:any": ["*"],
+        'create:any': ['*'],
+        'read:any': ['*'],
+        'update:any': ['*'],
+        'delete:any': ['*'],
       },
       ownershipTest: {
-        "read:own": ["*"],
+        'read:own': ['*'],
       },
       ownershipBindingTest: {
-        "read:own": ["*"],
+        'read:own': ['*'],
       },
       commonParamTest: {
-        "read:any": ["*"],
+        'read:any': ['*'],
       },
       overrideCommonParamTest: {
-        "read:any": ["*"],
+        'read:any': ['*'],
       },
       responseBodyTest: {
-        "create:any": ["*"],
-        "read:any": ["*"],
-        "update:any": ["*"],
-        "delete:any": ["*"],
+        'create:any': ['*'],
+        'read:any': ['*'],
+        'update:any': ['*'],
+        'delete:any': ['*'],
       },
       pets: {
-        "create:any": ["*"],
-        "read:any": ["*"],
-        "update:any": ["*"],
-        "delete:any": ["*"],
+        'create:any': ['*'],
+        'read:any': ['*'],
+        'update:any': ['*'],
+        'delete:any': ['*'],
       },
       multipartFormdata: {
-        "create:any": ["*"],
-        "read:any": ["*"],
-        "update:any": ["*"],
-        "delete:any": ["*"],
+        'create:any': ['*'],
+        'read:any': ['*'],
+        'update:any': ['*'],
+        'delete:any': ['*'],
       },
       requestBodyTest: {
-        "create:any": ["*"],
+        'create:any': ['*'],
       },
     },
     user: {
       pets: {
-        "read:any": ["*"],
+        'read:any': ['*'],
       },
     },
     userWithoutPermissions: {},
     extendeduser: {
-      $extend: ["user"],
+      $extend: ['user'],
     },
   });
 };
@@ -387,7 +387,7 @@ exports.grantsFile = (req, res) => {
  */
 exports.tokenVerificationTest = (req, res) => {
   res.send({
-    samplestring: "testing",
+    samplestring: 'testing',
   });
 };
 
@@ -423,7 +423,7 @@ exports.contentTypeTest = (req, res) => {
  */
 exports.wrongResponseCode = (req, res) => {
   res.status(400).send({
-    message: "This is a test",
+    message: 'This is a test',
   });
 };
 

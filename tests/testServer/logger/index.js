@@ -1,4 +1,4 @@
-var winston = require("winston");
+var winston = require('winston');
 
 var customFormat = winston.format.printf(
   (info) => `${info.timestamp} ${info.level}: ${info.message}`
@@ -13,11 +13,11 @@ var customLevels = {
     debug: 11,
   },
   colors: {
-    error: "red",
-    warning: "yellow",
-    custom: "magenta",
-    info: "white",
-    debug: "blue",
+    error: 'red',
+    warning: 'yellow',
+    custom: 'magenta',
+    info: 'white',
+    debug: 'blue',
   },
 };
 
@@ -25,7 +25,7 @@ var logger = winston.createLogger({
   levels: customLevels.levels,
   transports: [
     new winston.transports.Console({
-      level: "none",
+      level: 'none',
       handleExceptions: true,
       json: false,
       format: winston.format.combine(

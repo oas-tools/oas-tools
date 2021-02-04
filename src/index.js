@@ -5,29 +5,29 @@ https://github.com/ignpelloz
 https://github.com/isa-group/project-oas-tools
 */
 
-var _ = require("lodash-compat");
-var fs = require("fs");
-var pathModule = require("path");
-var jsyaml = require("js-yaml");
-var config = require("./configurations"),
+var _ = require('lodash-compat');
+var fs = require('fs');
+var pathModule = require('path');
+var jsyaml = require('js-yaml');
+var config = require('./configurations'),
   logger = config.logger;
-var ZSchema = require("z-schema");
-var deref = require("json-schema-deref-sync");
+var ZSchema = require('z-schema');
+var deref = require('json-schema-deref-sync');
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
   breakOnFirstError: false,
 });
-var utils = require("./lib/utils.js");
-var express = require("express");
-var request = require("request");
+var utils = require('./lib/utils.js');
+var express = require('express');
+var request = require('request');
 
 // var controllers;
 // var customConfigurations = false;
 
 var schemaV3 = fs.readFileSync(
-  pathModule.join(__dirname, "./schemas/openapi-3.0.yaml"),
-  "utf8"
+  pathModule.join(__dirname, './schemas/openapi-3.0.yaml'),
+  'utf8'
 );
 schemaV3 = jsyaml.safeLoad(schemaV3);
 
@@ -43,25 +43,25 @@ function fatalError(err) {
  */
 function init_checks(specDoc, callback) {
   if (_.isUndefined(specDoc)) {
-    throw new Error("specDoc is required");
+    throw new Error('specDoc is required');
   } else if (!_.isPlainObject(specDoc)) {
-    throw new TypeError("specDoc must be an object");
+    throw new TypeError('specDoc must be an object');
   }
 
   if (_.isUndefined(callback)) {
-    throw new Error("callback is required");
+    throw new Error('callback is required');
   } else if (!_.isFunction(callback)) {
-    throw new TypeError("callback must be a function");
+    throw new TypeError('callback must be a function');
   }
 
   var err = validator.validate(specDoc, schemaV3);
   if (err == false) {
     fatalError(
-      "Specification file is not valid: " +
+      'Specification file is not valid: ' +
         JSON.stringify(validator.getLastErrors())
     );
   } else {
-    logger.info("Valid specification file");
+    logger.info('Valid specification file');
   }
 }
 
@@ -87,40 +87,40 @@ function checkOperationId(load, pathName, methodName, methodSection) {
   var opId = undefined;
   var rawOpId = undefined;
 
-  if (_.has(methodSection, "operationId")) {
+  if (_.has(methodSection, 'operationId')) {
     rawOpId = methodSection.operationId;
     opId = utils.generateName(rawOpId, undefined); //there is opId: just normalize
   }
 
   if (opId == undefined) {
-    opId = utils.generateName(pathName, "function") + methodName.toUpperCase(); //there is no opId: normalize and add "func" at the beggining
+    opId = utils.generateName(pathName, 'function') + methodName.toUpperCase(); //there is no opId: normalize and add "func" at the beggining
     logger.debug(
-      "      There is no operationId for " +
+      '      There is no operationId for ' +
         methodName.toUpperCase() +
-        " - " +
+        ' - ' +
         pathName +
-        " -> generated: " +
+        ' -> generated: ' +
         opId
     );
   }
 
   if (load[opId] == undefined) {
     fatalError(
-      "      There is no function in the controller for " +
+      '      There is no function in the controller for ' +
         methodName.toUpperCase() +
-        " - " +
+        ' - ' +
         pathName +
-        " (operationId: " +
+        ' (operationId: ' +
         opId +
-        ")"
+        ')'
     );
   } else {
     logger.debug(
-      "      Controller for " +
+      '      Controller for ' +
         methodName.toUpperCase() +
-        " - " +
+        ' - ' +
         pathName +
-        ": OK"
+        ': OK'
     );
   }
 }
@@ -138,15 +138,15 @@ function checkControllers(
   methodSection,
   controllersLocation
 ) {
-  logger.debug("  " + methodName.toUpperCase() + " - " + pathName);
+  logger.debug('  ' + methodName.toUpperCase() + ' - ' + pathName);
   var controller;
   var load;
   var router_property;
 
-  if (methodSection["x-router-controller"] != undefined) {
-    router_property = "x-router-controller";
-  } else if (methodSection["x-swagger-router-controller"] != undefined) {
-    router_property = "x-swagger-router-controller";
+  if (methodSection['x-router-controller'] != undefined) {
+    router_property = 'x-router-controller';
+  } else if (methodSection['x-swagger-router-controller'] != undefined) {
+    router_property = 'x-swagger-router-controller';
   } else {
     router_property = undefined;
   }
@@ -154,7 +154,7 @@ function checkControllers(
   if (methodSection[router_property] != undefined) {
     controller = methodSection[router_property];
     logger.debug(
-      "    OAS-doc has " + router_property + " property " + controller
+      '    OAS-doc has ' + router_property + ' property ' + controller
     );
     try {
       load = require(pathModule.join(
@@ -166,9 +166,9 @@ function checkControllers(
       fatalError(err);
     }
   } else {
-    controller = utils.generateName(pathName, "controller");
+    controller = utils.generateName(pathName, 'controller');
     logger.debug(
-      "    Spec-file does not have router property -> try generic controller name: " +
+      '    Spec-file does not have router property -> try generic controller name: ' +
         controller
     );
     try {
@@ -179,14 +179,14 @@ function checkControllers(
         "    Controller with generic controller name wasn't found either -> try Default one"
       );
       try {
-        controller = "Default"; //try to load default one
+        controller = 'Default'; //try to load default one
         load = require(pathModule.join(controllersLocation, controller));
         checkOperationId(load, pathName, methodName, methodSection);
       } catch (err) {
         fatalError(
-          "    There is no controller for " +
+          '    There is no controller for ' +
             methodName.toUpperCase() +
-            " - " +
+            ' - ' +
             pathName
         );
       }
@@ -199,7 +199,7 @@ function checkControllers(
  * @param {string} oasPath - Path as shown in the oas-doc.
  */
 var getExpressVersion = function (oasPath) {
-  return oasPath.replace(/{/g, ":").replace(/}/g, "");
+  return oasPath.replace(/{/g, ':').replace(/}/g, '');
 };
 
 /**
@@ -211,24 +211,24 @@ function appendBasePath(specDoc, expressPath) {
   var res;
   if (specDoc.servers != undefined) {
     var specServer = specDoc.servers[0].url;
-    var url = specServer.split("/");
+    var url = specServer.split('/');
 
-    var basePath = "/";
+    var basePath = '/';
 
-    if (specServer.charAt(0) === "/") {
+    if (specServer.charAt(0) === '/') {
       basePath =
-        specServer.charAt(specServer.length - 1) !== "/"
+        specServer.charAt(specServer.length - 1) !== '/'
           ? specServer
           : specServer.slice(0, -1);
     } else {
       for (var i = 0; i < url.length; i++) {
         if (i >= 3) {
-          basePath += url[i] + "/";
+          basePath += url[i] + '/';
         }
       }
       basePath = basePath.slice(0, -1);
-      if (basePath == "/") {
-        basePath = "";
+      if (basePath == '/') {
+        basePath = '';
       }
     }
     config.basePath = basePath;
@@ -245,13 +245,13 @@ function extendGrants(specDoc, grantsFile) {
   Object.keys(grantsFile).forEach((role) => {
     newGrants[role] = {};
     Object.keys(grantsFile[role]).forEach((resource) => {
-      if (resource !== "$extend") {
+      if (resource !== '$extend') {
         var grants = grantsFile[role][resource];
-        var splitRes = resource.split("/");
+        var splitRes = resource.split('/');
         Object.keys(specDoc.paths).forEach((specPath) => {
           var found = true;
           var pos = -1;
-          var splitPath = specPath.split("/");
+          var splitPath = specPath.split('/');
           splitRes.forEach((resPart) => {
             var foundPos = splitPath.indexOf(resPart);
             if (!found || foundPos <= pos) {
@@ -272,9 +272,9 @@ function extendGrants(specDoc, grantsFile) {
 
 function isJWTScheme(secDef) {
   return (
-    secDef.type === "http" &&
-    secDef.scheme === "bearer" &&
-    secDef.bearerFormat === "JWT"
+    secDef.type === 'http' &&
+    secDef.scheme === 'bearer' &&
+    secDef.bearerFormat === 'JWT'
   );
 }
 
@@ -289,24 +289,24 @@ function initializeSecurityAndAuth(specDoc) {
     Object.keys(specDoc.components.securitySchemes).forEach((secName) => {
       var secDef = specDoc.components.securitySchemes[secName];
       if (isJWTScheme(secDef)) {
-        if (secDef["x-bearer-config"] && !config.securityFile[secName]) {
-          config.securityFile[secName] = secDef["x-bearer-config"];
+        if (secDef['x-bearer-config'] && !config.securityFile[secName]) {
+          config.securityFile[secName] = secDef['x-bearer-config'];
         }
-        if (secDef["x-acl-config"] && !config.grantsFile[secName]) {
-          config.grantsFile[secName] = secDef["x-acl-config"];
+        if (secDef['x-acl-config'] && !config.grantsFile[secName]) {
+          config.grantsFile[secName] = secDef['x-acl-config'];
         }
       }
     });
     Object.keys(config.securityFile).forEach((secName) => {
       if (
-        typeof config.securityFile[secName] === "string" &&
+        typeof config.securityFile[secName] === 'string' &&
         isJWTScheme(specDoc.components.securitySchemes[secName])
       ) {
-        if (config.securityFile[secName].substr(0, 4) === "http") {
+        if (config.securityFile[secName].substr(0, 4) === 'http') {
           request(config.securityFile[secName], (_err, _res, body) => {
             config.securityFile[secName] = JSON.parse(body);
           });
-        } else if (config.securityFile[secName].charAt(0) === "/") {
+        } else if (config.securityFile[secName].charAt(0) === '/') {
           config.securityFile[secName] = require(config.securityFile[secName]);
         } else {
           config.securityFile[secName] = require(pathModule.join(
@@ -318,17 +318,17 @@ function initializeSecurityAndAuth(specDoc) {
     });
     Object.keys(config.grantsFile).forEach((secName) => {
       if (
-        typeof config.grantsFile[secName] === "string" &&
+        typeof config.grantsFile[secName] === 'string' &&
         isJWTScheme(specDoc.components.securitySchemes[secName])
       ) {
-        if (config.grantsFile[secName].substr(0, 4) === "http") {
+        if (config.grantsFile[secName].substr(0, 4) === 'http') {
           request(config.grantsFile[secName], (_err, _res, body) => {
             config.grantsFile[secName] = extendGrants(
               specDoc,
               JSON.parse(body)
             );
           });
-        } else if (config.grantsFile[secName].charAt(0) === "/") {
+        } else if (config.grantsFile[secName].charAt(0) === '/') {
           config.grantsFile[secName] = extendGrants(
             specDoc,
             require(config.grantsFile[secName])
@@ -356,20 +356,20 @@ function initializeSecurityAndAuth(specDoc) {
  */
 function registerPaths(specDoc, app) {
   var OASRouterMid = function () {
-    var OASRouter = require("./middleware/oas-router");
+    var OASRouter = require('./middleware/oas-router');
     return OASRouter.call(undefined, config.controllers);
   };
   var OASValidatorMid = function () {
-    var OASValidator = require("./middleware/oas-validator");
+    var OASValidator = require('./middleware/oas-validator');
     return OASValidator.call(undefined, specDoc);
   };
   initializeSecurityAndAuth(specDoc);
   var OASSecurityMid = function () {
-    var OASSecurity = require("./middleware/oas-security");
+    var OASSecurity = require('./middleware/oas-security');
     return OASSecurity.call(undefined, specDoc);
   };
   var OASAuthMid = function () {
-    var OASAuth = require("./middleware/oas-auth");
+    var OASAuth = require('./middleware/oas-auth');
     return OASAuth.call(undefined, specDoc);
   };
 
@@ -378,26 +378,26 @@ function registerPaths(specDoc, app) {
   if (specDoc.servers) {
     var localServer = specDoc.servers.find(
       (server) =>
-        server.url.substr(0, 16) === "http://localhost" ||
-        server.url.charAt(0) === "/"
+        server.url.substr(0, 16) === 'http://localhost' ||
+        server.url.charAt(0) === '/'
     );
     if (!localServer) {
       logger.info(
-        "No localhost or relative server found in spec file, added for testing in Swagger UI"
+        'No localhost or relative server found in spec file, added for testing in Swagger UI'
       );
       var foundServer = specDoc.servers[0];
-      var basePath = "/" + foundServer.url.split("/").slice(3).join("/");
+      var basePath = '/' + foundServer.url.split('/').slice(3).join('/');
       specDoc.servers.push({
         url: basePath,
       });
     }
   } else {
     logger.info(
-      "No servers found in spec file, added relative server for testing in Swagger UI"
+      'No servers found in spec file, added relative server for testing in Swagger UI'
     );
     specDoc.servers = [
       {
-        url: "/",
+        url: '/',
       },
     ];
   }
@@ -405,14 +405,14 @@ function registerPaths(specDoc, app) {
   var paths = specDoc.paths;
   //  console.log('specDoc.paths ', specDoc.paths)
   var allowedMethods = [
-    "get",
-    "post",
-    "put",
-    "patch",
-    "delete",
-    "head",
-    "options",
-    "trace",
+    'get',
+    'post',
+    'put',
+    'patch',
+    'delete',
+    'head',
+    'options',
+    'trace',
   ];
   for (var path in paths) {
     for (var method in paths[path]) {
@@ -422,16 +422,16 @@ function registerPaths(specDoc, app) {
         //console.log('myPathObj ', myPathObj)
         //logger.debug('PWG ****: '+myPathObj+ " hasProperty "+  myPathObj.hasOwnProperty('x-swagger-router-controller'));
         if (
-          myPathObj.hasOwnProperty("x-swagger-router-controller") &&
-          myPathObj[method].hasOwnProperty("x-swagger-router-controller") ===
+          myPathObj.hasOwnProperty('x-swagger-router-controller') &&
+          myPathObj[method].hasOwnProperty('x-swagger-router-controller') ===
             false
         ) {
-          myPathObj[method]["x-swagger-router-controller"] =
-            myPathObj["x-swagger-router-controller"];
+          myPathObj[method]['x-swagger-router-controller'] =
+            myPathObj['x-swagger-router-controller'];
         }
         var expressPath = getExpressVersion(path); // TODO: take in account basePath/servers property of the spec doc.
         dictionary[expressPath.toString()] = path;
-        logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
+        logger.debug('Register: ' + method.toUpperCase() + ' - ' + expressPath);
         if (config.router == true && config.checkControllers == true) {
           checkControllers(
             path,
@@ -458,7 +458,7 @@ function registerPaths(specDoc, app) {
   }
   if (config.docs && config.docs.apiDocs) {
     if (!config.docs.apiDocsPrefix) {
-      config.docs.apiDocsPrefix = "";
+      config.docs.apiDocsPrefix = '';
     }
 
     const apiSpecDoc = Object.freeze(_.cloneDeep(specDoc));
@@ -468,24 +468,24 @@ function registerPaths(specDoc, app) {
     });
     if (config.docs.swaggerUi) {
       var uiHtml = fs.readFileSync(
-        pathModule.join(__dirname, "../swagger-ui/index.html"),
-        "utf8"
+        pathModule.join(__dirname, '../swagger-ui/index.html'),
+        'utf8'
       );
       uiHtml = uiHtml.replace(
         /url: "[^"]*"/,
         'url: "' + config.docs.apiDocsPrefix + config.docs.apiDocs + '"'
       );
       fs.writeFileSync(
-        pathModule.join(__dirname, "../swagger-ui/index.html"),
+        pathModule.join(__dirname, '../swagger-ui/index.html'),
         uiHtml,
-        "utf8"
+        'utf8'
       );
       if (!config.docs.swaggerUiPrefix) {
-        config.docs.swaggerUiPrefix = "";
+        config.docs.swaggerUiPrefix = '';
       }
       app.use(
         config.docs.swaggerUiPrefix + config.docs.swaggerUi,
-        express.static(pathModule.join(__dirname, "../swagger-ui"))
+        express.static(pathModule.join(__dirname, '../swagger-ui'))
       );
     }
   }
@@ -502,7 +502,7 @@ var initialize = function initialize(oasDoc, app, callback) {
   init_checks(oasDoc, callback);
 
   var fullSchema = deref(oasDoc);
-  logger.info("Specification file dereferenced");
+  logger.info('Specification file dereferenced');
 
   registerPaths(fullSchema, app);
 
@@ -520,7 +520,7 @@ var initializeMiddleware = function initializeMiddleware(
   app,
   callback
 ) {
-  var bodyParser = require("body-parser");
+  var bodyParser = require('body-parser');
   app.use(
     bodyParser.json({
       strict: false,
@@ -530,14 +530,14 @@ var initializeMiddleware = function initializeMiddleware(
   init_checks(specDoc, callback);
 
   var fullSchema = deref(specDoc);
-  logger.info("Specification file dereferenced");
+  logger.info('Specification file dereferenced');
 
   var middleware = {
-    swaggerValidator: require("./middleware/empty_middleware"),
-    swaggerRouter: require("./middleware/empty_middleware"),
-    swaggerMetadata: require("./middleware/empty_middleware"),
-    swaggerUi: require("./middleware/empty_middleware"),
-    swaggerSecurity: require("./middleware/empty_middleware"),
+    swaggerValidator: require('./middleware/empty_middleware'),
+    swaggerRouter: require('./middleware/empty_middleware'),
+    swaggerMetadata: require('./middleware/empty_middleware'),
+    swaggerUi: require('./middleware/empty_middleware'),
+    swaggerSecurity: require('./middleware/empty_middleware'),
   };
   registerPaths(fullSchema, app);
   callback(middleware);

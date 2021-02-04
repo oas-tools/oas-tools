@@ -1,4 +1,4 @@
-var Default = require("./DefaultService");
+var Default = require('./DefaultService');
 
 module.exports.showPetById = function showPetById(req, res, next) {
   Default.showPetById(req.swagger.params, res, next);

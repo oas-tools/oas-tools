@@ -17,17 +17,17 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-var path = require("path");
-var ZSchema = require("z-schema");
-var MIMEtype = require("whatwg-mimetype");
-var config = require("../configurations"),
+var path = require('path');
+var ZSchema = require('z-schema');
+var MIMEtype = require('whatwg-mimetype');
+var config = require('../configurations'),
   logger = config.logger;
 var validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
   breakOnFirstError: false,
 });
-var utils = require("../lib/utils.js");
+var utils = require('../lib/utils.js');
 
 function getExpectedResponse(responses, code) {
   // Exact match wins over range definitions (1XX, 2XX, 3XX, 4XX, 5XX)
@@ -35,7 +35,7 @@ function getExpectedResponse(responses, code) {
   if (resp !== undefined) {
     return resp;
   }
-  resp = responses[Math.floor(code / 100) + "XX"];
+  resp = responses[Math.floor(code / 100) + 'XX'];
   if (resp !== undefined) {
     return resp;
   }
@@ -53,7 +53,7 @@ function getExpectedResponse(responses, code) {
  */
 function stripUndefinedKeys(data, maxDepth = 1024) {
   if (
-    typeof data !== "object" ||
+    typeof data !== 'object' ||
     data === null ||
     maxDepth <= 0 ||
     data instanceof Buffer
@@ -61,7 +61,7 @@ function stripUndefinedKeys(data, maxDepth = 1024) {
     return data;
   }
   Object.getOwnPropertyNames(data).forEach((property) => {
-    if (typeof data[property] === "object") {
+    if (typeof data[property] === 'object') {
       stripUndefinedKeys(data[property], maxDepth - 1);
     } else if (data[property] === undefined) {
       delete data[property];
@@ -94,25 +94,25 @@ function checkResponse(
   var explicitType;
   var msg = [];
   var data = stripUndefinedKeys(content[0]);
-  logger.debug("Processing at checkResponse:");
-  logger.debug("  -code: " + code);
-  logger.debug("  -oasDoc: " + JSON.stringify(oasDoc));
-  logger.debug("  -method: " + method);
-  logger.debug("  -requestedSpecPath: " + requestedSpecPath);
-  logger.debug("  -data: " + JSON.stringify(data));
+  logger.debug('Processing at checkResponse:');
+  logger.debug('  -code: ' + code);
+  logger.debug('  -oasDoc: ' + JSON.stringify(oasDoc));
+  logger.debug('  -method: ' + method);
+  logger.debug('  -requestedSpecPath: ' + requestedSpecPath);
+  logger.debug('  -data: ' + JSON.stringify(data));
   var responseCodeSection = getExpectedResponse(
     oasDoc.paths[requestedSpecPath][method].responses,
     code
   ); //Section of the oasDoc file starting at a response code
-  if (res.get("content-type") === undefined) {
-    res.header("Content-Type", "application/json;charset=utf-8");
+  if (res.get('content-type') === undefined) {
+    res.header('Content-Type', 'application/json;charset=utf-8');
   } else {
-    explicitType = new MIMEtype(res.get("content-type"));
+    explicitType = new MIMEtype(res.get('content-type'));
   }
   if (responseCodeSection === undefined) {
     //if the code is undefined, data wont be checked as a status code is needed to retrieve 'schema' from the oasDoc file
     var newErr = {
-      message: "Wrong response code: " + code,
+      message: 'Wrong response code: ' + code,
     };
     msg.push(newErr);
     if (config.strict === true) {
@@ -123,11 +123,11 @@ function checkResponse(
       logger.warn(JSON.stringify(msg));
       oldSend.apply(res, content);
     }
-  } else if (responseCodeSection.hasOwnProperty("content")) {
+  } else if (responseCodeSection.hasOwnProperty('content')) {
     var resultType;
     var acceptTypes = [];
     if (req.headers.accept) {
-      acceptTypes = req.headers.accept.split(",").map((type) => {
+      acceptTypes = req.headers.accept.split(',').map((type) => {
         return type.trim();
       });
     }
@@ -141,17 +141,17 @@ function checkResponse(
           if (explicitType) {
             firstMatch =
               explicitType.type === mimeContent.type &&
-              (mimeAccept.type === mimeContent.type || mimeAccept.type === "*");
+              (mimeAccept.type === mimeContent.type || mimeAccept.type === '*');
             secondMatch =
               explicitType.subtype === mimeContent.subtype &&
               (mimeAccept.subtype === mimeContent.subtype ||
-                mimeAccept.subtype === "*");
+                mimeAccept.subtype === '*');
           } else {
             firstMatch =
-              mimeAccept.type === mimeContent.type || mimeAccept.type === "*";
+              mimeAccept.type === mimeContent.type || mimeAccept.type === '*';
             secondMatch =
               mimeAccept.subtype === mimeContent.subtype ||
-              mimeAccept.subtype === "*";
+              mimeAccept.subtype === '*';
           }
 
           if (firstMatch && secondMatch) {
@@ -161,31 +161,31 @@ function checkResponse(
       });
     });
     if (!resultType && acceptTypes.length === 0) {
-      resultType = new MIMEtype("application/json");
+      resultType = new MIMEtype('application/json');
     } else if (!resultType && acceptTypes.length !== 0) {
       newErr = {
-        message: "No acceptable content type found.",
+        message: 'No acceptable content type found.',
       };
       msg.push(newErr);
       content[0] = JSON.stringify(msg);
       logger.error(content[0]);
       res.status(406);
     } else {
-      res.header("Content-Type", resultType.essence + ";charset=utf-8");
+      res.header('Content-Type', resultType.essence + ';charset=utf-8');
     }
-    if (resultType && resultType.essence === "application/json") {
+    if (resultType && resultType.essence === 'application/json') {
       //if there is no content property for the given response then there is nothing to validate.
-      var validSchema = responseCodeSection.content["application/json"].schema;
+      var validSchema = responseCodeSection.content['application/json'].schema;
       utils.fixNullable(validSchema);
 
       content[0] = JSON.stringify(content[0]);
       logger.debug(
-        "Schema to use for validation: " + JSON.stringify(validSchema)
+        'Schema to use for validation: ' + JSON.stringify(validSchema)
       );
       var err = validator.validate(data, validSchema);
       if (err === false) {
         newErr = {
-          message: "Wrong data in the response. ",
+          message: 'Wrong data in the response. ',
           error: validator.getLastErrors(),
           content: data,
         };
@@ -203,7 +203,7 @@ function checkResponse(
             content[0].substr(0, 46) ===
             '{"message":"This is the mockup controller for '
           ) {
-            logger.warn("The used controller might not have been implemented");
+            logger.warn('The used controller might not have been implemented');
           }
           oldSend.apply(res, content);
         }
@@ -229,7 +229,7 @@ function existsController(locationOfControllers, controllerName) {
     return true;
   } catch (err) {
     logger.info(
-      "The controller " +
+      'The controller ' +
         controllerName +
         " doesn't exist at " +
         locationOfControllers
@@ -245,14 +245,14 @@ function existsController(locationOfControllers, controllerName) {
  * @param {object} method - Requested method.
  */
 function getOpId(oasDoc, requestedSpecPath, method) {
-  if (oasDoc.paths[requestedSpecPath][method].hasOwnProperty("operationId")) {
+  if (oasDoc.paths[requestedSpecPath][method].hasOwnProperty('operationId')) {
     return utils.generateName(
       oasDoc.paths[requestedSpecPath][method].operationId.toString(),
       undefined
     ); // Use opID specified in the oas doc
   }
   return (
-    utils.generateName(requestedSpecPath, "function") + method.toUpperCase()
+    utils.generateName(requestedSpecPath, 'function') + method.toUpperCase()
   );
 }
 
@@ -269,53 +269,53 @@ module.exports = (controllers) => {
 
     if (
       oasDoc.paths[requestedSpecPath].hasOwnProperty(
-        "x-swagger-router-controller"
+        'x-swagger-router-controller'
       ) &&
       oasDoc.paths[requestedSpecPath][method].hasOwnProperty(
-        "x-swagger-router-controller"
+        'x-swagger-router-controller'
       ) === false
     ) {
       oasDoc.paths[requestedSpecPath][method] =
-        oasDoc.paths[requestedSpecPath]["x-swagger-router-controller"];
+        oasDoc.paths[requestedSpecPath]['x-swagger-router-controller'];
     }
     if (
-      oasDoc.paths[requestedSpecPath].hasOwnProperty("x-router-controller") &&
+      oasDoc.paths[requestedSpecPath].hasOwnProperty('x-router-controller') &&
       oasDoc.paths[requestedSpecPath][method].hasOwnProperty(
-        "x-router-controller"
+        'x-router-controller'
       ) === false
     ) {
       oasDoc.paths[requestedSpecPath][method] =
-        oasDoc.paths[requestedSpecPath]["x-router-controller"];
+        oasDoc.paths[requestedSpecPath]['x-router-controller'];
     }
     // end pgillis
 
     if (
       oasDoc.paths[requestedSpecPath][method].hasOwnProperty(
-        "x-swagger-router-controller"
+        'x-swagger-router-controller'
       )
     ) {
       //oasDoc file has router_property: use the controller specified there
       controllerName =
-        oasDoc.paths[requestedSpecPath][method]["x-swagger-router-controller"];
+        oasDoc.paths[requestedSpecPath][method]['x-swagger-router-controller'];
     } else if (
       oasDoc.paths[requestedSpecPath][method].hasOwnProperty(
-        "x-router-controller"
+        'x-router-controller'
       )
     ) {
       //oasDoc file has router_property: use the controller specified there
       controllerName =
-        oasDoc.paths[requestedSpecPath][method]["x-router-controller"];
+        oasDoc.paths[requestedSpecPath][method]['x-router-controller'];
     } else if (
       existsController(
         controllers,
-        utils.generateName(requestedSpecPath, "controller")
+        utils.generateName(requestedSpecPath, 'controller')
       )
     ) {
       //oasDoc file doesn't have router_property: use the standard controller name (autogenerated) if found
-      controllerName = utils.generateName(requestedSpecPath, "controller");
+      controllerName = utils.generateName(requestedSpecPath, 'controller');
     } else {
       //oasDoc file doesn't have router_property and standard controller (autogenerated name) doesn't exist: use the default controller
-      controllerName = "Default";
+      controllerName = 'Default';
     }
 
     var opID = getOpId(oasDoc, requestedSpecPath, method);

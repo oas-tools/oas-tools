@@ -18,20 +18,20 @@ Considerar que:
 -OperationId será usado únicamente como nombre de función
 */
 
-var validator = require("validator");
+var validator = require('validator');
 
 var fixNullable = function (schema) {
   Object.getOwnPropertyNames(schema).forEach((property) => {
     if (
-      property === "type" &&
+      property === 'type' &&
       schema.nullable === true &&
-      schema.type !== "null" &&
+      schema.type !== 'null' &&
       !Array.isArray(schema.type) &&
-      schema.type.indexOf("null") === -1
+      schema.type.indexOf('null') === -1
     ) {
-      schema.type = [schema.type, "null"];
+      schema.type = [schema.type, 'null'];
     } else if (
-      typeof schema[property] === "object" &&
+      typeof schema[property] === 'object' &&
       schema[property] !== null
     ) {
       fixNullable(schema[property]);
@@ -45,17 +45,17 @@ var fixNullable = function (schema) {
  * @param {string} nameFor - possible values are controller, function, variable.
  */
 var generateName = function (input, nameFor) {
-  var chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789.";
+  var chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789.';
   var name = validator.whitelist(input, chars);
   switch (nameFor) {
-    case "controller":
-      name += "Controller";
+    case 'controller':
+      name += 'Controller';
       break;
-    case "function":
-      name = "func" + name;
+    case 'function':
+      name = 'func' + name;
       break;
-    case "variable":
-      name = "var" + name;
+    case 'variable':
+      name = 'var' + name;
       break;
     case undefined: //'nameFor' is undefined: just normalize
       break;

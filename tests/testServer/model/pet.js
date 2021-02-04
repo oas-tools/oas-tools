@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 //book schema definition
@@ -22,7 +22,7 @@ const PetSchema = new Schema(
   }
 );
 
-PetSchema.pre("save", (next) => {
+PetSchema.pre('save', (next) => {
   const now = new Date();
   if (!this.createdAt) {
     this.createdAt = now;
@@ -31,4 +31,4 @@ PetSchema.pre("save", (next) => {
 });
 
 //Exports the BookSchema for use elsewhere.
-module.exports = mongoose.model("pet", PetSchema);
+module.exports = mongoose.model('pet', PetSchema);

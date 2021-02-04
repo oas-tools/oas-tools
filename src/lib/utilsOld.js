@@ -19,19 +19,19 @@ Casuística: checkear esto
  * @param {string} reqRoutePath - Value or req.route.path (express version).
  */
 var getBasePath = function (reqRoutePath) {
-  var basePath = "";
+  var basePath = '';
   var first = true;
-  var path_array = reqRoutePath.split("/");
+  var path_array = reqRoutePath.split('/');
   for (var i = 0; i < path_array.length; i++) {
     //if (path_array[i].charAt(0) !== ':' && first == true && path_array[i].charAt(0) !== '') { // TODO: compare to '' or ' '?
     if (
-      path_array[i].charAt(0) !== ":" &&
+      path_array[i].charAt(0) !== ':' &&
       first == true &&
-      path_array[i].charAt(0) !== " "
+      path_array[i].charAt(0) !== ' '
     ) {
       basePath += path_array[i];
       first = false;
-    } else if (path_array[i].charAt(0) !== ":") {
+    } else if (path_array[i].charAt(0) !== ':') {
       basePath +=
         path_array[i].charAt(0).toUpperCase() +
         path_array[i].slice(1, path_array[i].length);
@@ -46,10 +46,10 @@ var getBasePath = function (reqRoutePath) {
  * @param {string} path - Requested path as shown in the oas doc.
  */
 var generateOperationId = function (method, path) {
-  var output = "";
-  var path2 = path.split("/");
+  var output = '';
+  var path2 = path.split('/');
   for (var i = 1; i < path2.length; i++) {
-    var chunck = path2[i].replace(/[{}]/g, "");
+    var chunck = path2[i].replace(/[{}]/g, '');
     output += chunck.charAt(0).toUpperCase() + chunck.slice(1, chunck.length);
   }
   output += method.toUpperCase();
@@ -63,8 +63,8 @@ var generateOperationId = function (method, path) {
  */
 var normalize_controllerName = function (controllerName) {
   return controllerName
-    .replace(/^[^a-zA-Z]*/, "")
-    .replace(/[^a-zA-Z0-9]*/g, "");
+    .replace(/^[^a-zA-Z]*/, '')
+    .replace(/[^a-zA-Z0-9]*/g, '');
 };
 
 /**
@@ -75,12 +75,12 @@ var normalize = function (operationId) {
   if (operationId == undefined) {
     return undefined;
   }
-  var validOpId = "";
+  var validOpId = '';
   for (var i = 0; i < operationId.length; i++) {
     if (
-      operationId[i] == "-" ||
-      operationId[i] == " " ||
-      operationId[i] == "."
+      operationId[i] == '-' ||
+      operationId[i] == ' ' ||
+      operationId[i] == '.'
     ) {
       validOpId += operationId[i + 1].toUpperCase();
       i += 1;
@@ -96,7 +96,7 @@ var normalize = function (operationId) {
  * @param {string} oasPath - Path as shown in the oas-doc.
  */
 var getExpressVersion = function (oasPath) {
-  return oasPath.replace(/{/g, ":").replace(/}/g, "");
+  return oasPath.replace(/{/g, ':').replace(/}/g, '');
 };
 
 module.exports = {
