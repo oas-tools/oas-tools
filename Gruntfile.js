@@ -12,6 +12,7 @@ module.exports = (grunt) => {
   grunt.loadNpmTasks("grunt-release-github");
   grunt.loadNpmTasks("grunt-banner");
   grunt.loadNpmTasks("grunt-dockerize");
+  grunt.loadNpmTasks("grunt-run");
 
   // Project configuration.
   grunt.initConfig({
@@ -27,6 +28,13 @@ module.exports = (grunt) => {
         encoding: "utf8",
       })
       .toString(),
+
+    run: {
+      npm_build: {
+        cmd: "npm",
+        args: ["run", "build"],
+      },
+    },
 
     //Add license notice and latest release notes
     usebanner: {
@@ -146,7 +154,13 @@ module.exports = (grunt) => {
   grunt.registerTask("test", ["jshint", "mochaTest"]);
 
   //BUILD TASK
-  grunt.registerTask("build", ["test", "buildOn", "usebanner", "dockerize"]);
+  grunt.registerTask("build", [
+    "test",
+    "buildOn",
+    "usebanner",
+    "run:npm_build",
+    "dockerize",
+  ]);
 
   //DEVELOPMENT TASK
   grunt.registerTask("dev", ["watch"]);

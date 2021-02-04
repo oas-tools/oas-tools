@@ -20,8 +20,8 @@
   ],
   "scripts": {
     "build": "npm run build-module && npm run build-commonjs",
-    "build-commonjs": "cross-env BABEL_ENV=commonjs babel ./src --out-dir common --source-maps --copy-files",
-    "build-module": "cross-env BABEL_ENV=module babel ./src --out-dir lib --source-maps --copy-files --keep-file-extension",
+    "build-commonjs": "cross-env BABEL_ENV=commonjs babel ./src --out-dir common --source-maps",
+    "build-module": "cross-env BABEL_ENV=module babel ./src --out-dir lib --source-maps --out-file-extension .mjs",
     "test": "mocha ./tests/basic.js",
     "test:tdd": "mocha ./tests/basic.js -w",
     "lint": "eslint src Gruntfile.js tests",
@@ -42,24 +42,23 @@
     "accesscontrol": "^2.2.1",
     "accesscontrol-middleware": "^1.0.3",
     "body-parser": "^1.18.3",
-    "fs": "0.0.2",
     "js-yaml": "^3.13.1",
     "json-schema-deref": "^0.5.0",
     "json-schema-deref-sync": "^0.13.0",
     "jsonwebtoken": "^8.5.1",
     "lodash-compat": "^3.10.2",
     "multer": "^1.4.1",
-    "path": "^0.12.7",
     "request": "^2.88.0",
+    "snyk": "^1.342.2",
     "validator": "^13.0.0",
     "whatwg-mimetype": "^2.3.0",
     "winston": "^3.2.1",
-    "z-schema": "^4.2.0",
-    "snyk": "^1.342.2"
+    "z-schema": "^4.2.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
+    "@babel/cli": "^7.12.13",
+    "@babel/core": "^7.12.13",
+    "@babel/preset-env": "^7.12.13",
     "chai": "^4.2.0",
     "chai-http": "^4.2.1",
     "codecov": "^3.7.1",
@@ -74,7 +73,7 @@
     "mongoose": "^5.7.5",
     "nyc": "^15.0.0",
     "prettier": "^2.2.1",
-    "publish-please": "^5.5.1"
+    "publish-please": "^5.5.2"
   },
   "snyk": true,
   "nyc": {

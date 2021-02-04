@@ -3,21 +3,20 @@
     "commonjs": {
       "presets": [
         [
-          "babel-preset-env",
+          "@babel/env",
           {
             "targets": {
-              "node": "6.10"
+              "node": "6.20"
             },
-            "modules": "cjs"
+            "modules": "commonjs"
           }
         ]
       ]
-      // "plugins": ["transform-object-rest-spread", "transform-class-properties"]
     },
     "module": {
       "presets": [
         [
-          "babel-preset-env",
+          "@babel/env",
           {
             "targets": {
               "node": "12.20"
@@ -26,7 +25,6 @@
           }
         ]
       ]
-      // "plugins": ["transform-object-rest-spread", "transform-class-properties"]
     }
   },
   "sourceMaps": true
