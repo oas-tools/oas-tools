@@ -1,9 +1,16 @@
-const chai = require('chai');
-const chaiHttp = require('chai-http');
-var fs = require('fs');
-var path = require('path');
-var jsyaml = require('js-yaml');
-var jwt = require('jsonwebtoken');
+import * as auxRequire from './testServer/controllers/petsController';
+import * as chai from 'chai';
+import * as chaiHttp from 'chai-http';
+import * as fs from 'fs';
+import * as indexFile from './../src/index';
+import * as jsyaml from 'js-yaml';
+import * as jwt from 'jsonwebtoken';
+import * as path from 'path';
+import * as serverProto from './testServer';
+import * as utilsFile from './../src/lib/utils';
+
+let server = serverProto;
+
 var token = jwt.sign(
   {
     iss: 'ISA Auth',
@@ -39,14 +46,9 @@ var userWithoutPermissions = jwt.sign(
   },
   'test'
 );
-const serverProto = require('./testServer');
-let server = require('./testServer');
-const indexFile = require('./../src/index');
-const utilsFile = require('./../src/lib/utils');
 const should = chai.should();
 chai.use(chaiHttp);
 var expect = chai.expect;
-const auxRequire = require('./testServer/controllers/petsController');
 auxRequire.corruptPets();
 
 function getTests() {

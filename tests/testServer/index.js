@@ -1,13 +1,16 @@
-var fs = require('fs'),
-  http = require('http'),
-  path = require('path');
+import * as bodyParser from 'body-parser';
+import * as express from 'express';
+import * as fs from 'fs';
+import * as http from 'http';
+import * as jsyaml from 'js-yaml';
+import * as logger from './logger';
+import * as multer from 'multer';
+import * as oasTools from '../../src/index.js';
+import * as path from 'path';
 
-var express = require('express');
-var bodyParser = require('body-parser');
 var app = express();
 // multer is the official express middleware
 // handling multipart/formdata requests
-const multer = require('multer');
 const upload = multer();
 app.use(
   bodyParser.json({
@@ -16,10 +19,7 @@ app.use(
 );
 app.use(upload.any()); // allow unlimited number of files with a request
 
-var oasTools = require('../../src/index.js');
-var jsyaml = require('js-yaml');
 var serverPort = 8080;
-var logger = require('./logger');
 
 var spec = fs.readFileSync(path.join(__dirname, 'api/oai-spec.yaml'), 'utf8'); //this one works
 var oasDoc = jsyaml.safeLoad(spec);
