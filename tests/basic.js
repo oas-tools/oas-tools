@@ -1695,6 +1695,49 @@ function multipartFormTests() {
   });
 }
 
+function noAdditionalPropertiesTest() {
+  describe('/POST noAdditionalPropertiesTest', () => {
+    const successResponse = 'operation successfull';
+    const validPet = {
+      id: 4711,
+      name: 'MultipartFormdataRabbit',
+    };
+
+    it('should successfully execute POST request', (done) => {
+      chai
+        .request(server)
+        .post('/api/v1/noAdditionalPropertiesTest')
+        .send(validPet)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(201);
+          expect(res.body).to.have.property('message');
+          expect(res.body.message).to.equal(successResponse);
+          done();
+        });
+    });
+
+    it('should fail, because an additional property is part of the request', (done) => {
+      const errorMessage = 'Wrong data in the body of the request. ';
+      chai
+        .request(server)
+        .post('/api/v1/noAdditionalPropertiesTest')
+        .send(Object.assign({ anyOtherProperty: 'any value' }, validPet))
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(400);
+          res.body.should.be.a('Array');
+          res.body[0].message.should.be.equal(errorMessage);
+          done();
+        });
+    });
+  });
+}
+
 describe('Pets', () => {
   before((done) => {
     // await for server creation
@@ -1717,4 +1760,5 @@ describe('Pets', () => {
   deleteTests();
   multipartFormTests();
   miscTests();
+  noAdditionalPropertiesTest();
 });

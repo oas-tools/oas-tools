@@ -498,7 +498,7 @@ function registerPaths(specDoc, app) {
 var initialize = function initialize(oasDoc, app, callback) {
   init_checks(oasDoc, callback);
 
-  var fullSchema = deref(oasDoc);
+  var fullSchema = deref(oasDoc, { mergeAdditionalProperties: true });
   logger.info('Specification file dereferenced');
 
   registerPaths(fullSchema, app);
