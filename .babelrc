@@ -6,7 +6,7 @@
           "@babel/env",
           {
             "targets": {
-              "node": "6.20"
+              "node": "10.23"
             },
             "modules": "commonjs"
           }
@@ -22,6 +22,52 @@
               "node": "12.20"
             },
             "modules": false
+          }
+        ]
+      ]
+    },
+    "test": {
+      "presets": [
+        [
+          "@babel/env",
+          {
+            "targets": {
+              "node": "10.23"
+            },
+            "modules": "commonjs"
+          }
+        ]
+      ],
+      "plugins": [
+        [
+          "module-resolver",
+          {
+            "alias": {
+              "src": "./common"
+            }
+          }
+        ]
+      ]
+    },
+    "test-mjs": {
+      "presets": [
+        [
+          "@babel/env",
+          {
+            "targets": {
+              "node": "12.20"
+            },
+            "modules": false
+          }
+        ]
+      ],
+      "plugins": [
+        [
+          "module-resolver",
+          {
+            "alias": {
+              "src": "./lib"
+            }
           }
         ]
       ]

@@ -5,6 +5,7 @@
 # build 
 /lib/
 /common/
+/lib-tests/
 
 # Grunt usually preprocesses files such as coffeescript, compass... inside the .tmp directory
 .tmp/

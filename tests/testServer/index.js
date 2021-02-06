@@ -1,11 +1,12 @@
 import * as bodyParser from "body-parser";
-import * as express from "express";
 import * as fs from "fs";
 import * as http from "http";
 import * as jsyaml from "js-yaml";
 import * as logger from "./logger";
-import * as multer from "multer";
+import * as oasTools from "src/index.js";
 import * as path from "path";
+import express from "express";
+import multer from "multer";
 
 var app = express();
 // multer is the official express middleware

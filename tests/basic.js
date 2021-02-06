@@ -2,10 +2,12 @@ import * as auxRequire from "./testServer/controllers/petsController";
 import * as chai from "chai";
 import * as chaiHttp from "chai-http";
 import * as fs from "fs";
+import * as indexFile from "src/index";
 import * as jsyaml from "js-yaml";
 import * as jwt from "jsonwebtoken";
 import * as path from "path";
 import * as serverProto from "./testServer";
+import * as utilsFile from "src/lib/utils";
 
 let server = serverProto;
 
