@@ -1,12 +1,11 @@
-import * as bodyParser from 'body-parser';
-import * as express from 'express';
-import * as fs from 'fs';
-import * as http from 'http';
-import * as jsyaml from 'js-yaml';
-import * as logger from './logger';
-import * as multer from 'multer';
-import * as oasTools from '../../src/index.js';
-import * as path from 'path';
+import * as bodyParser from "body-parser";
+import * as express from "express";
+import * as fs from "fs";
+import * as http from "http";
+import * as jsyaml from "js-yaml";
+import * as logger from "./logger";
+import * as multer from "multer";
+import * as path from "path";
 
 var app = express();
 // multer is the official express middleware
@@ -21,11 +20,11 @@ app.use(upload.any()); // allow unlimited number of files with a request
 
 var serverPort = 8080;
 
-var spec = fs.readFileSync(path.join(__dirname, 'api/oai-spec.yaml'), 'utf8'); //this one works
+var spec = fs.readFileSync(path.join(__dirname, "api/oai-spec.yaml"), "utf8"); //this one works
 var oasDoc = jsyaml.safeLoad(spec);
 
-var securityThird = require(path.join(__dirname, 'security.json'));
-var grantsThird = require(path.join(__dirname, 'grants.json'));
+var securityThird = require(path.join(__dirname, "security.json"));
+var grantsThird = require(path.join(__dirname, "grants.json"));
 
 function verifyToken(req, secDef, token, next) {
   if (token) {
@@ -36,7 +35,7 @@ function verifyToken(req, secDef, token, next) {
 }
 
 var options_object = {
-  controllers: path.join(__dirname, './controllers'),
+  controllers: path.join(__dirname, "./controllers"),
   //loglevel: 'debug',
   //loglevel: 'none',
   customLogger: logger,
@@ -45,13 +44,13 @@ var options_object = {
   validator: true,
   oasSecurity: true,
   securityFile: {
-    SecondBearer: './tests/testServer/security.json',
+    SecondBearer: "./tests/testServer/security.json",
     ThirdBearer: securityThird,
     FourthBearer: verifyToken,
   },
   oasAuth: true,
   grantsFile: {
-    SecondBearer: './tests/testServer/grants.json',
+    SecondBearer: "./tests/testServer/grants.json",
     ThirdBearer: grantsThird,
   },
   ignoreUnknownFormats: true,
@@ -68,11 +67,11 @@ function init(done) {
     });
   });
 
-  app.get('/info', (req, res) => {
+  app.get("/info", (req, res) => {
     res.send({
-      infoEN: 'This is a very simple API that uses the oas-tools Module!',
+      infoEN: "This is a very simple API that uses the oas-tools Module!",
       infoDE:
-        'Dies ist eine sehr einfache API, die unser oas-tools Modul benutzt!',
+        "Dies ist eine sehr einfache API, die unser oas-tools Modul benutzt!",
     });
   });
 }
@@ -84,4 +83,4 @@ app.close = function close() {
   process.exit(0);
 };
 
-module.exports = app; //export for chai tests
+export default { app };

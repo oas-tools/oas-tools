@@ -1,23 +1,23 @@
-import * as _ from 'lodash-compat';
-import * as async from 'async';
-import { config, logger } from '../configurations';
-import jwt from 'jsonwebtoken';
+import * as _ from "lodash-compat";
+import * as async from "async";
+import { config, logger } from "../configurations";
+import jwt from "jsonwebtoken";
 
 var getValue = (req, secDef, secName, secReq) => {
   var propName = secDef.name;
   var propLocation = secDef.in;
   var value;
 
-  if (secDef.type === 'oauth2') {
+  if (secDef.type === "oauth2") {
     value = secReq[secName];
-  } else if (secDef.type === 'http') {
-    if (secDef.scheme === 'bearer') {
+  } else if (secDef.type === "http") {
+    if (secDef.scheme === "bearer") {
       value = req.headers.authorization;
     }
-  } else if (secDef.type === 'apiKey') {
-    if (propLocation === 'query') {
+  } else if (secDef.type === "apiKey") {
+    if (propLocation === "query") {
       value = req.query;
-    } else if (propLocation === 'header') {
+    } else if (propLocation === "header") {
       value = req.headers[propName.toLowerCase()];
     }
   }
@@ -27,7 +27,7 @@ var getValue = (req, secDef, secName, secReq) => {
 var sendSecurityError = (err, res, next) => {
   // Populate default values if not present
   if (!err.code) {
-    err.code = 'server_error';
+    err.code = "server_error";
   }
 
   if (!err.statusCode) {
@@ -46,11 +46,11 @@ var sendSecurityError = (err, res, next) => {
 
 function removeBasePath(reqRoutePath) {
   return reqRoutePath
-    .split('')
+    .split("")
     .filter((a, i) => {
       return a !== config.basePath[i];
     })
-    .join('');
+    .join("");
 }
 
 function verifyToken(req, secDef, token, secName, next) {
@@ -61,12 +61,12 @@ function verifyToken(req, secDef, token, secName, next) {
   }
 
   if (token && bearerRegex.test(token)) {
-    var newToken = token.replace(bearerRegex, '');
+    var newToken = token.replace(bearerRegex, "");
     jwt.verify(
       newToken,
       config.securityFile[secName].key,
       {
-        algorithms: config.securityFile[secName].algorithms || ['HS256'],
+        algorithms: config.securityFile[secName].algorithms || ["HS256"],
         issuer: config.securityFile[secName].issuer,
       },
       (error, decoded) => {
@@ -88,7 +88,7 @@ export default (specDoc) => {
     var securityReqs;
 
     if (operation) {
-      logger.debug('Checking security...');
+      logger.debug("Checking security...");
       securityReqs =
         specDoc.paths[operation][req.method.toLowerCase()].security ||
         specDoc.security;
@@ -127,11 +127,11 @@ export default (specDoc) => {
 
                 secName = name;
 
-                if (!handler || typeof handler !== 'function') {
+                if (!handler || typeof handler !== "function") {
                   if (
-                    secDef.type === 'http' &&
-                    secDef.scheme === 'bearer' &&
-                    secDef.bearerFormat === 'JWT'
+                    secDef.type === "http" &&
+                    secDef.scheme === "bearer" &&
+                    secDef.bearerFormat === "JWT"
                   ) {
                     return verifyToken(
                       req,
@@ -143,7 +143,7 @@ export default (specDoc) => {
                   }
                   return callback(
                     new Error(
-                      'No handler was specified for security scheme ' + name
+                      "No handler was specified for security scheme " + name
                     )
                   );
                 }
@@ -157,10 +157,10 @@ export default (specDoc) => {
               },
               (err) => {
                 logger.debug(
-                  '    Security check ' +
+                  "    Security check " +
                     secName +
-                    ': ' +
-                    (_.isNull(err) ? 'allowed' : 'denied')
+                    ": " +
+                    (_.isNull(err) ? "allowed" : "denied")
                 );
 
                 // swap normal err and result to short-circuit the logical OR
@@ -168,15 +168,15 @@ export default (specDoc) => {
                   return callback(undefined, err);
                 }
 
-                return callback(new Error('OK'));
+                return callback(new Error("OK"));
               }
             );
           },
           (ok, errors) => {
             // note swapped results
-            var allowed = !_.isNull(ok) && ok.message === 'OK';
+            var allowed = !_.isNull(ok) && ok.message === "OK";
 
-            logger.debug('    Request allowed: ' + allowed);
+            logger.debug("    Request allowed: " + allowed);
 
             if (allowed) {
               return next();

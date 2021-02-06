@@ -20,10 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 /**
  * Module dependecies.
  * */
-import * as jsyaml from 'js-yaml';
-import * as winston from 'winston';
-import fs from 'fs';
-import path from 'path';
+import * as jsyaml from "js-yaml";
+import * as winston from "winston";
+import fs from "fs";
+import path from "path";
 
 /*
  * Export functions and Objects
@@ -31,28 +31,28 @@ import path from 'path';
 export const config = {
   setConfigurations: function setConfigurations(options, encoding) {
     if (!options) {
-      throw new Error('Configurations parameter is required');
-    } else if (typeof options == 'string') {
+      throw new Error("Configurations parameter is required");
+    } else if (typeof options == "string") {
       try {
         var configString = fs.readFileSync(options, encoding);
         var newConfigurations;
-        if (options === path.join(__dirname, 'configs.yaml')) {
+        if (options === path.join(__dirname, "configs.yaml")) {
           // default configurations loaded, only development and production environments are available
           newConfigurations = jsyaml.safeLoad(configString)[
-            process.env.NODE_ENV === 'production' ? 'production' : 'development'
+            process.env.NODE_ENV === "production" ? "production" : "development"
           ];
         } else {
           newConfigurations = jsyaml.safeLoad(configString)[
-            process.env.NODE_ENV || 'development'
+            process.env.NODE_ENV || "development"
           ];
         }
       } catch (err) {
         console.log(
           "The specified configuration file wasn't found at " +
             options +
-            '.  Default configurations will be set'
+            ".  Default configurations will be set"
         );
-        config.setConfigurations(path.join(__dirname, 'configs.yaml'), 'utf8');
+        config.setConfigurations(path.join(__dirname, "configs.yaml"), "utf8");
       }
     } else {
       newConfigurations = options;
@@ -60,16 +60,16 @@ export const config = {
 
     if (newConfigurations.controllers == undefined) {
       //TODO: Fix this!
-      newConfigurations.controllers = path.join(process.cwd(), './controllers'); // for production (document that if no controller is specified then 'node' must be done wher /controllers is)
+      newConfigurations.controllers = path.join(process.cwd(), "./controllers"); // for production (document that if no controller is specified then 'node' must be done wher /controllers is)
     }
     //If newConfigurations does indeed contain 'controllers', it will be initialized inside the following lop:
     for (var c in newConfigurations) {
       this.setProperty(c, newConfigurations[c]);
-      if (c == 'loglevel') {
+      if (c == "loglevel") {
         //loglevel changes, then new logger is needed
         createNewLogger();
-      } else if (c === 'customLogger') {
-        this.setProperty('logger', newConfigurations[c]);
+      } else if (c === "customLogger") {
+        this.setProperty("logger", newConfigurations[c]);
       }
     }
   },
@@ -82,7 +82,7 @@ export function setProperty(propertyName, newValue) {
 /**
  * Setup default configurations
  */
-config.setConfigurations(path.join(__dirname, 'configs.yaml'), 'utf8');
+config.setConfigurations(path.join(__dirname, "configs.yaml"), "utf8");
 function createNewLogger() {
   var customFormat = winston.format.printf(
     (info) => `${info.timestamp} ${info.level}: ${info.message}`
@@ -100,11 +100,11 @@ function createNewLogger() {
       debug: 11,
     },
     colors: {
-      error: 'red',
-      warn: 'yellow',
-      custom: 'magenta',
-      info: 'white',
-      debug: 'blue',
+      error: "red",
+      warn: "yellow",
+      custom: "magenta",
+      info: "white",
+      debug: "blue",
     },
   };
 
