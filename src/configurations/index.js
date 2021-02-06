@@ -29,7 +29,7 @@ import path from "path";
  * Export functions and Objects
  */
 export const config = {
-  setConfigurations: function setConfigurations(options, encoding) {
+  setConfigurations: function (options, encoding) {
     if (!options) {
       throw new Error("Configurations parameter is required");
     } else if (typeof options == "string") {
@@ -64,19 +64,19 @@ export const config = {
     }
     //If newConfigurations does indeed contain 'controllers', it will be initialized inside the following lop:
     for (var c in newConfigurations) {
-      this.setProperty(c, newConfigurations[c]);
+      setProperty(c, newConfigurations[c]);
       if (c == "loglevel") {
         //loglevel changes, then new logger is needed
         createNewLogger();
       } else if (c === "customLogger") {
-        this.setProperty("logger", newConfigurations[c]);
+        setProperty("logger", newConfigurations[c]);
       }
     }
   },
 };
 
 export function setProperty(propertyName, newValue) {
-  this[propertyName] = newValue;
+  config[propertyName] = newValue;
 }
 
 /**
