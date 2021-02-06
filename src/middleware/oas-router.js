@@ -17,8 +17,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 import * as MIMEtype from "whatwg-mimetype";
-import * as utils from "./lib/utils.js";
-import { config, logger } from "./configurations";
+import * as utils from "../lib/utils.js";
+import { config, logger } from "../configurations";
 import ZSchema from "z-schema";
 import path from "path";
 const validator = new ZSchema({
