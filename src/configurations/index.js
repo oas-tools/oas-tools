@@ -63,26 +63,27 @@ export const config = {
       newConfigurations.controllers = path.join(process.cwd(), "./controllers"); // for production (document that if no controller is specified then 'node' must be done wher /controllers is)
     }
     //If newConfigurations does indeed contain 'controllers', it will be initialized inside the following lop:
-    for (var c in newConfigurations) {
-      setProperty(c, newConfigurations[c]);
+    for (const c in newConfigurations) {
+      config.setProperty(c, newConfigurations[c]);
       if (c == "loglevel") {
         //loglevel changes, then new logger is needed
-        createNewLogger();
+        config.logger = createNewLogger();
       } else if (c === "customLogger") {
-        setProperty("logger", newConfigurations[c]);
+        config.setProperty("logger", newConfigurations[c]);
       }
     }
   },
-};
 
-export function setProperty(propertyName, newValue) {
-  config[propertyName] = newValue;
-}
+  setProperty: function (propertyName, newValue) {
+    config[propertyName] = newValue;
+  },
+};
 
 /**
  * Setup default configurations
  */
 config.setConfigurations(path.join(__dirname, "configs.yaml"), "utf8");
+config.logger = createNewLogger();
 function createNewLogger() {
   var customFormat = winston.format.printf(
     (info) => `${info.timestamp} ${info.level}: ${info.message}`
@@ -143,5 +144,3 @@ function createNewLogger() {
     exitOnError: false,
   });
 }
-
-export const logger = createNewLogger();

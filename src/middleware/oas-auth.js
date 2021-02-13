@@ -1,6 +1,6 @@
-import { config, logger } from "../configurations";
 import AccessControl from "accesscontrol";
 import AccessControlMiddleware from "accesscontrol-middleware";
+import { config } from "../configurations";
 import jwt from "jsonwebtoken";
 
 function removeBasePath(reqRoutePath) {
@@ -39,7 +39,7 @@ export default (oasDoc) => {
   return function OASAuth(req, res, next) {
     const usedPath = config.pathsDict[removeBasePath(req.route.path)];
     const method = req.method.toLowerCase();
-    logger.debug("Checking authorization...");
+    config.logger.debug("Checking authorization...");
     var securityReqs =
       oasDoc.paths[usedPath][method].security || oasDoc.security;
 
@@ -130,11 +130,11 @@ export default (oasDoc) => {
         var middleware = accessControlMiddleware.check(checkObject);
         middleware(req, res, next);
       } else {
-        logger.debug("No security definition including JWT was found");
+        config.logger.debug("No security definition including JWT was found");
         return next();
       }
     } else {
-      logger.debug("No security requirements found for this request");
+      config.logger.debug("No security requirements found for this request");
       return next();
     }
   };

@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 import * as _ from "lodash-compat";
 import * as utils from "../lib/utils.js";
-import { config, logger } from "../configurations";
 import ZSchema from "z-schema";
+import { config } from "../configurations";
 const validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
@@ -109,7 +109,7 @@ function checkBody(req, requestBody) {
         content: data,
       };
     }
-    logger.info("Valid parameter on request");
+    config.logger.info("Valid parameter on request");
   }
   return undefined;
 }
@@ -157,15 +157,15 @@ function checkParameter(req, params) {
       if (err == false) {
         if (err.code == "UNKNOWN_FORMAT") {
           var registeredFormats = ZSchema.getRegisteredFormats();
-          logger.error("UNKNOWN_FORMAT error - Registered Formats: ");
-          logger.error(registeredFormats);
+          config.logger.error("UNKNOWN_FORMAT error - Registered Formats: ");
+          config.logger.error(registeredFormats);
         }
         errorMessages.push({
           message: "Wrong parameter " + name + " in " + location + ". ",
           error: validator.getLastErrors(),
         });
       } else {
-        logger.info("Valid parameter on request");
+        config.logger.info("Valid parameter on request");
       }
     }
   }
@@ -219,12 +219,12 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
       });
       next(error);
     } else {
-      logger.error(JSON.stringify(msg));
+      config.logger.error(JSON.stringify(msg));
       res.status(400).send(msg);
     }
   } else {
     if (msg.length != 0) {
-      logger.warn(JSON.stringify(msg));
+      config.logger.warn(JSON.stringify(msg));
     }
     res.locals.oasDoc = oasDoc;
     next();
@@ -385,7 +385,8 @@ function convertValue(value, optionalSchema, optionalType) {
   if (schema.allowEmptyValue && value === "") {
     return value;
   }
-  const type = optionalType === undefined ? getParameterType(schema) : type;
+  const type =
+    optionalType === undefined ? getParameterType(schema) : optionalType;
 
   switch (type) {
     case "array":
@@ -403,7 +404,7 @@ function convertValue(value, optionalSchema, optionalType) {
 
     case "string":
     default:
-      return convertStringValue(value);
+      return convertStringValue(value, schema);
   }
 }
 
@@ -424,7 +425,9 @@ export default (oasDoc) => {
   return function OASValidator(req, res, next) {
     var method = req.method.toLowerCase();
 
-    logger.info("Requested method-url pair: " + method + " - " + req.url);
+    config.logger.info(
+      "Requested method-url pair: " + method + " - " + req.url
+    );
 
     var requestedSpecPath = config.pathsDict[removeBasePath(req.route.path)];
     var operation = oasDoc.paths[requestedSpecPath][method];
@@ -488,7 +491,7 @@ export default (oasDoc) => {
     }
 
     res.locals.requestedSpecPath = requestedSpecPath;
-    logger.debug(
+    config.logger.debug(
       "OASValidator  -res.locals.requestedSpecPath: " +
         res.locals.requestedSpecPath
     );

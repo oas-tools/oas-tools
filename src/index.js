@@ -8,7 +8,6 @@ https://github.com/isa-group/project-oas-tools
 import * as _ from "lodash-compat";
 import * as express from "express";
 import * as utils from "./lib/utils.js";
-import { config, logger as defaultLogger } from "./configurations";
 import EmptyMiddleware from "./middleware/empty_middleware";
 import OASAuth from "./middleware/oas-auth";
 import OASRouter from "./middleware/oas-router";
@@ -16,6 +15,7 @@ import OASSecurity from "./middleware/oas-security";
 import OASValidator from "./middleware/oas-validator";
 import ZSchema from "z-schema";
 import bodyParser from "body-parser";
+import { config } from "./configurations";
 import deref from "json-schema-deref-sync";
 import fs from "fs";
 import { join } from "path";
@@ -27,13 +27,12 @@ const validator = new ZSchema({
   ignoreUnknownFormats: config.ignoreUnknownFormats,
   breakOnFirstError: false,
 });
-const logger = defaultLogger;
 const schemaV3 = jsyaml.safeLoad(
   fs.readFileSync(join(__dirname, "./schemas/openapi-3.0.yaml"), "utf8")
 );
 
 function fatalError(err) {
-  logger.error(err);
+  config.logger.error(err);
   throw err;
 }
 
@@ -62,7 +61,7 @@ export function init_checks(specDoc, callback) {
         JSON.stringify(validator.getLastErrors())
     );
   } else {
-    logger.info("Valid specification file");
+    config.logger.info("Valid specification file");
   }
 }
 
@@ -72,9 +71,6 @@ export function init_checks(specDoc, callback) {
  */
 export function configure(options) {
   config.setConfigurations(options);
-  if (options.customLogger || options.loglevel != undefined) {
-    // logger = config.logger; //loglevel changes, then new logger is needed
-  }
 }
 
 /**
@@ -95,7 +91,7 @@ function checkOperationId(load, pathName, methodName, methodSection) {
 
   if (opId == undefined) {
     opId = utils.generateName(pathName, "function") + methodName.toUpperCase(); //there is no opId: normalize and add "func" at the beggining
-    logger.debug(
+    config.logger.debug(
       "      There is no operationId for " +
         methodName.toUpperCase() +
         " - " +
@@ -116,7 +112,7 @@ function checkOperationId(load, pathName, methodName, methodSection) {
         ")"
     );
   } else {
-    logger.debug(
+    config.logger.debug(
       "      Controller for " +
         methodName.toUpperCase() +
         " - " +
@@ -139,7 +135,7 @@ function checkControllers(
   methodSection,
   controllersLocation
 ) {
-  logger.debug("  " + methodName.toUpperCase() + " - " + pathName);
+  config.logger.debug("  " + methodName.toUpperCase() + " - " + pathName);
   var controller;
   var load;
   var router_property;
@@ -154,7 +150,7 @@ function checkControllers(
 
   if (methodSection[router_property] != undefined) {
     controller = methodSection[router_property];
-    logger.debug(
+    config.logger.debug(
       "    OAS-doc has " + router_property + " property " + controller
     );
     try {
@@ -168,7 +164,7 @@ function checkControllers(
     }
   } else {
     controller = utils.generateName(pathName, "controller");
-    logger.debug(
+    config.logger.debug(
       "    Spec-file does not have router property -> try generic controller name: " +
         controller
     );
@@ -176,7 +172,7 @@ function checkControllers(
       load = require(join(controllersLocation, controller));
       checkOperationId(load, pathName, methodName, methodSection);
     } catch (err) {
-      logger.debug(
+      config.logger.debug(
         "    Controller with generic controller name wasn't found either -> try Default one"
       );
       try {
@@ -379,7 +375,7 @@ function registerPaths(specDoc, app) {
         server.url.charAt(0) === "/"
     );
     if (!localServer) {
-      logger.info(
+      config.logger.info(
         "No localhost or relative server found in spec file, added for testing in Swagger UI"
       );
       var foundServer = specDoc.servers[0];
@@ -389,7 +385,7 @@ function registerPaths(specDoc, app) {
       });
     }
   } else {
-    logger.info(
+    config.logger.info(
       "No servers found in spec file, added relative server for testing in Swagger UI"
     );
     specDoc.servers = [
@@ -417,7 +413,7 @@ function registerPaths(specDoc, app) {
         // pgillis 2019 June 10
         var myPathObj = paths[path];
         //console.log('myPathObj ', myPathObj)
-        //logger.debug('PWG ****: '+myPathObj+ " hasProperty "+  myPathObj.hasOwnProperty('x-swagger-router-controller'));
+        //config.logger.debug('PWG ****: '+myPathObj+ " hasProperty "+  myPathObj.hasOwnProperty('x-swagger-router-controller'));
         if (
           myPathObj.hasOwnProperty("x-swagger-router-controller") &&
           myPathObj[method].hasOwnProperty("x-swagger-router-controller") ===
@@ -428,7 +424,9 @@ function registerPaths(specDoc, app) {
         }
         var expressPath = getExpressVersion(path); // TODO: take in account basePath/servers property of the spec doc.
         dictionary[expressPath.toString()] = path;
-        logger.debug("Register: " + method.toUpperCase() + " - " + expressPath);
+        config.logger.debug(
+          "Register: " + method.toUpperCase() + " - " + expressPath
+        );
         if (config.router == true && config.checkControllers == true) {
           checkControllers(
             path,
@@ -499,7 +497,7 @@ export function initialize(oasDoc, app, callback) {
   init_checks(oasDoc, callback);
 
   var fullSchema = deref(oasDoc, { mergeAdditionalProperties: true });
-  logger.info("Specification file dereferenced");
+  config.logger.info("Specification file dereferenced");
 
   registerPaths(fullSchema, app);
 
@@ -522,7 +520,7 @@ export function initializeMiddleware(specDoc, app, callback) {
   init_checks(specDoc, callback);
 
   var fullSchema = deref(specDoc);
-  logger.info("Specification file dereferenced");
+  config.logger.info("Specification file dereferenced");
 
   var middleware = {
     swaggerValidator: EmptyMiddleware,

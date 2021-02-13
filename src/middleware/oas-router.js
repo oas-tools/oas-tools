@@ -16,10 +16,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-import * as MIMEtype from "whatwg-mimetype";
 import * as utils from "../lib/utils.js";
-import { config, logger } from "../configurations";
+import MIMEtype from "whatwg-mimetype";
 import ZSchema from "z-schema";
+import { config } from "../configurations";
 import path from "path";
 const validator = new ZSchema({
   ignoreUnresolvableReferences: true,
@@ -92,12 +92,12 @@ function checkResponse(
   var explicitType;
   var msg = [];
   var data = stripUndefinedKeys(content[0]);
-  logger.debug("Processing at checkResponse:");
-  logger.debug("  -code: " + code);
-  logger.debug("  -oasDoc: " + JSON.stringify(oasDoc));
-  logger.debug("  -method: " + method);
-  logger.debug("  -requestedSpecPath: " + requestedSpecPath);
-  logger.debug("  -data: " + JSON.stringify(data));
+  config.logger.debug("Processing at checkResponse:");
+  config.logger.debug("  -code: " + code);
+  config.logger.debug("  -oasDoc: " + JSON.stringify(oasDoc));
+  config.logger.debug("  -method: " + method);
+  config.logger.debug("  -requestedSpecPath: " + requestedSpecPath);
+  config.logger.debug("  -data: " + JSON.stringify(data));
   var responseCodeSection = getExpectedResponse(
     oasDoc.paths[requestedSpecPath][method].responses,
     code
@@ -114,11 +114,11 @@ function checkResponse(
     };
     msg.push(newErr);
     if (config.strict === true) {
-      logger.error(JSON.stringify(msg));
+      config.logger.error(JSON.stringify(msg));
       content[0] = JSON.stringify(msg);
       oldSend.apply(res, content);
     } else {
-      logger.warn(JSON.stringify(msg));
+      config.logger.warn(JSON.stringify(msg));
       oldSend.apply(res, content);
     }
   } else if (responseCodeSection.hasOwnProperty("content")) {
@@ -166,7 +166,7 @@ function checkResponse(
       };
       msg.push(newErr);
       content[0] = JSON.stringify(msg);
-      logger.error(content[0]);
+      config.logger.error(content[0]);
       res.status(406);
     } else {
       res.header("Content-Type", resultType.essence + ";charset=utf-8");
@@ -177,7 +177,7 @@ function checkResponse(
       utils.fixNullable(validSchema);
 
       content[0] = JSON.stringify(content[0]);
-      logger.debug(
+      config.logger.debug(
         "Schema to use for validation: " + JSON.stringify(validSchema)
       );
       var err = validator.validate(data, validSchema);
@@ -190,18 +190,20 @@ function checkResponse(
         msg.push(newErr);
         if (config.strict === true) {
           content[0] = JSON.stringify(msg);
-          logger.error(content[0]);
+          config.logger.error(content[0]);
           res.status(400);
           oldSend.apply(res, content);
         } else {
-          logger.warn(
+          config.logger.warn(
             JSON.stringify(msg) + JSON.stringify(validator.getLastErrors())
           );
           if (
             content[0].substr(0, 46) ===
             '{"message":"This is the mockup controller for '
           ) {
-            logger.warn("The used controller might not have been implemented");
+            config.logger.warn(
+              "The used controller might not have been implemented"
+            );
           }
           oldSend.apply(res, content);
         }
@@ -226,7 +228,7 @@ function existsController(locationOfControllers, controllerName) {
     require(path.join(locationOfControllers, controllerName));
     return true;
   } catch (err) {
-    logger.info(
+    config.logger.info(
       "The controller " +
         controllerName +
         " doesn't exist at " +

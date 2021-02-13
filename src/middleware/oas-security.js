@@ -1,6 +1,6 @@
 import * as _ from "lodash-compat";
 import * as async from "async";
-import { config, logger } from "../configurations";
+import { config } from "../configurations";
 import jwt from "jsonwebtoken";
 
 var getValue = (req, secDef, secName, secReq) => {
@@ -72,6 +72,7 @@ function verifyToken(req, secDef, token, secName, next) {
       (error, decoded) => {
         if (error === null && decoded) {
           next();
+          return;
         }
         next(sendError(403));
       }
@@ -88,7 +89,7 @@ export default (specDoc) => {
     var securityReqs;
 
     if (operation) {
-      logger.debug("Checking security...");
+      config.logger.debug("Checking security...");
       securityReqs =
         specDoc.paths[operation][req.method.toLowerCase()].security ||
         specDoc.security;
@@ -156,7 +157,7 @@ export default (specDoc) => {
                 );
               },
               (err) => {
-                logger.debug(
+                config.logger.debug(
                   "    Security check " +
                     secName +
                     ": " +
@@ -176,7 +177,7 @@ export default (specDoc) => {
             // note swapped results
             var allowed = !_.isNull(ok) && ok.message === "OK";
 
-            logger.debug("    Request allowed: " + allowed);
+            config.logger.debug("    Request allowed: " + allowed);
 
             if (allowed) {
               return next();
