@@ -1,4 +1,4 @@
-let pets = [
+const normalPets = [
   {
     id: 1,
     name: "Wolf",
@@ -31,100 +31,70 @@ let pets = [
   },
 ];
 
-function corruptPets() {
-  pets = [
-    {
-      id: "1",
-      name: "Wolf",
-      tag: "Barks at the moon",
-    },
-    {
-      id: 2,
-      name: "Cat",
-      tag: "Boring animal",
-    },
-    {
-      id: 3,
-      name: "Rabbit",
-      tag: "Eats carrots",
-    },
-    {
-      id: 10,
-      name: "Pig",
-      tag: undefined,
-    },
-    {
-      name: "Bat",
-      tag: "At night",
-    },
-    {
-      id: 200,
-      name: "AnimalZ",
-      tag: "This is supposed to be a wrong object",
-    },
-  ];
-  exports.pets = pets;
-}
+const corruptedPets = [
+  {
+    id: "1",
+    name: "Wolf",
+    tag: "Barks at the moon",
+  },
+  {
+    id: 2,
+    name: "Cat",
+    tag: "Boring animal",
+  },
+  {
+    id: 3,
+    name: "Rabbit",
+    tag: "Eats carrots",
+  },
+  {
+    id: 10,
+    name: "Pig",
+    tag: undefined,
+  },
+  {
+    name: "Bat",
+    tag: "At night",
+  },
+  {
+    id: 200,
+    name: "AnimalZ",
+    tag: "This is supposed to be a wrong object",
+  },
+];
 
-function setCorrectPets() {
-  pets = [
-    {
-      id: 1,
-      name: "Wolf",
-      tag: "Barks at the moon",
-    },
-    {
-      id: 2,
-      name: "Cat",
-      tag: "Boring animal",
-    },
-    {
-      id: 3,
-      name: "Rabbit",
-      tag: "Eats carrots",
-    },
-    {
-      id: 4,
-      name: "Bat",
-      tag: "Ozzy's breakfast",
-    },
-    {
-      id: 10,
-      name: "Pig",
-      tag: undefined,
-    },
-    {
-      id: 200,
-      name: "AnimalZ",
-      tag: "It is not wrong anymore",
-    },
-  ];
-}
+export const petsHandler = {
+  pets: normalPets,
+  corruptPets: () => {
+    petsHandler.pets = corruptedPets;
+  },
+  setCorrectPets: () => {
+    petsHandler.pets = normalPets;
+  },
+};
 
 // args = req.swagger.params
 
 /**
  *  Creates a pet
  */
-exports.createPets = (args, res) => {
-  pets.push(args.pet.value);
-  exports.pets = pets;
-  res.status(201).send(pets);
+export const createPets = (args, res) => {
+  petsHandler.pets.push(args.pet.value);
+  res.status(201).send(petsHandler.pets);
 };
 
 /**
  *  Retrieves the whole pets collection
  */
-exports.listPets = (args, res) => {
-  exports.pets = pets;
-  res.status(200).send(pets.slice(0, args.limit.value));
+export const listPets = (args, res) => {
+  res.status(200).send(petsHandler.pets.slice(0, args.limit.value));
 };
 
 /**
  *  Retrieves a single pet
  */
-exports.showPetById = (args, res) => {
-  exports.pets = pets;
+export const showPetById = (args, res) => {
+  const { pets } = petsHandler;
   var res_pet;
   for (var i = 0; i < pets.length; i++) {
     if (pets[i].id == args.petId.value) {
@@ -144,8 +114,9 @@ exports.showPetById = (args, res) => {
 /**
  *  Deletes a single pet from the collection
  */
-exports.deletePet = (args, res) => {
+export const deletePet = (args, res) => {
   var index = -1;
+  const { pets } = petsHandler;
   for (var i = 0; i < pets.length; i++) {
     if (pets[i].id == args.petId.value) {
       index = i;
@@ -159,24 +130,22 @@ exports.deletePet = (args, res) => {
     pets.splice(index, 1);
     res.status(204).send(); //{message: "Pet successfully deleted!"}
   }
-  exports.pets = pets;
 };
 
 /**
  *  Deletes all the pets in the collection
  */
-exports.deletePets = (args, res) => {
-  exports.pets = pets;
-  pets.splice(0, pets.length);
-  exports.pets = pets;
+export const deletePets = (args, res) => {
+  petsHandler.pets = [];
   res.status(204).send(); //{message: "All pets successfully deleted!"}
 };
 
 /**
  *  Updates a pet
  */
-exports.updatePet = (args, res) => {
+export const updatePet = (args, res) => {
   var present = false;
+  const { pets } = petsHandler;
   for (var i = 0; i < pets.length; i++) {
     if (pets[i].id == args.petId.value) {
       present = true;
@@ -191,9 +160,4 @@ exports.updatePet = (args, res) => {
       message: "There is no pet with id " + args.petId.value,
     });
   }
-  exports.pets = pets;
 };
-
-exports.pets = pets;
-exports.corruptPets = corruptPets;
-exports.setCorrectPets = setCorrectPets;
