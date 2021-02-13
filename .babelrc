@@ -19,7 +19,7 @@
           "@babel/env",
           {
             "targets": {
-              "node": "12.20"
+              "node": "14.15"
             },
             "modules": false
           }
