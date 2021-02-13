@@ -1,15 +1,17 @@
 import * as auxRequire from "./testServer/controllers/petsController.mjs";
-import * as chai from "chai";
-import * as chaiHttp from "chai-http";
 import * as fs from "fs";
 import * as indexFile from "../src/index.js";
-import * as jsyaml from "js-yaml";
-import * as jwt from "jsonwebtoken";
-import * as path from "path";
 import * as serverProto from "./testServer/index.mjs";
 import * as utilsFile from "../src/lib/utils.js";
+import { dirname, join } from "path";
+import chai from "chai";
+import chaiHttp from "chai-http";
+import { fileURLToPath } from "url";
+import jsyaml from "js-yaml";
+import jwt from "jsonwebtoken";
 
-let server = serverProto;
+const currentDirName = dirname(fileURLToPath(import.meta.url));
+let server = serverProto.app;
 
 var token = jwt.sign(
   {
@@ -1530,7 +1532,7 @@ function miscTests() {
     return 0;
   };
   var spec = fs.readFileSync(
-    path.join(__dirname, "./testServer/api/oai-spec.yaml"),
+    join(currentDirName, "./testServer/api/oai-spec.yaml"),
     "utf8"
   );
   var oasDoc = jsyaml.safeLoad(spec);
@@ -1614,7 +1616,7 @@ function multipartFormTests() {
         id: 4711,
         name: "MultipartFormdataRabbit",
       };
-      const file = path.join(__dirname, "pet.zip");
+      const file = join(currentDirName, "pet.zip");
 
       return chai
         .request(server)
@@ -1636,7 +1638,7 @@ function multipartFormTests() {
         id: 4711,
         name: "MultipartFormdataRabbit",
       };
-      const file = path.join(__dirname, "pet.zip");
+      const file = join(currentDirName, "pet.zip");
 
       return chai
         .request(server)
@@ -1659,7 +1661,7 @@ function multipartFormTests() {
         id: 4711,
         name: "MultipartFormdataRabbit",
       };
-      const file = path.join(__dirname, "pet.zip");
+      const file = join(currentDirName, "pet.zip");
 
       return chai
         .request(server)
@@ -1742,15 +1744,15 @@ describe("Pets", () => {
   before((done) => {
     // await for server creation
     serverProto.init(() => {
-      server = serverProto.getServer();
+      server = serverProto.app;
       setTimeout(done, 1000);
     });
   });
 
   after((done) => {
     // close()
-    serverProto.close(() => {
-      server = serverProto.close();
+    serverProto.app.close(() => {
+      server = serverProto.app.close();
       done();
     });
   });

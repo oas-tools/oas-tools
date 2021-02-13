@@ -20,10 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 /**
  * Module dependecies.
  * */
-import * as jsyaml from "js-yaml";
-import * as winston from "winston";
 import fs from "fs";
+import jsyaml from "js-yaml";
 import path from "path";
+import winston from "winston";
 
 /*
  * Export functions and Objects

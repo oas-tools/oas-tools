@@ -1,14 +1,16 @@
-import bodyParser from "body-parser";
 import * as fs from "fs";
 import * as http from "http";
-import * as jsyaml from "js-yaml";
 import * as logger from "./logger/index.mjs";
-import * as oasTools from "../../src/index.js";
-import * as path from "path";
+import { dirname, join } from "path";
+import bodyParser from "body-parser";
+import { createRequire } from "module";
 import express from "express";
+import { fileURLToPath } from "url";
+import jsyaml from "js-yaml";
 import multer from "multer";
+import oasTools from "../../src/index.js";
 
-var app = express();
+export var app = express();
 // multer is the official express middleware
 // handling multipart/formdata requests
 const upload = multer();
@@ -20,12 +22,14 @@ app.use(
 app.use(upload.any()); // allow unlimited number of files with a request
 
 var serverPort = 8080;
+const currentDirName = dirname(fileURLToPath(import.meta.url));
+const require = createRequire(import.meta.url);
 
-var spec = fs.readFileSync(path.join(__dirname, "api/oai-spec.yaml"), "utf8"); //this one works
+var spec = fs.readFileSync(join(currentDirName, "api/oai-spec.yaml"), "utf8"); //this one works
 var oasDoc = jsyaml.safeLoad(spec);
 
-var securityThird = require(path.join(__dirname, "security.json"));
-var grantsThird = require(path.join(__dirname, "grants.json"));
+var securityThird = require(join(currentDirName, "security.json"));
+var grantsThird = require(join(currentDirName, "grants.json"));
 
 function verifyToken(req, secDef, token, next) {
   if (token) {
@@ -36,7 +40,7 @@ function verifyToken(req, secDef, token, next) {
 }
 
 var options_object = {
-  controllers: path.join(__dirname, "./controllers"),
+  controllers: join(currentDirName, "./controllers"),
   //loglevel: 'debug',
   //loglevel: 'none',
   customLogger: logger,
@@ -57,7 +61,7 @@ var options_object = {
   ignoreUnknownFormats: true,
 };
 
-function init(done) {
+export function init(done) {
   oasTools.configure(options_object);
 
   oasTools.initialize(oasDoc, app, () => {
@@ -83,5 +87,3 @@ app.getServer = function getServer() {
 app.close = function close() {
   process.exit(0);
 };
-
-export default { app };

@@ -65,10 +65,10 @@ const corruptedPets = [
 export const petsHandler = {
   pets: normalPets,
   corruptPets: () => {
-    this.pets = corruptedPets;
+    petsHandler.pets = corruptedPets;
   },
   setCorrectPets: () => {
-    this.pets = normalPets;
+    petsHandler.pets = normalPets;
   },
 };
 

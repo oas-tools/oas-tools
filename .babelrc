@@ -32,13 +32,11 @@
           "@babel/env",
           {
             "targets": {
-              "node": "10.23"
-            },
-            "modules": "commonjs"
+              "node": "current"
+            }
           }
         ]
-      ],
-      "plugins": [["@babel/transform-runtime"]]
+      ]
     }
   },
   "sourceMaps": true

@@ -6,9 +6,7 @@ https://github.com/isa-group/project-oas-tools
 */
 
 import * as _ from "lodash-compat";
-import * as deref from "json-schema-deref-sync";
 import * as express from "express";
-import * as request from "request";
 import * as utils from "./lib/utils.js";
 import { config, logger as defaultLogger } from "./configurations";
 import EmptyMiddleware from "./middleware/empty_middleware";
@@ -18,18 +16,20 @@ import OASSecurity from "./middleware/oas-security";
 import OASValidator from "./middleware/oas-validator";
 import ZSchema from "z-schema";
 import bodyParser from "body-parser";
+import deref from "json-schema-deref-sync";
 import fs from "fs";
+import { join } from "path";
 import jsyaml from "js-yaml";
-import path from "path";
+import request from "request";
 
 const validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,
   breakOnFirstError: false,
 });
-let logger = defaultLogger;
+const logger = defaultLogger;
 const schemaV3 = jsyaml.safeLoad(
-  fs.readFileSync(path.join(__dirname, "./schemas/openapi-3.0.yaml"), "utf8")
+  fs.readFileSync(join(__dirname, "./schemas/openapi-3.0.yaml"), "utf8")
 );
 
 function fatalError(err) {
@@ -42,7 +42,7 @@ function fatalError(err) {
  *@param {object} specDoc - Speceficitation file.
  *@param {object} callback - Callback function passed to the initialization function.
  */
-function init_checks(specDoc, callback) {
+export function init_checks(specDoc, callback) {
   if (_.isUndefined(specDoc)) {
     throw new Error("specDoc is required");
   } else if (!_.isPlainObject(specDoc)) {
@@ -70,12 +70,12 @@ function init_checks(specDoc, callback) {
  * Function to set configurations. Initializes local variables that then will be used in the callback inside initializeMiddleware function.
  *@param {object} options - Parameter containing controllers location, enable logs, and strict checks. It can be a STRING or an OBJECT.
  */
-var configure = function configure(options) {
+export function configure(options) {
   config.setConfigurations(options);
   if (options.customLogger || options.loglevel != undefined) {
-    logger = config.logger; //loglevel changes, then new logger is needed
+    // logger = config.logger; //loglevel changes, then new logger is needed
   }
-};
+}
 
 /**
  * Checks if operationId (or generic) and function for it exists on controller for a given pair path-method.
@@ -158,7 +158,7 @@ function checkControllers(
       "    OAS-doc has " + router_property + " property " + controller
     );
     try {
-      load = require(path.join(
+      load = require(join(
         controllersLocation,
         utils.generateName(controller, undefined)
       ));
@@ -173,7 +173,7 @@ function checkControllers(
         controller
     );
     try {
-      load = require(path.join(controllersLocation, controller));
+      load = require(join(controllersLocation, controller));
       checkOperationId(load, pathName, methodName, methodSection);
     } catch (err) {
       logger.debug(
@@ -181,7 +181,7 @@ function checkControllers(
       );
       try {
         controller = "Default"; //try to load default one
-        load = require(path.join(controllersLocation, controller));
+        load = require(join(controllersLocation, controller));
         checkOperationId(load, pathName, methodName, methodSection);
       } catch (err) {
         fatalError(
@@ -310,7 +310,7 @@ function initializeSecurityAndAuth(specDoc) {
         } else if (config.securityFile[secName].charAt(0) === "/") {
           config.securityFile[secName] = require(config.securityFile[secName]);
         } else {
-          config.securityFile[secName] = require(path.join(
+          config.securityFile[secName] = require(join(
             process.cwd(),
             config.securityFile[secName]
           ));
@@ -337,7 +337,7 @@ function initializeSecurityAndAuth(specDoc) {
         } else {
           config.grantsFile[secName] = extendGrants(
             specDoc,
-            require(path.join(process.cwd(), config.grantsFile[secName]))
+            require(join(process.cwd(), config.grantsFile[secName]))
           );
         }
       } else {
@@ -465,7 +465,7 @@ function registerPaths(specDoc, app) {
     });
     if (config.docs.swaggerUi) {
       var uiHtml = fs.readFileSync(
-        path.join(__dirname, "../swagger-ui/index.html"),
+        join(__dirname, "../swagger-ui/index.html"),
         "utf8"
       );
       uiHtml = uiHtml.replace(
@@ -473,7 +473,7 @@ function registerPaths(specDoc, app) {
         'url: "' + config.docs.apiDocsPrefix + config.docs.apiDocs + '"'
       );
       fs.writeFileSync(
-        path.join(__dirname, "../swagger-ui/index.html"),
+        join(__dirname, "../swagger-ui/index.html"),
         uiHtml,
         "utf8"
       );
@@ -482,7 +482,7 @@ function registerPaths(specDoc, app) {
       }
       app.use(
         config.docs.swaggerUiPrefix + config.docs.swaggerUi,
-        express.static(path.join(__dirname, "../swagger-ui"))
+        express.static(join(__dirname, "../swagger-ui"))
       );
     }
   }
@@ -495,7 +495,7 @@ function registerPaths(specDoc, app) {
  *@param {object} app - Express server used for the application. Needed to register the paths.
  *@param {function} callback - Function in which the app is started.
  */
-var initialize = function initialize(oasDoc, app, callback) {
+export function initialize(oasDoc, app, callback) {
   init_checks(oasDoc, callback);
 
   var fullSchema = deref(oasDoc, { mergeAdditionalProperties: true });
@@ -504,7 +504,7 @@ var initialize = function initialize(oasDoc, app, callback) {
   registerPaths(fullSchema, app);
 
   callback();
-};
+}
 
 /**
  * Function to initialize swagger-tools middlewares.
@@ -512,11 +512,7 @@ var initialize = function initialize(oasDoc, app, callback) {
  *@param {function} app - //TODO IN CASE EXPRESS CAN BE USED INSTEAD OF CONNECT, USER MUST PASS THIS TO initializeMiddleware TO REGISTER ROUTES.
  *@param {function} callback - Function that initializes middlewares one by one.
  */
-var initializeMiddleware = function initializeMiddleware(
-  specDoc,
-  app,
-  callback
-) {
+export function initializeMiddleware(specDoc, app, callback) {
   app.use(
     bodyParser.json({
       strict: false,
@@ -537,11 +533,4 @@ var initializeMiddleware = function initializeMiddleware(
   };
   registerPaths(fullSchema, app);
   callback(middleware);
-};
-
-export default {
-  init_checks: init_checks,
-  initialize: initialize,
-  initializeMiddleware: initializeMiddleware,
-  configure: configure,
-};
+}
