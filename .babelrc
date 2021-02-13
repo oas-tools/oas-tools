@@ -38,39 +38,7 @@
           }
         ]
       ],
-      "plugins": [
-        [
-          "module-resolver",
-          {
-            "alias": {
-              "src": "./common"
-            }
-          }
-        ]
-      ]
-    },
-    "test-mjs": {
-      "presets": [
-        [
-          "@babel/env",
-          {
-            "targets": {
-              "node": "12.20"
-            },
-            "modules": false
-          }
-        ]
-      ],
-      "plugins": [
-        [
-          "module-resolver",
-          {
-            "alias": {
-              "src": "./lib"
-            }
-          }
-        ]
-      ]
+      "plugins": [["@babel/transform-runtime"]]
     }
   },
   "sourceMaps": true
