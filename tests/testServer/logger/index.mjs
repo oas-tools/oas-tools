@@ -1,4 +1,4 @@
-import * as winston from "winston";
+import winston from "winston";
 
 var customFormat = winston.format.printf(
   (info) => `${info.timestamp} ${info.level}: ${info.message}`

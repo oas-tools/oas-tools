@@ -1,9 +1,9 @@
-import * as bodyParser from "body-parser";
+import bodyParser from "body-parser";
 import * as fs from "fs";
 import * as http from "http";
 import * as jsyaml from "js-yaml";
-import * as logger from "./logger";
-import * as oasTools from "src/index.js";
+import * as logger from "./logger/index.mjs";
+import * as oasTools from "../../src/index.js";
 import * as path from "path";
 import express from "express";
 import multer from "multer";
