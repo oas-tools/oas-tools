@@ -1,8 +1,8 @@
 import * as auxRequire from "./testServer/controllers/petsController.mjs";
 import * as fs from "fs";
-import * as indexFile from "../src/index.js";
+import * as indexFile from "../common/index.js";
 import * as serverProto from "./testServer/index.mjs";
-import * as utilsFile from "../src/lib/utils.js";
+import * as utilsFile from "../common/lib/utils.js";
 import { dirname, join } from "path";
 import chai from "chai";
 import chaiHttp from "chai-http";

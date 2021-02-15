@@ -8,7 +8,7 @@ import express from "express";
 import { fileURLToPath } from "url";
 import jsyaml from "js-yaml";
 import multer from "multer";
-import oasTools from "../../src/index.js";
+import oasTools from "../../common/index.js";
 
 export var app = express();
 // multer is the official express middleware

@@ -22,6 +22,7 @@
     "build": "npm run build-module && npm run build-commonjs",
     "build-commonjs": "cross-env BABEL_ENV=commonjs babel ./src --out-dir common --source-maps --copy-files",
     "build-module": "cross-env BABEL_ENV=module babel ./src --out-dir lib --source-maps --out-file-extension .mjs --copy-files",
+    "pretest": "npm run build-commonjs",
     "test": "cross-env BABEL_ENV=test mocha --require @babel/register --reporter spec ./tests/basic.mjs",
     "test:tdd": "npm run test -- -w",
     "lint": "eslint src Gruntfile.js tests",
