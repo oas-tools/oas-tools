@@ -205,7 +205,7 @@ function checkRequestData(oasDoc, requestedSpecPath, method, res, req, next) {
     const params = filterParams(methodParams, pathParams);
     const errorMessages = checkParameter(req, params);
     if (errorMessages.length !== 0) {
-      msg.concat(...errorMessages);
+      msg = msg.concat(errorMessages);
       keepGoing = false;
     }
   }
@@ -294,19 +294,15 @@ function convertArrayValue(value, schema) {
   if (typeof value === "string") {
     try {
       arrayValue = JSON.parse(value);
+      // Handle situation where the expected type is array but only one value was provided
       if (Array.isArray(arrayValue) === false) {
-        return value;
+        return [value];
       }
     } catch (err) {
       return value;
     }
   }
 
-  // Handle situation where the expected type is array but only one value was provided
-  if (Array.isArray(arrayValue) === false) {
-    // WARNING: unreachable code -> TODO
-    return [value];
-  }
   return arrayValue.map(value, (item, index) => {
     const itemSchema = Array.isArray(schema.items)
       ? schema.items[index]
