@@ -114,6 +114,18 @@ function checkBody(req, requestBody) {
   return undefined;
 }
 
+function getRequestProperty(req, location, name) {
+  const requestLocation = req[location];
+  if (location === "headers") {
+    return requestLocation[
+      Object.keys(requestLocation).find(
+        (key) => key.toLowerCase() === name.toLowerCase()
+      )
+    ];
+  }
+  return requestLocation[name];
+}
+
 function checkParameter(req, params) {
   const errorMessages = [];
   for (var i = 0; i < params.length; i++) {
@@ -132,13 +144,15 @@ function checkParameter(req, params) {
         ? false
         : Boolean(currentParameter.required);
 
-    if (req[location][name] === undefined) {
+    const requestParameter = getRequestProperty(req, location, name);
+
+    if (requestParameter === undefined) {
       if (required) {
         errorMessages.push({
           message: "Missing parameter " + name + " in " + location + ". ",
         });
       }
-    } else if (req[location][name] === null) {
+    } else if (requestParameter === null) {
       if (nullable === false) {
         errorMessages.push({
           message:
@@ -148,7 +162,7 @@ function checkParameter(req, params) {
     } else {
       // In case the parameter is indeed present, check type. In the case of array, check also type of its items!
       const value = convertValue(
-        req[location][name],
+        requestParameter,
         schema,
         getParameterType(currentParameter),
         currentParameter
