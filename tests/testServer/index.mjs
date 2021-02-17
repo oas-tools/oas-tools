@@ -1,12 +1,12 @@
 import * as fs from "fs";
 import * as http from "http";
-import * as logger from "./logger/index.mjs";
 import { dirname, join } from "path";
 import bodyParser from "body-parser";
 import { createRequire } from "module";
 import express from "express";
 import { fileURLToPath } from "url";
 import jsyaml from "js-yaml";
+import { logger } from "./logger/index.mjs";
 import multer from "multer";
 import oasTools from "../../common/index.js";
 
