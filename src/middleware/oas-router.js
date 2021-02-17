@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 import * as utils from "../lib/utils.js";
 import MIMEtype from "whatwg-mimetype";
 import ZSchema from "z-schema";
+import { cloneDeep } from "lodash-compat";
 import { config } from "../configurations";
 import path from "path";
 const validator = new ZSchema({
@@ -173,7 +174,9 @@ function checkResponse(
     }
     if (resultType && resultType.essence === "application/json") {
       //if there is no content property for the given response then there is nothing to validate.
-      var validSchema = responseCodeSection.content["application/json"].schema;
+      var validSchema = cloneDeep(
+        responseCodeSection.content["application/json"].schema
+      );
       utils.fixNullable(validSchema);
 
       content[0] = JSON.stringify(content[0]);
