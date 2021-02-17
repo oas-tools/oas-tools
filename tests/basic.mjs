@@ -651,7 +651,7 @@ function getTests() {
     it("it shouldn´t GET all the pets but show a message with errors (missing/wrong parameters)", (done) => {
       chai
         .request(server)
-        .get("/api/v1/pets?limit=10")
+        .get("/api/v1/petsCorrupt?limit=10")
         .set("Authorization", "Bearer " + token)
         .end((err, res) => {
           if (err) {

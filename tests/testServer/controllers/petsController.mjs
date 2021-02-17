@@ -171,6 +171,10 @@ export const listPets = (args, res) => {
   res.status(200).send(petsHandler.pets.slice(0, args.query.limit));
 };
 
+export const listCorruptPets = (args, res) => {
+  res.status(200).send(corruptedPets.slice(0, args.query.limit));
+};
+
 /**
  *  Retrieves a single pet
  */
@@ -314,6 +318,9 @@ export const grantsFile = (req, res) => {
         "read:any": ["*"],
         "update:any": ["*"],
         "delete:any": ["*"],
+      },
+      petsCorrupt: {
+        "read:any": ["*"],
       },
       pets: {
         "create:any": ["*"],
