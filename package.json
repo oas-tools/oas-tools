@@ -25,7 +25,7 @@
     "pretest": "npm run build-commonjs",
     "test": "cross-env BABEL_ENV=test mocha --require @babel/register --reporter spec ./tests/basic.mjs",
     "test:tdd": "npm run test -- -w",
-    "lint": "eslint src Gruntfile.js tests",
+    "lint": "eslint src Gruntfile.js tests --ext .mjs --ext .js",
     "format": "npm run lint -- --fix",
     "preconverage": "npm run build-tests",
     "coverage": "nyc mocha ./lib-tests/basic.js",
