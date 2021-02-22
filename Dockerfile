@@ -1,3 +1,0 @@
-FROM node:10.23.0-alpine
-
-EXPOSE 80 8080
