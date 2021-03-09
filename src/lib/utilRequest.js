@@ -2,8 +2,7 @@
 
 const http = require('http');
 const https = require('https');
-// const config = require('../configurations')
-const config = { logger: { debug: msg => console.log('DEBUG: ' + msg), error: msg => console.log('ERROR: ' + msg)  } }
+const config = require('../configurations')
 const logger = config.logger;
 /**
  * Retreives content from a url using a HTTP or HTTPS get request.
