@@ -12,7 +12,7 @@ const logger = config.logger;
  * @param {function} jsonHandlerCallback - the function that handles the response from the url
  */
 const urlGetJson = (url, jsonHandlerCallback) => {
-  if (typeof url !== 'string' || (url.toLowerCase().indexOf('https://') !== 0 && url.toLowerCase().indexOf('http://') !== 0)) {
+  if (typeof url !== 'string' || url.toLowerCase().indexOf('https://') !== 0 && url.toLowerCase().indexOf('http://') !== 0) {
     throw new Error('utilRequest.urlGetJson requires a url starting with http:// or https://')
   }
   if (typeof jsonHandlerCallback !== 'function') {
