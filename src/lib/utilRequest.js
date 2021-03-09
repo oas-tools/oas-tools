@@ -4,6 +4,7 @@ const http = require('http');
 const https = require('https');
 const config = require('../configurations')
 const logger = config.logger;
+
 /**
  * Retreives content from a url using a HTTP or HTTPS get request.
  * The function either calls a call back on sucess or just logs an exception if there are any errors.
@@ -22,11 +23,11 @@ const urlGetJson = (url, jsonHandlerCallback) => {
     const req = htp.request(
       url,
       {}, // REQUEST OPTIONS
-      res => {
+      (res) => {
         const chkAry = []
-        res.on('error', ex => logger.error('urlGetJson error processing response from ' + url + ': ' + ex))
-        res.on('data', chk => chkAry.push(chk))
-        res.on('end', _ => {
+        res.on('error', (ex) => logger.error('urlGetJson error processing response from ' + url + ': ' + ex))
+        res.on('data', (chk) => chkAry.push(chk))
+        res.on('end', () => {
           const txt = chkAry.join('')
           if (res.statusCode !== 200) {
             logger.error('urlGetJson request to ' + url + ' returned an invalid response code ' + res.statusCode + '. ' + txt)
