@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 import * as _ from "lodash-compat";
-import * as utils from "../lib/utils.js";
+import * as utils from "../lib/utils";
 import ZSchema from "z-schema";
 import { config } from "../configurations";
 const validator = new ZSchema({

@@ -16,12 +16,14 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-import * as utils from "../lib/utils.js";
+import * as utils from "../lib/utils";
 import MIMEtype from "whatwg-mimetype";
 import ZSchema from "z-schema";
-import { cloneDeep } from "lodash-compat";
 import { config } from "../configurations";
 import path from "path";
+import pkg from "lodash-compat";
+
+const { cloneDeep } = pkg;
 const validator = new ZSchema({
   ignoreUnresolvableReferences: true,
   ignoreUnknownFormats: config.ignoreUnknownFormats,

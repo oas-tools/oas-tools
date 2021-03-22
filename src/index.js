@@ -7,7 +7,7 @@ https://github.com/isa-group/project-oas-tools
 
 import * as _ from "lodash-compat";
 import * as express from "express";
-import * as utils from "./lib/utils.js";
+import * as utils from "./lib/utils";
 import EmptyMiddleware from "./middleware/empty_middleware";
 import OASAuth from "./middleware/oas-auth";
 import OASRouter from "./middleware/oas-router";
