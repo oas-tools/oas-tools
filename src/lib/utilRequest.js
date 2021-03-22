@@ -2,6 +2,7 @@
 
 const http = require('http');
 const https = require('https');
+const URL = require('url').URL
 const config = require('../configurations')
 const logger = config.logger;
 
@@ -12,17 +13,25 @@ const logger = config.logger;
  * @param {function} jsonHandlerCallback - the function that handles the response from the url
  */
 const urlGetJson = (url, jsonHandlerCallback) => {
-  if (typeof url !== 'string' || (url.toLowerCase().indexOf('https://') !== 0 && url.toLowerCase().indexOf('http://') !== 0)) {
+  if (typeof url !== 'string') {
+    throw new Error('utilRequest.urlGetJson requires a url string')
+  }
+  if (url.toLowerCase().indexOf('https://') !== 0 && url.toLowerCase().indexOf('http://') !== 0) {
     throw new Error('utilRequest.urlGetJson requires a url starting with http:// or https://')
   }
   if (typeof jsonHandlerCallback !== 'function') {
     throw new Error('utilRequest.urlGetJson requires a jsonHandlerCallback(jsonObject) function which was not supplied.')
   }
-  const htp = url.toLowerCase().indexOf('https://') === 0 ? https : http
+  const u = new URL(url)
+  const opt = {
+    host: u.host,
+    port: u.port,
+    path: u.path
+  }
+  const htp = u.protocol === 'https:' ? https : http
   try {
     const req = htp.request(
-      url,
-      {}, // REQUEST OPTIONS
+      opt, // REQUEST OPTIONS
       (res) => {
         const chkAry = []
         res.on('error', (ex) => logger.error('urlGetJson error processing response from ' + url + ': ' + ex))
