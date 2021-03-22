@@ -1,10 +1,9 @@
 import * as fs from "fs";
 import * as http from "http";
-import { dirname, join } from "path";
 import bodyParser from "body-parser";
 import { createRequire } from "module";
 import express from "express";
-import { fileURLToPath } from "url";
+import { join } from "path";
 import jsyaml from "js-yaml";
 import { logger } from "./logger/index.mjs";
 import multer from "multer";
@@ -22,7 +21,7 @@ app.use(
 app.use(upload.any()); // allow unlimited number of files with a request
 
 var serverPort = 8080;
-const currentDirName = dirname(fileURLToPath(import.meta.url));
+const currentDirName = __dirname;
 const require = createRequire(import.meta.url);
 
 var spec = fs.readFileSync(join(currentDirName, "api/oai-spec.yaml"), "utf8"); //this one works
