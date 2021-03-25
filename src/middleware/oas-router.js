@@ -167,8 +167,16 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
       }
       utils.fixNullable(validSchema)
 
-      content[0] = JSON.stringify(content[0]);
+      try {
+        JSON.parse(content[0]);
+      } catch (e) {
+        // Not a valid JSON object/string, so parse it!!!!
+        content[0] = JSON.stringify(content[0]);
+      }
+
       logger.debug("Schema to use for validation: " + JSON.stringify(validSchema));
+      logger.debug("Data to use for validation: " + content[0]);
+
       var err = validator.validate(JSON.parse(content[0]), validSchema);
       if (err === false) {
         newErr = {
