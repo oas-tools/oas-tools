@@ -92,6 +92,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
   logger.debug("  -requestedSpecPath: " + requestedSpecPath);
   logger.debug("  -data: " + JSON.stringify(data));
   var responseCodeSection = getExpectedResponse(oasDoc.paths[requestedSpecPath][method].responses, code); //Section of the oasDoc file starting at a response code
+  logger.debug("  -responseCodeSection: " + JSON.stringify(responseCodeSection));
   if (res.get('content-type') === undefined) {
     res.header("Content-Type", "application/json;charset=utf-8");
   } else {
@@ -118,6 +119,7 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
         return type.trim();
       });
     }
+    var MimeContentType;
     acceptTypes.forEach((acceptType) => {
       var mimeAccept = new MIMEtype(acceptType);
       Object.keys(responseCodeSection.content).forEach((contentType) => {
@@ -135,11 +137,15 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
 
           if (firstMatch && secondMatch) {
             resultType = mimeContent;
+          } else {
+            if (mimeContent.type  === '*' &&  mimeContent.subtype  === '*') {
+              MimeContentType = '*';
+            }
           }
         }
       });
     });
-    if (!resultType && acceptTypes.length === 0) {
+    if (!resultType && (acceptTypes.length === 0 || MimeContentType === '*')) {
       resultType = new MIMEtype('application/json');
     } else if (!resultType && acceptTypes.length !== 0) {
       newErr = {
@@ -154,7 +160,13 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
     }
     if (resultType && resultType.essence === 'application/json') {
       //if there is no content property for the given response then there is nothing to validate.
-      var validSchema = responseCodeSection.content['application/json'].schema;
+      var validContent = responseCodeSection.content['application/json'];
+      var validSchema;
+      if (validContent) {
+        validSchema = validContent.schema;
+      } else {
+        validSchema = responseCodeSection.content['*/*'].schema;
+      }
       utils.fixNullable(validSchema)
 
       content[0] = JSON.stringify(content[0]);
