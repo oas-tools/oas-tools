@@ -22,7 +22,7 @@ var serverPort = 8080;
 var logger = require('./logger');
 
 var spec = fs.readFileSync(path.join(__dirname, 'api/oai-spec.yaml'), 'utf8'); //this one works
-var oasDoc = jsyaml.safeLoad(spec);
+var oasDoc = jsyaml.load(spec);
 
 var securityThird = require(path.join(__dirname, 'security.json'));
 var grantsThird = require(path.join(__dirname, 'grants.json'));

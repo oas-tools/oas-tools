@@ -28,7 +28,7 @@ var request = require('request');
 // var customConfigurations = false;
 
 var schemaV3 = fs.readFileSync(pathModule.join(__dirname, './schemas/openapi-3.0.yaml'), 'utf8');
-schemaV3 = jsyaml.safeLoad(schemaV3);
+schemaV3 = jsyaml.load(schemaV3);
 
 function fatalError(err) {
   logger.error(err);

@@ -35,7 +35,7 @@ var jsyaml = require('js-yaml');
 var fs = require('fs');
 
 var spec = fs.readFileSync(path.join('path/to/spec/file'), 'utf8');
-var oasDoc = jsyaml.safeLoad(spec);
+var oasDoc = jsyaml.load(spec);
 ```
 
 [Note: you might want to use the module ‘path’ for loading the specification file, that way your app will work on any OS]

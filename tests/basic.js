@@ -1368,7 +1368,7 @@ function miscTests() {
         return 0;
     };
     var spec = fs.readFileSync(path.join(__dirname, './testServer/api/oai-spec.yaml'), 'utf8');
-    var oasDoc = jsyaml.safeLoad(spec);
+    var oasDoc = jsyaml.load(spec);
 
     describe('Initialization', () => {
         it('No spec file', () => {
