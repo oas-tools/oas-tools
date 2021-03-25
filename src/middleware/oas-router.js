@@ -137,10 +137,8 @@ function checkResponse(req, res, oldSend, oasDoc, method, requestedSpecPath, con
 
           if (firstMatch && secondMatch) {
             resultType = mimeContent;
-          } else {
-            if (mimeContent.type  === '*' &&  mimeContent.subtype  === '*') {
+          } else if (mimeContent.type === '*' && mimeContent.subtype === '*') {
               MimeContentType = '*';
-            }
           }
         }
       });
