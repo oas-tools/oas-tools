@@ -498,6 +498,12 @@ exports.defaultResponseCode = (req, res) => {
   });
 };
 
+exports.anyResponse = (req, res) => {
+  res.status(201).send({
+    message: "operation successfull"
+  })
+}
+
 exports.pets = pets;
 exports.corruptPets = corruptPets;
 exports.setCorrectPets = setCorrectPets;
