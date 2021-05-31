@@ -1,7 +1,7 @@
 {
-  "name": "oas-tools",
+  "name": "@decentgradient/oas-tools",
   "version": "2.1.8",
-  "description": "",
+  "description": "[![Build Status](https://travis-ci.org/isa-group/oas-tools.svg?branch=master)](https://travis-ci.org/isa-group/oas-tools) [![dependencies Status](https://david-dm.org/isa-group/oas-tools/status.svg)](https://david-dm.org/isa-group/oas-tools) [![codecov](https://codecov.io/gh/isa-group/oas-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/isa-group/oas-tools) [![Known Vulnerabilities](https://snyk.io/test/github/isa-group/oas-tools/badge.svg?targetFile=package.json)](https://snyk.io/test/github/isa-group/oas-tools?targetFile=package.json)",
   "main": "src/index.js",
   "scripts": {
     "test": "mocha ./tests/basic.js",
@@ -63,5 +63,12 @@
       "text",
       "lcovonly"
     ]
+  },
+  "bugs": {
+    "url": "https://github.com/decentgradient/oas-tools/issues"
+  },
+  "homepage": "https://github.com/decentgradient/oas-tools#readme",
+  "directories": {
+    "test": "tests"
   }
 }
