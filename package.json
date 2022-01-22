@@ -25,20 +25,16 @@
     "pretest": "npm run build-commonjs",
     "test": "cross-env BABEL_ENV=test mocha --require @babel/register --reporter spec ./tests/basic.mjs",
     "test:tdd": "npm run test -- -w",
-    "lint": "eslint src Gruntfile.js tests --ext .mjs --ext .js",
+    "lint": "eslint src tests --ext .mjs --ext .js",
     "format": "npm run lint -- --fix",
     "precoverage": "npm run build-commonjs",
-    "coverage": "cross-env BABEL_ENV=test nyc mocha --require @babel/register ./tests/basic.mjs",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect",
-    "publish-please": "publish-please",
-    "prepublishOnly": "publish-please guard"
+    "coverage": "cross-env BABEL_ENV=test nyc mocha --require @babel/register ./tests/basic.mjs"
   },
   "author": "ISA Group, University of Seville",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/isa-group/oas-tools.git"
+    "url": "git+https://github.com/oas-tools/oas-tools.git"
   },
   "dependencies": {
     "accesscontrol": "^2.2.1",
@@ -76,11 +72,14 @@
     "mocha": "^8.3.0",
     "mongoose": "^5.7.5",
     "nyc": "^15.1.0",
-    "prettier": "^2.2.1",
-    "publish-please": "^5.5.2",
-    "snyk": "^1.440.4"
+    "prettier": "^2.2.1"
   },
-  "snyk": true,
+  "eslintIgnore": [
+    "/lib",
+    "/common",
+    "/node_modules",
+    "/lib-tests"
+  ],
   "nyc": {
     "exclude": [
       "node_modules",
