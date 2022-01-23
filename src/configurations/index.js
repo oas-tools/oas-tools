@@ -38,13 +38,17 @@ export const config = {
         var newConfigurations;
         if (options === path.join(__dirname, "configs.yaml")) {
           // default configurations loaded, only development and production environments are available
-          newConfigurations = jsyaml.safeLoad(configString)[
-            process.env.NODE_ENV === "production" ? "production" : "development"
-          ];
+          newConfigurations =
+            jsyaml.safeLoad(configString)[
+              process.env.NODE_ENV === "production"
+                ? "production"
+                : "development"
+            ];
         } else {
-          newConfigurations = jsyaml.safeLoad(configString)[
-            process.env.NODE_ENV || "development"
-          ];
+          newConfigurations =
+            jsyaml.safeLoad(configString)[
+              process.env.NODE_ENV || "development"
+            ];
         }
       } catch (err) {
         console.log(
