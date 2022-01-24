@@ -6,7 +6,7 @@
           "@babel/env",
           {
             "targets": {
-              "node": "16.13.0"
+              "node": "12.22"
             },
             "modules": "commonjs"
           }
@@ -19,7 +19,7 @@
           "@babel/env",
           {
             "targets": {
-              "node": "14.15"
+              "node": "12.22"
             },
             "modules": false
           }

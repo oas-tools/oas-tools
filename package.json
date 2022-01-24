@@ -18,6 +18,9 @@
     "swagger-ui",
     "schemas"
   ],
+  "engines": {
+    "node": ">=12.22"
+  },
   "scripts": {
     "build": "npm run build-module && npm run build-commonjs",
     "build-commonjs": "cross-env BABEL_ENV=commonjs babel ./src --out-dir common --source-maps --copy-files",

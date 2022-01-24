@@ -1,10 +1,16 @@
-# oas-tools
+# OAS TOOLS
+<center>
 
+[![NPM](https://nodei.co/npm/oas-tools.png?compact=true)](https://nodei.co/npm/oas-tools/)
+
+![node-current](https://img.shields.io/node/v/oas-tools)
+![npm](https://img.shields.io/npm/v/oas-tools)
 [![Node.js CI](https://github.com/oas-tools/oas-tools/actions/workflows/nodejs.yaml/badge.svg)](https://github.com/oas-tools/oas-tools/actions/workflows/nodejs.yaml)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-green.svg)](https://conventionalcommits.org)
 
-[![NPM](https://nodei.co/npm/oas-tools.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/oas-tools/)
+</center>
 
+## Setup
 This module supports the management of RESTfull APIs defined with OpenAPI 3.0 Specs over express servers.
 
 If you are creating an API from scratch we recommend you to take a look at [oas-generator](https://github.com/isa-group/oas-generator)
