@@ -1,14 +1,19 @@
 # OAS TOOLS
-<center>
+
+<div align="center">
 
 [![NPM](https://nodei.co/npm/oas-tools.png?compact=true)](https://nodei.co/npm/oas-tools/)
 
-![node-current](https://img.shields.io/node/v/oas-tools)
 ![npm](https://img.shields.io/npm/v/oas-tools)
+![node-current](https://img.shields.io/node/v/oas-tools)
+![npm](https://img.shields.io/npm/dw/oas-tools)
 [![Node.js CI](https://github.com/oas-tools/oas-tools/actions/workflows/nodejs.yaml/badge.svg)](https://github.com/oas-tools/oas-tools/actions/workflows/nodejs.yaml)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-green.svg)](https://conventionalcommits.org)
+<br/>
 
-</center>
+![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/oas-tools)
+![Coveralls branch](https://img.shields.io/coveralls/github/oas-tools/oas-tools/main)
+</div>
 
 ## Setup
 This module supports the management of RESTfull APIs defined with OpenAPI 3.0 Specs over express servers.

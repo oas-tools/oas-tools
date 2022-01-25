@@ -36,7 +36,7 @@ jobs:
           CI: true
   
   coverage:
-    name: Lint, test and coverage to coveralls
+    name: Coverage analysis
     runs-on: ubuntu-latest
     needs: test
     steps:
@@ -51,11 +51,12 @@ jobs:
         run: npm run coverage
         env:
           CI: true
-      # - name: Coverage to Codecov
-      #   continue-on-error: true
-      #   uses: codecov/codecov-action@v2
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Coverage to Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          CI: true
 
   githubRelease:
     name: Release new version to GitHub
