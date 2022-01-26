@@ -11,8 +11,8 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-green.svg)](https://conventionalcommits.org)
 <br/>
 
-![Snyk Vulnerabilities for npm package](https://img.shields.io/snyk/vulnerabilities/npm/oas-tools)
-![Coveralls branch](https://img.shields.io/coveralls/github/oas-tools/oas-tools/main)
+[![Known Vulnerabilities](https://snyk.io/test/github/oas-tools/oas-tools/main/badge.svg)](https://snyk.io/test/github/oas-tools/oas-tools)
+[![Coverage Status](https://coveralls.io/repos/github/oas-tools/oas-tools/badge.svg?branch=main)](https://coveralls.io/github/oas-tools/oas-tools?branch=main)
 </div>
 
 ## Setup
