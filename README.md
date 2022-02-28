@@ -1,12 +1,21 @@
-# oas-tools
+# OAS TOOLS
 
-[![Build Status](https://travis-ci.org/isa-group/oas-tools.svg?branch=master)](https://travis-ci.org/isa-group/oas-tools)
-[![dependencies Status](https://david-dm.org/isa-group/oas-tools/status.svg)](https://david-dm.org/isa-group/oas-tools)
-[![codecov](https://codecov.io/gh/isa-group/oas-tools/branch/master/graph/badge.svg)](https://codecov.io/gh/isa-group/oas-tools)
-[![Known Vulnerabilities](https://snyk.io/test/github/isa-group/oas-tools/badge.svg?targetFile=package.json)](https://snyk.io/test/github/isa-group/oas-tools?targetFile=package.json)
+<div align="center">
 
-[![NPM](https://nodei.co/npm/oas-tools.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/oas-tools/)
+[![NPM](https://nodei.co/npm/oas-tools.png?compact=true)](https://nodei.co/npm/oas-tools/)
 
+![npm](https://img.shields.io/npm/v/oas-tools)
+![node-current](https://img.shields.io/node/v/oas-tools)
+![npm](https://img.shields.io/npm/dw/oas-tools)
+[![Node.js CI](https://github.com/oas-tools/oas-tools/actions/workflows/nodejs.yaml/badge.svg)](https://github.com/oas-tools/oas-tools/actions/workflows/nodejs.yaml)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-green.svg)](https://conventionalcommits.org)
+<br/>
+
+[![Known Vulnerabilities](https://snyk.io/test/github/oas-tools/oas-tools/main/badge.svg)](https://snyk.io/test/github/oas-tools/oas-tools)
+[![Coverage Status](https://coveralls.io/repos/github/oas-tools/oas-tools/badge.svg?branch=main)](https://coveralls.io/github/oas-tools/oas-tools?branch=main)
+</div>
+
+## Setup
 This module supports the management of RESTfull APIs defined with OpenAPI 3.0 Specs over express servers.
 
 If you are creating an API from scratch we recommend you to take a look at [oas-generator](https://github.com/isa-group/oas-generator)
