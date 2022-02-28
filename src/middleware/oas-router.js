@@ -182,10 +182,9 @@ function checkResponse(
       utils.fixNullable(validSchema);
 
       content[0] = JSON.stringify(content[0]);
-      config.logger.debug(
-        "Schema to use for validation: " + JSON.stringify(validSchema)
-      );
-      var err = validator.validate(data, validSchema);
+      config.logger.debug("Schema to use for validation: " + JSON.stringify(validSchema));
+      var err = validator.validate(JSON.parse(content[0]), validSchema);
+
       if (err === false) {
         newErr = {
           message: "Wrong data in the response. ",

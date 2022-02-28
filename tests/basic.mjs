@@ -54,7 +54,7 @@ var expect = chai.expect;
 auxRequire.petsHandler.corruptPets();
 
 function getTests() {
-  describe("/A GET pets", () => {
+  describe("/GET pets", () => {
     it("it should get a 401 code informing that no JWT token was provided", (done) => {
       chai
         .request(server)
