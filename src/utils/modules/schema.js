@@ -1,0 +1,61 @@
+import jsyaml from "js-yaml";
+import fs from "fs";
+import path from "path";
+import Ajv2020 from "ajv/dist/2020";
+import Ajv04 from "ajv-draft-04";
+import addFormats from "ajv-formats";
+import { logger } from "./logger";
+import { ValidationError } from "./errors";
+
+/**
+ * Validates the oasDoc against the openApi schema
+ * @param {string} oasDocPath - Path to the spec file.
+ */
+export function validate(oasDocPath) {
+  if (!fs.existsSync(oasDocPath)) {
+    throw new ValidationError(`Specification file at ${oasDocPath} not found`);
+  }
+  const oasDoc = jsyaml.safeLoad(fs.readFileSync(oasDocPath, "utf8"));
+  const version = oasDoc.openapi;
+  let ajv;
+  let schema;
+
+  switch(true) {
+    case /^3\.0\.\d(-.+)?$/.test(version):
+      ajv = new Ajv04({strict: false, logger: logger});
+      schema = JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/openapi-3.0.json"), "utf8")); break;
+    case /^3\.1\.\d+(-.+)?$/.test(version):
+      ajv = new Ajv2020({strict: false, logger: logger});
+      schema = JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/openapi-3.1.json"), "utf8")); break;
+    default:
+      throw new ValidationError(`Unsupported OpenAPI version: ${version}. Supported versions are 3.0.X, 3.1.X`);
+  }
+
+  addFormats(ajv);
+  const validate = ajv.compile(schema);
+  const valid = validate(oasDoc);
+  if (!valid) {
+    throw new ValidationError(`Specification file does not meet OpenAPI ${version} schema.\n Failed > ${validate.errors.map(e => e.message).join("\n Failed > ")}`);
+  }
+}
+
+export function fixNullable(schema) {
+  Object.getOwnPropertyNames(schema).forEach((property) => {
+    if (
+      property === "type" &&
+      schema.nullable === true &&
+      schema.type !== "null" &&
+      !Array.isArray(schema.type) &&
+      schema.type.indexOf("null") === -1
+    ) {
+      schema.type = [schema.type, "null"];
+    } else if (
+      typeof schema[property] === "object" &&
+      schema[property] !== null
+    ) {
+      fixNullable(schema[property]);
+    }
+  });
+}
+
+
