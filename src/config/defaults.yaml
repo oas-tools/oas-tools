@@ -1,0 +1,27 @@
+logger:
+  customLogger: null
+  level: info
+  logFile: false
+  logFilePath: './logs/oas-tools.log'
+
+errors:
+  customErrorHandling: false
+
+middleware:
+  router:
+    disable: false
+  validator:
+    disable: false
+    strict: false
+  auth:
+    disable: true
+    grantsFile: null
+  security:
+    disable: true
+    securityFile: null
+
+docs:
+  apiDocs: '/api-docs'
+  apiDocsPrefix: ''
+  swaggerUi: '/docs'
+  swaggerUiPrefix: ''
