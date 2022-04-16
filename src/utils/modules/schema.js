@@ -8,15 +8,15 @@ import { logger } from "./logger";
 import { ValidationError } from "./errors";
 
 /**
- * Validates the oasDoc against the openApi schema
- * @param {string} oasDocPath - Path to the spec file.
+ * Validates the oasFile against the openApi schema
+ * @param {string} oasFilePath - Path to the spec file.
  */
-export function validate(oasDocPath) {
-  if (!fs.existsSync(oasDocPath)) {
-    throw new ValidationError(`Specification file at ${oasDocPath} not found`);
+export function validate(oasFilePath) {
+  if (!fs.existsSync(oasFilePath)) {
+    throw new ValidationError(`Specification file at ${oasFilePath} not found`);
   }
-  const oasDoc = jsyaml.safeLoad(fs.readFileSync(oasDocPath, "utf8"));
-  const version = oasDoc.openapi;
+  const oasFile = jsyaml.safeLoad(fs.readFileSync(oasFilePath, "utf8"));
+  const version = oasFile.openapi;
   let ajv;
   let schema;
 
@@ -33,7 +33,7 @@ export function validate(oasDocPath) {
 
   addFormats(ajv);
   const validate = ajv.compile(schema);
-  const valid = validate(oasDoc);
+  const valid = validate(oasFile);
   if (!valid) {
     throw new ValidationError(`Specification file does not meet OpenAPI ${version} schema.\n Failed > ${validate.errors.map(e => e.message).join("\n Failed > ")}`);
   }

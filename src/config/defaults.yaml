@@ -10,6 +10,7 @@ errors:
 middleware:
   router:
     disable: false
+    controllers: './controllers'
   validator:
     disable: false
     strict: false
@@ -21,7 +22,6 @@ middleware:
     securityFile: null
 
 docs:
-  apiDocs: '/api-docs'
-  apiDocsPrefix: ''
+  disable: false
+  oasFile: '/oas-file'
   swaggerUi: '/docs'
-  swaggerUiPrefix: ''
