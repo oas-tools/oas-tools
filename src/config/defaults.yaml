@@ -20,8 +20,6 @@ middleware:
   security:
     disable: true
     securityFile: null
-
-docs:
-  disable: false
-  oasFile: '/oas-file'
-  swaggerUi: '/docs'
+  swagger:
+    disable: false
+    path: '/docs'
