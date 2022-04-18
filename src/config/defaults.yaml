@@ -1,3 +1,9 @@
+packageJSON: 'package.json'
+oasFile: 'api/oas-file.yaml'
+useAnnotations: false
+
+endpointCfg: null
+
 logger:
   customLogger: null
   level: info
@@ -23,3 +29,6 @@ middleware:
   swagger:
     disable: false
     path: '/docs'
+    ui:
+      customCss: null
+      customJs: null

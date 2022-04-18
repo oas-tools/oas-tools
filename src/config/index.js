@@ -18,19 +18,26 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 import fs from "fs";
+import readline from "readline";
 import jsyaml from "js-yaml";
 import path from "path";
 import _ from "lodash";
 import rc from "rc";
+import {logger} from "../utils"
 
 export default async(config_object) => {
-  return await _loadDefaults().then(defaults => {
+  return await _loadDefaults().then(async defaults => {
     const packageJSON = JSON.parse(fs.readFileSync(config_object?.packageJSON || defaults.packageJSON, "utf8"));
     const oastoolsrc = _.omit(rc('oastools', _.assign( {}, defaults)), ['config', 'configs', '_']);
-    return _.merge(defaults, packageJSON['oas-tools'], oastoolsrc, config_object);
+    const config = _.merge(defaults, packageJSON['oas-tools'], oastoolsrc, config_object);
+    if (config.useAnnotations)
+      config.endpointCfg = await _readJsDoc(config.middleware.router.controllers);
+    return config;
   })
 }
 
+/** Loads default configurations
+ * @returns {object} default configs*/
 async function _loadDefaults(){
   let defaultString = fs.readFileSync(path.join(__dirname, "defaults.yaml"), "utf8");
   let defaults = jsyaml.safeLoad(defaultString);
@@ -38,4 +45,54 @@ async function _loadDefaults(){
   defaults.packageJSON = path.join(process.cwd(), 'package.json');
   defaults.oasFile = path.join(process.cwd(), 'api/oas-file.yaml');
   return defaults;
+}
+
+/** Reads files containing oas-tools endpoints configs expressed as JSDoc annotations.
+ * @param {string} path - Directory containing oas-tools JsDoc annotated files.*/
+async function _readJsDoc(path) {
+  let res = {};
+
+  /* Reads files in parallel */
+  await Promise.all(fs.readdirSync(path).map(async file => {
+    let isController, controller, jsdoc, endCycle;
+    let tmp = {};
+    const rl = readline.createInterface({input: fs.createReadStream(`${path}/${file}`)});
+    
+    /* Read and check each line of the file */
+    for await (const line of rl) {
+      isController = isController || line && /@oastools {Controller} [\S]+/.test(line);
+      if (isController) {
+        /* Get the function name annotated with jsdoc and build its config*/
+        if (endCycle && Object.entries(tmp).length > 0) {
+          tmp.exportName = [...line.matchAll(/export(?:s\.| [\w]+ )([\w]+)/g)].flat()[1];
+          tmp.exportPath = `${path}/${file}`;
+          const endpoint = `${controller}${tmp.path || ''}`;
+          if(!res[endpoint]) res[endpoint] = [];
+          res[endpoint].push(tmp);
+          endCycle = false;
+          tmp = {};
+        } 
+        /* Targets jsDoc expression */
+        if (/\/\*\*/.test(line)){ 
+          jsdoc = true;
+        }
+        /* Targets every @oastools annotation properly formatted */
+        if (jsdoc && /@oastools {[\S]+} [\S]+/.test(line)){
+          const [_result, key, val] = [...line.matchAll(/@oastools {([\S]+)} ([\S]+)/g)].flat();
+          if(key === 'Controller') controller = val;
+          else tmp[key] = val;
+        } 
+        /* Targets the end of jsDoc expression */
+        if (/\*\//.test(line)){ 
+          jsdoc = false;
+          endCycle = !(/@oastools {Controller} [\S]+/.test(line));
+        } 
+      } else if (line) {
+        if (/@oastools/.test(fs.readFileSync(`${path}/${file}`, "utf8").toString())) 
+          logger.warn(`${file} has been ignored: file does not contain a valid controller annotation.`);
+        break;
+      }    
+    };
+  }));
+  return res;
 }
