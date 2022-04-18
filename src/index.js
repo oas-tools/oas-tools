@@ -17,8 +17,11 @@ import { OASSwagger } from "./middleware";
  */
 export async function initialize(app, config) {
 
-    await loadConfig(config).then(async cfg => { 
+    await loadConfig(config).then(async cfg => {
       logger.configure(cfg.logger);
+
+      if(cfg.useAnnotations) 
+        logger.warn("Annotations enabled. This feature is currently experimental and may not work as expected.");
 
       schema.validate(cfg.oasFile);
       logger.info("Valid specification file");
@@ -36,7 +39,7 @@ export async function initialize(app, config) {
 
 function _registerNativeMiddleware(app, oasFile, config) {
   if(!config.middleware.swagger.disable){
-    OASSwagger.initialize(config, oasFile).register(config.middleware.swagger.path, '*', app);
+    OASSwagger.initialize(config.middleware.swagger, oasFile, config.endpointCfg).register(config.middleware.swagger.path, '*', app);
     logger.info(`Swagger middleware registered. Swagger UI available at: ${config.middleware.swagger.path}`);
   }
 }
