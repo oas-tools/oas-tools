@@ -1,5 +1,6 @@
 import jsyaml from "js-yaml";
 import fs from "fs";
+import _ from 'lodash';
 import path from "path";
 import Ajv2020 from "ajv/dist/2020";
 import Ajv04 from "ajv-draft-04";
@@ -37,6 +38,19 @@ export function validate(oasFilePath) {
   if (!valid) {
     throw new ValidationError(`Specification file does not meet OpenAPI ${version} schema.\n Failed > ${validate.errors.map(e => e.message).join("\n Failed > ")}`);
   }
+}
+
+/**
+ * Modifies OAS paths to match the format expected by express middlewares.
+ * @param {string} oasFile - OpenApi Specification file.
+ */
+export function expressPaths(oasFile) {
+  const oasFileExpress = _.cloneDeep(oasFile);
+  Object.entries(oasFile.paths).forEach(([path, obj]) => {
+    let expressPath = path.replace(/{/g, ":").replace(/}/g, "");
+    oasFileExpress.paths[expressPath] = obj;
+  });
+  return oasFileExpress;
 }
 
 export function fixNullable(schema) {

@@ -1,29 +1,26 @@
 import swaggerUI from 'swagger-ui-express';
 import _ from "lodash";
+import { OASBase } from './oas-base';
 
-export class OASSwagger {
-    #middleware;
-    #options;
-    
-    constructor(options, middleware) {
-      this.#middleware = middleware;
-      this.#options = options;
+export class OASSwagger extends OASBase {
+    #config;
+
+    constructor(config, oasFile, middleware) {
+      super(oasFile, middleware);
+      this.#config = config;
     }
 
-    static initialize(config, oasFile, endpointCfg) {
-      let swaggerFile = OASSwagger.#filterPaths(oasFile, endpointCfg);
-      return new OASSwagger(config.ui, (req, _res, next) => {
+    static initialize(oasFile, config) {
+      let swaggerFile = OASSwagger.#filterPaths(oasFile, config.endpoints);
+      return new OASSwagger(config, oasFile, (req, _res, next) => {
         req.swaggerDoc = swaggerFile;
         next();
       });  
     }
 
-    register(path, method, app) {
-      app[method && method !== '*' ? method : 'use'](path, this.#middleware, swaggerUI.serve, swaggerUI.setup(null, this.#options));
-    }
-
-    getMiddleware() {
-        return this.#middleware;
+    /* Overridden */
+    register(app) {
+      app.use(this.#config.path, super.getMiddleware(), swaggerUI.serve, swaggerUI.setup(null, this.#config.ui));
     }
 
     /* Private methods */

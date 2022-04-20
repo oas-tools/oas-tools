@@ -8,7 +8,7 @@ https://github.com/isa-group/project-oas-tools
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { logger, schema } from "./utils";
 import loadConfig from "./config";
-import { OASSwagger } from "./middleware";
+import { OASSwagger, OASRouter, OASBase } from "./middleware";
 
 /**
  * Function to initialize OAS-tools middlewares.
@@ -38,8 +38,18 @@ export async function initialize(app, config) {
 }
 
 function _registerNativeMiddleware(app, oasFile, config) {
+  const expressOasFile = schema.expressPaths(oasFile);
+
+  /* Base middleware: Register locals */
+  new OASBase(expressOasFile, (req, res, next) => { res.locals.requestPath = req.route.path; next()}).register(app);
+
+  if(!config.middleware.router.disable) {
+    OASRouter.initialize(expressOasFile, {...config.middleware.router, endpoints: config.endpointCfg}).register(app);
+    logger.info(`Router middleware registered`);
+  }
   if(!config.middleware.swagger.disable){
-    OASSwagger.initialize(config.middleware.swagger, oasFile, config.endpointCfg).register(config.middleware.swagger.path, '*', app);
+    OASSwagger.initialize(oasFile, {...config.middleware.swagger, endpoints: config.endpointCfg}).register(app);
     logger.info(`Swagger middleware registered. Swagger UI available at: ${config.middleware.swagger.path}`);
   }
+  
 }
