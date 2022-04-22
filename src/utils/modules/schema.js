@@ -46,9 +46,10 @@ export function validate(oasFilePath) {
  */
 export function expressPaths(oasFile) {
   const oasFileExpress = _.cloneDeep(oasFile);
-  Object.entries(oasFile.paths).forEach(([path, obj]) => {
+  Object.entries(oasFile.paths).filter(path => /{[\S]*}/g.test(path)).forEach(([path, obj]) => {
     let expressPath = path.replace(/{/g, ":").replace(/}/g, "");
     oasFileExpress.paths[expressPath] = obj;
+    delete oasFileExpress.paths[path];
   });
   return oasFileExpress;
 }
