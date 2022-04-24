@@ -5,7 +5,7 @@ import * as validator from "validator";
  * @param {string} input - String to generate a name from.
  * @param {string} nameFor - possible values are controller, function, variable.
  */
- export function generateName(input, nameFor) {
+export function generateName(input, nameFor) {
     var chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789.";
     var name = validator.whitelist(input, chars);
     switch (nameFor) {
@@ -22,4 +22,19 @@ import * as validator from "validator";
         break;
     }
     return name;
-  }
+}
+
+/**
+ * @param {String} path - OAS formatted path.
+ */
+export function expressPath(path){
+  return path.replace(/{/g, ':').replace(/}/g, '');
+}
+
+/**
+ * @param {Array} arr1 - Source array
+ * @param {Array} arr2 - Array to be substracted from source array.
+ */
+export function arrayDiff(arr1, arr2) {
+  return arr1.filter(x => !arr2.includes(x));
+}

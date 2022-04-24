@@ -12,3 +12,9 @@ export class ValidationError extends BaseError {
     super("ValidationError", message);
   }
 }
+
+export class RoutingError extends BaseError {
+  constructor(message) {
+    super("RoutingError", message);
+  }
+}
