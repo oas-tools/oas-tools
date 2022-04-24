@@ -18,7 +18,8 @@ middleware:
     disable: false
     controllers: './controllers'
   validator:
-    disable: false
+    requestValidation: true
+    responseValidation: true
     strict: false
   auth:
     disable: true

@@ -8,7 +8,7 @@ https://github.com/isa-group/project-oas-tools
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { logger, schema } from "./utils";
 import loadConfig from "./config";
-import { OASSwagger, OASRouter, OASBase } from "./middleware";
+import { OASSwagger, OASRouter, OASParams } from "./middleware";
 
 /**
  * Function to initialize OAS-tools middlewares.
@@ -40,8 +40,8 @@ export async function initialize(app, config) {
 function _registerNativeMiddleware(app, oasFile, config) {
   const expressOasFile = schema.expressPaths(oasFile);
 
-  /* Base middleware: Register locals */
-  new OASBase(expressOasFile, (req, res, next) => { res.locals.requestPath = req.route.path; next()}).register(app);
+  /* Params middleware: Register locals */
+  OASParams.initialize(expressOasFile, config).register(app);
 
   if(!config.middleware.router.disable) {
     OASRouter.initialize(expressOasFile, {...config.middleware.router, endpoints: config.endpointCfg}).register(app);
