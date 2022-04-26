@@ -10,9 +10,6 @@ logger:
   logFile: false
   logFilePath: './logs/oas-tools.log'
 
-errors:
-  customErrorHandling: false
-
 middleware:
   router:
     disable: false
