@@ -16,7 +16,7 @@ export class OASParams extends OASBase {
             let paramsObj = {};
             Object.values(params).forEach(param => paramsObj[param.name] = _getParameterValue(req, param));
             res.locals.oas = { params: paramsObj, body: req.body };
-            if(req.files && req.files.length > 0) res.locals.oas.files = req.files;
+            if(req.file || req.files && req.files.length > 0) res.locals.oas.files = [req.files, req.file].flat().filter(file => file !== undefined);
             next()
         });
     }

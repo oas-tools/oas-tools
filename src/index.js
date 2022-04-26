@@ -8,7 +8,7 @@ https://github.com/isa-group/project-oas-tools
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { logger, schema } from "./utils";
 import loadConfig from "./config";
-import { OASSwagger, OASRouter, OASParams } from "./middleware";
+import { OASSwagger, OASRouter, OASParams, OASRequestValidator } from "./middleware";
 
 /**
  * Function to initialize OAS-tools middlewares.
@@ -43,6 +43,10 @@ function _registerNativeMiddleware(app, oasFile, config) {
   /* Params middleware: Register locals */
   OASParams.initialize(expressOasFile, config).register(app);
 
+  if(config.middleware.validator.requestValidation) {
+    OASRequestValidator.initialize(expressOasFile, {...config.middleware.validator, endpoints: config.endpointCfg}).register(app);
+    logger.info(`Request validator middleware registered`);
+  } 
   if(!config.middleware.router.disable) {
     OASRouter.initialize(expressOasFile, {...config.middleware.router, endpoints: config.endpointCfg}).register(app);
     logger.info(`Router middleware registered`);
