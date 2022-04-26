@@ -31,7 +31,7 @@ function _getParameterValue(req, parameter) {
     let defaultVal = parameter.schema ? parameter.schema.default : undefined;
     let paramLocation = parameter.in;
     let val;
-
+    
     // The following code takes into account OAS serialization. https://swagger.io/docs/specification/serialization/
     switch (paramLocation) {
         case "path": // transform any style,explode param into default (style=simple, explode=false)
@@ -45,7 +45,9 @@ function _getParameterValue(req, parameter) {
                 else val = req.params[parameter.name]; break;
             }
         case "query": // transform any style,explode param into default (style=form, explode=true)
-            if(parameter.explode === false){
+            if (parameter.content) { // ignores style and explode when content is defined
+                val = _.get(req.query, parameter.name); break;
+            } else if(parameter.explode === false) {
                 if (parameter.style === "spaceDelimited") val = _.get(req.query, parameter.name)?.replaceAll(' ', ',');
                 else if (parameter.style === "pipeDelimited") val = _.get(req.query, parameter.name)?.replaceAll('|', ',');
                 else val = _.get(req.query, parameter.name)?.replace(`${parameter.name}=`, ''); break;
@@ -54,8 +56,8 @@ function _getParameterValue(req, parameter) {
                 else val = _.get(req.query, parameter.name); break;
             }
         case "header": // transform any style,explode param into default (style=simple, explode=false)
-            if (parameter.explode){
-                val = req.headers[parameter.name.toLowerCase()].replaceAll('=', ',');; break;
+            if (!parameter.content && parameter.explode){ // ignores style and explode when content is defined
+                val = req.headers[parameter.name.toLowerCase()].replaceAll('=', ','); break;
             } else{
                 val = req.headers[parameter.name.toLowerCase()]; break;
             }
@@ -69,7 +71,12 @@ function _getParameterValue(req, parameter) {
 }
 
 function _parseValue(val, paramDefinition) {
-    let schema = paramDefinition.schema;
+    let schema;
+    if (paramDefinition.schema) schema = paramDefinition.schema;
+    else {
+        const contentType = Object.keys(paramDefinition.content)[0];
+        schema = paramDefinition.content[contentType].schema;
+    }
     let type = _getType(schema);
 
     if (val === undefined) return val;
@@ -91,12 +98,22 @@ function _parseValue(val, paramDefinition) {
             if (typeof val !== "string") return val;
             return val.split(',');
         case "object":
-            logger.warn("Sending objects on path, query, header, or cookie parameters may fail for complex schemas. Consider using request body instead");
-            let map = new Map(val.split(',').reduce((res, _val, idx, arr) => {
-                if (idx %2 === 0) res.push(arr.slice(idx, idx + 2));
-                return res;
-            }, []));
-            return Object.fromEntries(map);
+            if (paramDefinition.content) {
+                const contentType = Object.keys(paramDefinition.content)[0];
+                if (contentType.toLocaleLowerCase() === "application/json") {
+                    return JSON.parse(val);   
+                } else {
+                    logger.warn(`Content type ${contentType} is not supported. Raw value will be returned.`);
+                    return val
+                };
+            } else {
+                logger.warn(`Parameter [${paramDefinition.name}] sent in the ${paramDefinition.in} is an object. Consider using content instead of schema or send it in request body.`);
+                let map = new Map(val.split(',').reduce((res, _val, idx, arr) => {
+                    if (idx %2 === 0) res.push(arr.slice(idx, idx + 2));
+                    return res;
+                }, []));
+                return Object.fromEntries(map);
+            }
         default:
             throw new TypeError(`Invalid type ${type} for parameter ${paramDefinition.name}`);
     }
