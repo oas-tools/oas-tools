@@ -8,7 +8,7 @@ https://github.com/isa-group/project-oas-tools
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import { logger, schema } from "./utils";
 import loadConfig from "./config";
-import { OASSwagger, OASRouter, OASParams, OASRequestValidator } from "./middleware";
+import { OASSwagger, OASRouter, OASParams, OASRequestValidator, OASResponseValidator } from "./middleware";
 
 /**
  * Function to initialize OAS-tools middlewares.
@@ -47,6 +47,10 @@ function _registerNativeMiddleware(app, oasFile, config) {
     OASRequestValidator.initialize(expressOasFile, {...config.middleware.validator, endpoints: config.endpointCfg}).register(app);
     logger.info(`Request validator middleware registered`);
   } 
+  if(config.middleware.validator.responseValidation) {
+    OASResponseValidator.initialize(expressOasFile, {...config.middleware.validator, endpoints: config.endpointCfg}).register(app);
+    logger.info(`Response validator middleware registered`);
+  }
   if(!config.middleware.router.disable) {
     OASRouter.initialize(expressOasFile, {...config.middleware.router, endpoints: config.endpointCfg}).register(app);
     logger.info(`Router middleware registered`);
@@ -55,5 +59,4 @@ function _registerNativeMiddleware(app, oasFile, config) {
     OASSwagger.initialize(oasFile, {...config.middleware.swagger, endpoints: config.endpointCfg}).register(app);
     logger.info(`Swagger middleware registered. Swagger UI available at: ${config.middleware.swagger.path}`);
   }
-  
 }

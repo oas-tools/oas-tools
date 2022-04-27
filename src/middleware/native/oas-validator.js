@@ -1,5 +1,6 @@
 import { OASBase } from "./oas-base";
 import { logger } from "../../utils";
+import MIMEtype from "whatwg-mimetype";
 import addFormats from "ajv-formats";
 import Ajv from "ajv";
 
@@ -75,4 +76,61 @@ export class OASRequestValidator extends OASBase {
       next();
     });
   }
+}
+
+export class OASResponseValidator extends OASBase {
+  constructor(oasFile, middleware) {
+    super(oasFile, middleware);
+  }
+
+  static initialize(oasFile, config) {
+    /* Instanciate validator */
+    const ajv = new Ajv({strict: false, logger: logger});
+    addFormats(ajv);
+
+    /* Instanciate middleware */
+    return new OASResponseValidator(oasFile, (req, res, next) => {
+      const oasRequest = oasFile.paths[req.route.path][req.method.toLowerCase()];
+
+      /* Intercepts response */
+      const oldSend = res.send;
+      res.send = function send(data) {
+        let code = res.statusCode;
+        let contentType = new MIMEtype(res.get("content-type") ?? "application/json;charset=utf-8");
+        let expectedResponse = oasRequest.responses[code] ?? oasRequest.responses[`${Math.floor(code / 100)}XX`] ?? oasRequest.responses.default;
+
+        /* Check content type */
+        if (!res.get("content-type")) {
+          logger.warn("Response content-type is not defined. Using default: application/json;charset=utf-8");
+          res.header("Content-Type", contentType.toString());
+        }
+
+        /* Check expected response */
+        if (!expectedResponse) {
+          logger.warn(`Response ${code} is not defined in the OAS Document for ${req.method} ${req.route.path}`);
+        } else if (expectedResponse.content) {
+          let acceptTypes = req.headers.accept? req.headers.accept.split(",").map(type => new MIMEtype(type.trim()).essence) : ["*/*"];
+          let neededTypes = [contentType.essence, `${contentType.type}/*`, `*/*`];
+          if (neededTypes.every(type => !acceptTypes.includes(type))) {
+            throw "Not acceptable" // TODO handle properly
+          } else {
+            const schemaContentType = Object.keys(expectedResponse.content)[0];
+            const schema = expectedResponse.content[schemaContentType].schema;
+            const validate = ajv.compile(schema);
+            const valid = validate(data);
+
+            if (!valid) {
+              logger.warn(`Wrong data in response.\n${validate.errors.map(e => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`);
+            } 
+            oldSend.call(res, contentType.essence === "application/json" ? JSON.stringify(data) : data);        
+          }
+        } else {
+          logger.debug("Response content is not defined in the OAS Document for this response");
+          oldSend.call(res, contentType.essence === "application/json" ? JSON.stringify(data) : data);
+        }
+      }
+      next();
+    });
+  }
+    
 }
