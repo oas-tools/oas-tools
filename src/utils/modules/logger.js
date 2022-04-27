@@ -39,7 +39,7 @@ class Logger {
     if (conf.customLogger) {
       this.#logger = conf.customLogger;
     } else {
-      this.config.transports.level = conf.level
+      this.config.transports[0].level = conf.level
       if(conf.logFile){
         this.config.transports = [
           ...this.config.transports,
