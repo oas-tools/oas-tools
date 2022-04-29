@@ -8,6 +8,10 @@
     ".": {
       "require": "./common/index.js",
       "default": "./lib/index.mjs"
+    },
+    "./utils" : {
+      "require": "./common/utils/index.js",
+      "default": "./lib/utils/index.mjs"
     }
   },
   "module": "./lib/index.mjs",
