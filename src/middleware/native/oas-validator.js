@@ -1,11 +1,12 @@
 import { OASBase } from "./oas-base";
-import { logger } from "../../utils";
+import { logger, errors, commons } from "../../utils";
 import MIMEtype from "whatwg-mimetype";
 import addFormats from "ajv-formats";
 import Ajv from "ajv";
 
-export class OASRequestValidator extends OASBase {
+const { RequestValidationError, ResponseValidationError } = errors;
 
+export class OASRequestValidator extends OASBase {
   constructor(oasFile, middleware) {
     super(oasFile, middleware);
   }
@@ -42,11 +43,11 @@ export class OASRequestValidator extends OASBase {
         const valid = validate(body);
 
         if (!valid) {
-          logger.warn(`Request body does not match the schema specified in the OAS Document:\n${validate.errors.map(e => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`);
+          commons.handle(RequestValidationError, `Request body does not match the schema specified in the OAS Document:\n${validate.errors.map(e => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
         }
 
       } else if (oasRequest.requestBody?.required) {
-        logger.warn("Missing object in the request body. Request body is required.");
+        commons.handle(RequestValidationError, "Missing object in the request body. Request body is required.", config.strict);
       }
 
       /* Check parameters */
@@ -65,11 +66,11 @@ export class OASRequestValidator extends OASBase {
             const valid = validate(value);
 
             if (!valid) {
-              logger.warn(`Parameter ${param.name} does not match the schema specified in the OAS Document:\n${validate.errors.map(e => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`);
+              commons.handle(RequestValidationError, `Parameter ${param.name} does not match the schema specified in the OAS Document:\n${validate.errors.map(e => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
             }
 
           } else if (param.required) {
-            logger.warn(`Missing parameter ${param.name} in the request ${param.in}. Parameter is required.`);
+            commons.handle(RequestValidationError, `Missing parameter ${param.name} in the request ${param.in}. Parameter is required.`, config.strict);
           }
         });
       }
@@ -107,12 +108,12 @@ export class OASResponseValidator extends OASBase {
 
         /* Check expected response */
         if (!expectedResponse) {
-          logger.warn(`Response ${code} is not defined in the OAS Document for ${req.method} ${req.route.path}`);
+          commons.handle(ResponseValidationError, `Response ${code} is not defined in the OAS Document for ${req.method} ${req.route.path}`, config.strict);
         } else if (expectedResponse.content) {
           let acceptTypes = req.headers.accept? req.headers.accept.split(",").map(type => new MIMEtype(type.trim()).essence) : ["*/*"];
           let neededTypes = [contentType.essence, `${contentType.type}/*`, `*/*`];
           if (neededTypes.every(type => !acceptTypes.includes(type))) {
-            throw "Not acceptable" // TODO handle properly
+            commons.handle(ResponseValidationError, 'Response content-type is not accepted by the client', true);
           } else {
             const schemaContentType = Object.keys(expectedResponse.content)[0];
             const schema = expectedResponse.content[schemaContentType].schema;
@@ -120,7 +121,7 @@ export class OASResponseValidator extends OASBase {
             const valid = validate(data);
 
             if (!valid) {
-              logger.warn(`Wrong data in response.\n${validate.errors.map(e => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`);
+              commons.handle(ResponseValidationError, `Wrong data in response.\n${validate.errors.map(e => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
             } 
             oldSend.call(res, contentType.essence === "application/json" ? JSON.stringify(data) : data);        
           }

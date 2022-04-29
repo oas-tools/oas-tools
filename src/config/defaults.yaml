@@ -30,3 +30,7 @@ middleware:
     ui:
       customCss: null
       customJs: null
+  error:
+    disable: false
+    printStackTrace: false
+    customHandler: null

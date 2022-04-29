@@ -15,6 +15,7 @@ export class OASParams extends OASBase {
             let params = _.merge(pathParams, methodParams);
             let paramsObj = {};
             Object.values(params).forEach(param => paramsObj[param.name] = _getParameterValue(req, param));
+            res.defaultSend = res.send; // save original send for error handling
             res.locals.oas = { params: paramsObj, body: req.body };
             if(req.file || req.files && req.files.length > 0) res.locals.oas.files = [req.files, req.file].flat().filter(file => file !== undefined);
             next()

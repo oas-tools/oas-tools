@@ -1,5 +1,5 @@
 import * as validator from "validator";
-
+import { logger } from "./logger"
 /**
  * Generates a valid name, according to value of nameFor.
  * @param {string} input - String to generate a name from.
@@ -37,4 +37,14 @@ export function expressPath(path){
  */
 export function arrayDiff(arr1, arr2) {
   return arr1.filter(x => !arr2.includes(x));
+}
+
+/**
+ * @param {Class} errorClass - Error class to be thrown.
+ * @param {String} message - Message to be thrown.
+ * @param {Boolean} strict - If true, throw error, else log warning.
+ */
+export function handle(errorClass, message, strict = false) {
+  if (strict) throw new errorClass(message);
+  else logger.warn(message);
 }
