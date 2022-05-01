@@ -72,17 +72,17 @@ async function _readJsDoc(path) {
           endCycle = false;
           tmp = {};
         } 
-        /* Targets jsDoc expression */
+        /* Captures jsDoc expression */
         if (/\/\*\*/.test(line)){ 
           jsdoc = true;
         }
-        /* Targets every @oastools annotation properly formatted */
+        /* Captures every @oastools annotation properly formatted */
         if (jsdoc && /@oastools {[\S]+} [\S]+/.test(line)){
           const [_result, key, val] = [...line.matchAll(/@oastools {([\S]+)} ([\S]+)/g)].flat();
           if(key === 'Controller') controller = val;
           else tmp[key] = val;
         } 
-        /* Targets the end of jsDoc expression */
+        /* Captures the end of jsDoc expression */
         if (/\*\//.test(line)){ 
           jsdoc = false;
           endCycle = !(/@oastools {Controller} [\S]+/.test(line));

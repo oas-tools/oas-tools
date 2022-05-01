@@ -18,8 +18,7 @@
   "files": [
     "src",
     "common",
-    "lib",
-    "schemas"
+    "lib"
   ],
   "engines": {
     "node": ">=12.22"
