@@ -2,7 +2,8 @@ import { OASBase } from "./oas-base";
 import { logger, errors, commons } from "../../utils";
 import MIMEtype from "whatwg-mimetype";
 import addFormats from "ajv-formats";
-import Ajv from "ajv";
+import Ajv2020 from "ajv/dist/2020";
+import Ajv04 from "ajv-draft-04";
 
 const { RequestValidationError, ResponseValidationError } = errors;
 
@@ -13,7 +14,9 @@ export class OASRequestValidator extends OASBase {
 
   static initialize(oasFile, config) {
     /* Instanciate validator */
-    const ajv = new Ajv({strict: false, logger: logger});
+    let ajv;
+    if(/^3\.0\.\d(-.+)?$/.test(oasFile.openapi)) ajv = new Ajv04({strict: false, logger: logger}); // 3.0.X - Json draft04
+    else ajv = new Ajv2020({strict: false, logger: logger}); // 3.1.X - Json schema 2020-12
     addFormats(ajv);
 
     /* Instanciate middleware */
@@ -86,7 +89,9 @@ export class OASResponseValidator extends OASBase {
 
   static initialize(oasFile, config) {
     /* Instanciate validator */
-    const ajv = new Ajv({strict: false, logger: logger});
+    let ajv;
+    if(/^3\.0\.\d(-.+)?$/.test(oasFile.openapi)) ajv = new Ajv04({strict: false, logger: logger}); // 3.0.X - Json draft04
+    else ajv = new Ajv2020({strict: false, logger: logger}); // 3.1.X - Json schema 2020-12
     addFormats(ajv);
 
     /* Instanciate middleware */

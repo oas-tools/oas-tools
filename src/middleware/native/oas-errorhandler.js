@@ -16,7 +16,7 @@ export class OASErrorHandler extends OASBase {
     }
     return new OASErrorHandler(oasFile, (err, req, res, next) => {
       /* Resets send behaviour */
-      res.send = res.defaultSend;
+      if(res.defaultSend) res.send = res.defaultSend;
       
       if (res.headersSent){
           return next(err);

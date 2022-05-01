@@ -33,7 +33,7 @@ function _getParameterValue(req, parameter) {
     let paramLocation = parameter.in;
     let val;
     
-    // The following code takes into account OAS serialization. https://swagger.io/docs/specification/serialization/
+    /* The following code takes into account OAS serialization. https://swagger.io/docs/specification/serialization/ */
     switch (paramLocation) {
         case "path": // transform any style,explode param into default (style=simple, explode=false)
             if (parameter.explode){
@@ -68,22 +68,33 @@ function _getParameterValue(req, parameter) {
     if (_.isUndefined(val) && !_.isUndefined(defaultVal)) {
         val = defaultVal;
     }
-    return _parseValue(val, parameter);
-}
 
-function _parseValue(val, paramDefinition) {
+    /* Get schema and type and parse value */
     let schema;
-    if (paramDefinition.schema) schema = paramDefinition.schema;
+    if (parameter.schema) schema = parameter.schema;
     else {
-        const contentType = Object.keys(paramDefinition.content)[0];
-        schema = paramDefinition.content[contentType].schema;
+        const contentType = Object.keys(parameter.content)[0];
+        schema = parameter.content[contentType].schema;
     }
     let type = _getType(schema);
+    if (Array.isArray(type)) { // Mixed params (OAS 3.1)
+        let parsedVal;
+        for (const t of type) {
+            parsedVal = _parseValue(val, parameter, schema, t);
+            if (parsedVal !== val && t !== 'string') break;
+        }
+        return parsedVal;
+    } else { // Single params
+        return _parseValue(val, parameter, schema, type);
+    }
+}
 
+function _parseValue(val, paramDefinition, schema, type) {
     if (val === undefined) return val;
-    if (schema.nullable && val === null) return val;
+    if ((schema.nullable || type === 'null') && val === null) return val;
     if (paramDefinition.allowEmptyValue && val === "") return val;
     switch (type) {
+        case "null":
         case "string":
             if (typeof val !== "string") return val;
             if (schema.format === "date-time" || schema.format === "date") return new Date(val) === 'Invalid Date' ? val : new Date(val);

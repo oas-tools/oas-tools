@@ -24,10 +24,14 @@ export function validate(oasFilePath) {
   switch(true) {
     case /^3\.0\.\d(-.+)?$/.test(version):
       ajv = new Ajv04({strict: false, logger: logger});
-      schema = JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/openapi-3.0.json"), "utf8")); break;
+      schema = JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/v3.0/schema.json"), "utf8")); break;
     case /^3\.1\.\d+(-.+)?$/.test(version):
       ajv = new Ajv2020({strict: false, logger: logger});
-      schema = JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/openapi-3.1.json"), "utf8")); break;
+      ajv.addFormat("media-range", "^[^\\s;]+/[^\\s;]+$");
+      ajv.addSchema(JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/v3.1/dialect.json"), "utf8")));
+      ajv.addSchema(JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/v3.1/vocab.json"), "utf8")));
+      ajv.addSchema(JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/v3.1/schema.json"), "utf8")));
+      schema = JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/v3.1/schema-base.json"), "utf8")); break;
     default:
       throw new ValidationError(`Unsupported OpenAPI version: ${version}. Supported versions are 3.0.X, 3.1.X`);
   }
@@ -36,7 +40,8 @@ export function validate(oasFilePath) {
   const validate = ajv.compile(schema);
   const valid = validate(oasFile);
   if (!valid) {
-    throw new ValidationError(`Specification file does not meet OpenAPI ${version} schema.\n Failed > ${validate.errors.map(e => e.message).join("\n Failed > ")}`);
+    throw new ValidationError(`Specification file does not meet OpenAPI ${version} schema.\n` +
+    `${validate.errors.map(e => `- Validation failed at ${e.instancePath.split('/').map(s => s.includes('~1')? `[${s.replaceAll('~1','/')}]` : s).join('/')} > ${e.message}`).join("\n")}`);
   }
 }
 

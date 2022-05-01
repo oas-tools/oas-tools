@@ -55,7 +55,9 @@ function _registerNativeMiddleware(app, oasFile, config) {
     OASRouter.initialize(expressOasFile, {...config.middleware.router, endpoints: config.endpointCfg}).register(app);
     logger.info(`Router middleware registered`);
   }
-  if(!config.middleware.swagger.disable){
+  if (/^3\.1\.\d+(-.+)?$/.test(oasFile.openapi)) {
+    logger.warn("Swagger UI is not supported for OpenAPI 3.1.x, middleware will be disabled");
+  } else if(!config.middleware.swagger.disable){
     OASSwagger.initialize(oasFile, {...config.middleware.swagger, endpoints: config.endpointCfg}).register(app);
     logger.info(`Swagger middleware registered. Swagger UI available at: ${config.middleware.swagger.path}`);
   }
