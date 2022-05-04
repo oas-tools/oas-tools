@@ -63,7 +63,7 @@ function _getParameterValue(req, parameter) {
                 val = req.headers[parameter.name.toLowerCase()]; break;
             }
         case "cookie":
-            val = req.headers.cookie.split(';').find(c => c.trim().startsWith(`${parameter.name}=`))?.split('=')[1]; break;    
+            val = req.headers.cookie?.split(';').find(c => c.trim().startsWith(`${parameter.name}=`))?.split('=')[1]; break;    
     }
     if (_.isUndefined(val) && !_.isUndefined(defaultVal)) {
         val = defaultVal;
