@@ -9,7 +9,7 @@
       "require": "./common/index.js",
       "default": "./lib/index.mjs"
     },
-    "./utils" : {
+    "./utils": {
       "require": "./common/utils/index.js",
       "default": "./lib/utils/index.mjs"
     }
@@ -42,19 +42,13 @@
     "url": "git+https://github.com/oas-tools/oas-tools.git"
   },
   "dependencies": {
-    "accesscontrol": "^2.2.1",
-    "accesscontrol-middleware": "^1.0.3",
     "ajv": "^8.11.0",
     "ajv-draft-04": "^1.0.0",
     "ajv-formats": "^2.1.1",
-    "async": "^3.2.3",
     "js-yaml": "^3.13.1",
     "json-schema-ref-parser": "^9.0.9",
-    "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
-    "multer": "^1.4.1",
     "rc": "^1.2.8",
-    "request": "^2.88.0",
     "swagger-ui-express": "^4.3.0",
     "validator": "^13.0.0",
     "whatwg-mimetype": "^2.3.0",

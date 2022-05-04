@@ -18,12 +18,9 @@ middleware:
     requestValidation: true
     responseValidation: true
     strict: false
-  auth:
-    disable: true
-    grantsFile: null
   security:
     disable: true
-    securityFile: null
+    auth: null
   swagger:
     disable: false
     path: '/docs'

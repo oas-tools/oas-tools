@@ -34,9 +34,14 @@ export class OASErrorHandler extends OASBase {
         if (/[\S\s]* content-type is not accepted [\S\s]*/.test(err.message)) res.status(406);
         else res.status(400);
         res.send({error: `${err.name}: ${err.message}`});
-      } else {
+      } 
+      else if (err instanceof errors.SecurityError) {
+        logger.error(config.printStackTrace ? err.stack : `${err.name}: ${err.message}`);
+        res.status(401).send({error: `${err.name}: ${err.message}`});
+      } 
+      else {
         logger.error(config.printStackTrace ? err.stack : err.message);
-        res.status(500).send({error: `${err.name}: ${err.message}`});
+        res.status(res.statusCode !== 200 ? res.statusCode : 500).send({error: `${err.name}: ${err.message}`});
       }
       
     });

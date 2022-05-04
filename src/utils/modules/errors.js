@@ -12,6 +12,12 @@ export class ConfigError extends BaseError {
   }
 }
 
+export class UnsupportedError extends BaseError {
+  constructor(message) {
+    super("UnsupportedError", message);
+  }
+}
+
 export class ValidationError extends BaseError {
   constructor(message, name = "ValidationError") {
     super(name, message);
@@ -33,5 +39,19 @@ export class ResponseValidationError extends ValidationError {
 export class RoutingError extends BaseError {
   constructor(message) {
     super("RoutingError", message);
+  }
+}
+
+export class SecurityError extends BaseError {
+  constructor(message) {
+    super("SecurityError", message);
+  }
+}
+
+/* Not used natively, given as an utility 
+ * class that may be imported externally */
+export class AuthError extends BaseError {
+  constructor(message) {
+    super("AuthError", message);
   }
 }
