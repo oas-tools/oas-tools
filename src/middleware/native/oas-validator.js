@@ -26,29 +26,32 @@ export class OASRequestValidator extends OASBase {
 
       /* Check body */
       if (res.locals.oas.body && JSON.stringify(res.locals.oas.body) !== "{}") {
-        const contentType = Object.keys(oasRequest.requestBody.content)[0];
-        const schema = oasRequest.requestBody.content[contentType].schema;
-        let body = res.locals.oas.body;
-        
-        /* On multipart requests insert files in body for validation */
-        if (contentType.toLocaleLowerCase() === 'multipart/form-data' && res.locals.oas.files) {
-          res.locals.oas.files.forEach(file => {
-            if(file.fieldname && file.originalname) {
-              if(req.file?.fieldname === file.fieldname) body[file.fieldname] = file.originalname // single file uploaded
-              else body[file.fieldname] = body[file.fieldname]? [...body[file.fieldname], file.originalname] : [file.originalname] // multiple files uploaded
-            } else {
-              logger.warn('Ignored files in validation: Unable to find properties {fieldname, originalname} in file', file);
-            }
-          });
+        if (oasRequest.requestBody) {
+          const contentType = Object.keys(oasRequest.requestBody.content)[0];
+          const schema = oasRequest.requestBody.content[contentType].schema;
+          let body = res.locals.oas.body;
+          
+          /* On multipart requests insert files in body for validation */
+          if (contentType.toLocaleLowerCase() === 'multipart/form-data' && res.locals.oas.files) {
+            res.locals.oas.files.forEach(file => {
+              if(file.fieldname && file.originalname) {
+                if(req.file?.fieldname === file.fieldname) body[file.fieldname] = file.originalname // single file uploaded
+                else body[file.fieldname] = body[file.fieldname]? [...body[file.fieldname], file.originalname] : [file.originalname] // multiple files uploaded
+              } else {
+                logger.warn('Ignored files in validation: Unable to find properties {fieldname, originalname} in file', file);
+              }
+            });
+          }
+  
+          const validate = ajv.compile(schema);
+          const valid = validate(body);
+  
+          if (!valid) {
+            commons.handle(RequestValidationError, `Request body does not match the schema specified in the OAS Document:\n${validate.errors.map(e => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
+          }
+        } else {
+          commons.handle(RequestValidationError, "Missing request body declaration in OAS Document", config.strict);
         }
-
-        const validate = ajv.compile(schema);
-        const valid = validate(body);
-
-        if (!valid) {
-          commons.handle(RequestValidationError, `Request body does not match the schema specified in the OAS Document:\n${validate.errors.map(e => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
-        }
-
       } else if (oasRequest.requestBody?.required) {
         commons.handle(RequestValidationError, "Missing object in the request body. Request body is required.", config.strict);
       }
