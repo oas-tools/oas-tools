@@ -50,12 +50,15 @@ export class OASSecurity extends OASBase {
                   token = req.headers.cookie?.split(';').find(c => c.trim().startsWith(`${secDef.name}=`))?.split('=')[1];
                 } break;
               case 'oauth2':
-                throw new UnsupportedError(`oauth2 security schemes are not supported yet.`);
+              case 'openIdConnect':
+                handlers[secName](secDef, secScope, (status) => res.status(status));
               default:
                 throw new UnsupportedError(`Security scheme ${secName} is invalid or not supported.`);
             }
-            if (!token) throw new SecurityError(`Missing token for security scheme ${secName}.`);
-            handlers[secName](token, (status) => res.status(status));
+            if (['http', 'apiKey'].includes(secDef.type)) {
+              if (!token) throw new SecurityError(`Missing token for security scheme ${secName}.`);
+              handlers[secName](token, (status) => res.status(status));
+            }
           });
         })).catch(err => {
           if (err instanceof AggregateError) {
