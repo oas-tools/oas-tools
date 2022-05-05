@@ -1,5 +1,7 @@
-import { OASBase } from "./oas-base";
-import { commons, errors, logger } from "../../utils";
+import { OASBase } from "oas-devtools/middleware";
+import { commons } from "../../utils";
+import { errors, logger } from "oas-devtools/utils";
+import { pathToFileURL } from "url";
 
 export class OASRouter extends OASBase {
 
@@ -7,8 +9,8 @@ export class OASRouter extends OASBase {
     super(oasFile, middleware);
   }
 
-  static initialize(oasFile, config) {
-    const controllers = OASRouter.#loadControllers(oasFile, config);
+  static async initialize(oasFile, config) {
+    const controllers = await OASRouter.#loadControllers(oasFile, config);
     return new OASRouter(oasFile, (req, res, next) => {  
       let requestPath = req.route.path;
       let method = req.method;
@@ -18,7 +20,7 @@ export class OASRouter extends OASBase {
   }
 
   /* Private methods */
-  static #loadControllers(oasFile, config) {
+  static async #loadControllers(oasFile, config) {
     let controllers = {};
 
     try {
@@ -36,36 +38,34 @@ export class OASRouter extends OASBase {
         if (annDiff.length > 0) logger.warn(`Missing OAS declaration for:\n > ${annDiff.join('\n > ')}`);
         
         /* Import functions */
-        Object.entries(config.endpoints).forEach(([path, arr]) => {
+        await Promise.all(Object.entries(config.endpoints).map(async ([path, arr]) => {
           let tmp = {};
           let expressPath = commons.expressPath(path);
-          arr.forEach(e => tmp[e.method] = require(e.exportPath)[e.exportName]);
+          await Promise.all(arr.map(e => import(pathToFileURL(e.exportPath)).then(imp => tmp[e.method] = imp[e.exportName])));
           controllers[expressPath] = tmp;
-        })
+        }));
       } else { // Load when annotations disabled
-        Object.entries(oasFile.paths).forEach(([expressPath, obj]) => {
+        await Promise.all(Object.entries(oasFile.paths).map(async ([expressPath, obj]) => {
           let tmp = {};
           let opId = commons.generateName(expressPath, "function");
           let controllerName = obj['x-router-controller'] ?? commons.generateName(expressPath, "controller");
-          Object.entries(obj).forEach(([method, methodObj]) => {
+          await Promise.all(Object.entries(obj).map(([method, methodObj]) => {
             opId = methodObj['operationId'] ?? opId;
             controllerName = methodObj['x-router-controller'] ?? controllerName;
-            tmp[method.toUpperCase()] = require(`${config.controllers}/${controllerName}`)[opId];
-            if (!tmp[method.toUpperCase()]) 
-              throw new Error(`Controller ${controllerName} does not have method ${opId}`);
-          });
+            let path = commons.filePath(config.controllers, controllerName);
+            if (!path) throw new errors.RoutingError(`Controller ${controllerName} not found`);
+            return import(pathToFileURL(path)).then(imp => {
+              tmp[method.toUpperCase()] = imp[opId]
+              if (!tmp[method.toUpperCase()])
+                throw new Error(`Controller ${path} does not have method ${opId}`);
+            });
+          }));
           controllers[expressPath] = tmp;
-        });
+        }));
       }
       return controllers;
     } catch (err) { // Exception handling
-      switch (true) {
-        case /Cannot find module/.test(err.message):
-          let controllerName = [...err.message.matchAll(/Cannot find module \'([\S]*)\'/g)].flat()[1].split('/').pop();
-          throw new errors.RoutingError(`Failed while importing controller. ${controllerName} does not exist.`); break;
-        default:
-          throw new errors.RoutingError(err.message);
-      }
+      throw new errors.RoutingError(err.message);
     }
   }
 }

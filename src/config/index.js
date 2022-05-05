@@ -21,9 +21,10 @@ import fs from "fs";
 import readline from "readline";
 import jsyaml from "js-yaml";
 import path from "path";
+import { fileURLToPath } from "url";
 import _ from "lodash";
 import rc from "rc";
-import {logger} from "../utils"
+import { logger } from "oas-devtools/utils";
 
 export default async(config_object) => {
   return await _loadDefaults().then(async defaults => {
@@ -39,7 +40,8 @@ export default async(config_object) => {
 /** Loads default configurations
  * @returns {object} default configs*/
 async function _loadDefaults(){
-  let defaultString = fs.readFileSync(path.join(__dirname, "defaults.yaml"), "utf8");
+  const __filename = fileURLToPath(import.meta.url);
+  let defaultString = fs.readFileSync(path.join(path.dirname(__filename), 'defaults.yaml'), "utf8");
   let defaults = jsyaml.safeLoad(defaultString);
   defaults.middleware.router.controllers = path.join(process.cwd(), 'controllers');
   defaults.packageJSON = path.join(process.cwd(), 'package.json');

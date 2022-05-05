@@ -2,11 +2,11 @@ import jsyaml from "js-yaml";
 import fs from "fs";
 import _ from 'lodash';
 import path from "path";
+import { fileURLToPath } from "url";
 import Ajv2020 from "ajv/dist/2020";
 import Ajv04 from "ajv-draft-04";
 import addFormats from "ajv-formats";
-import { logger } from "./logger";
-import { ValidationError } from "./errors";
+import { logger, ValidationError } from "oas-devtools/utils";
 
 /**
  * Validates the oasFile against the openApi schema
@@ -16,6 +16,7 @@ export function validate(oasFilePath) {
   if (!fs.existsSync(oasFilePath)) {
     throw new ValidationError(`Specification file at ${oasFilePath} not found`);
   }
+  const __filename = fileURLToPath(import.meta.url);
   const oasFile = jsyaml.safeLoad(fs.readFileSync(oasFilePath, "utf8"));
   const version = oasFile.openapi;
   let ajv;
@@ -24,14 +25,14 @@ export function validate(oasFilePath) {
   switch(true) {
     case /^3\.0\.\d(-.+)?$/.test(version):
       ajv = new Ajv04({strict: false, logger: logger});
-      schema = JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/v3.0/schema.json"), "utf8")); break;
+      schema = JSON.parse(fs.readFileSync(path.join(path.dirname(__filename), "../../schemas/v3.0/schema.json"), "utf8")); break;
     case /^3\.1\.\d+(-.+)?$/.test(version):
       ajv = new Ajv2020({strict: false, logger: logger});
       ajv.addFormat("media-range", "^[^\\s;]+/[^\\s;]+$");
-      ajv.addSchema(JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/v3.1/dialect.json"), "utf8")));
-      ajv.addSchema(JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/v3.1/vocab.json"), "utf8")));
-      ajv.addSchema(JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/v3.1/schema.json"), "utf8")));
-      schema = JSON.parse(fs.readFileSync(path.join(__dirname, "../../schemas/v3.1/schema-base.json"), "utf8")); break;
+      ajv.addSchema(JSON.parse(fs.readFileSync(path.join(path.dirname(__filename), "../../schemas/v3.1/dialect.json"), "utf8")));
+      ajv.addSchema(JSON.parse(fs.readFileSync(path.join(path.dirname(__filename), "../../schemas/v3.1/vocab.json"), "utf8")));
+      ajv.addSchema(JSON.parse(fs.readFileSync(path.join(path.dirname(__filename), "../../schemas/v3.1/schema.json"), "utf8")));
+      schema = JSON.parse(fs.readFileSync(path.join(path.dirname(__filename), "../../schemas/v3.1/schema-base.json"), "utf8")); break;
     default:
       throw new ValidationError(`Unsupported OpenAPI version: ${version}. Supported versions are 3.0.X, 3.1.X`);
   }

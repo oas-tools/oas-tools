@@ -6,9 +6,11 @@ https://github.com/isa-group/project-oas-tools
 */
 
 import $RefParser from "@apidevtools/json-schema-ref-parser";
-import { logger, schema } from "./utils";
+import { logger } from "oas-devtools/utils";
+import { schema } from "./utils";
 import loadConfig from "./config";
-import { OASSwagger, OASRouter, OASParams, OASRequestValidator, OASResponseValidator, OASErrorHandler, OASSecurity } from "./middleware";
+import { OASSwagger, OASRouter, OASParams, OASRequestValidator, OASResponseValidator, OASSecurity } from "./middleware";
+import { OASErrorHandler } from "oas-devtools/middleware";
 
 /**
  * Function to initialize OAS-tools middlewares.
@@ -29,7 +31,7 @@ export async function initialize(app, config) {
       const oasFile = await $RefParser.dereference(cfg.oasFile);
       logger.info("Specification file dereferenced");
 
-      _registerNativeMiddleware(app, oasFile, cfg);
+      await _registerNativeMiddleware(app, oasFile, cfg);
       
     }).catch(err => {
       logger.error(err.stack);
@@ -37,7 +39,7 @@ export async function initialize(app, config) {
     });
 }
 
-function _registerNativeMiddleware(app, oasFile, config) {
+async function _registerNativeMiddleware(app, oasFile, config) {
   const expressOasFile = schema.expressPaths(oasFile);
 
   /* Params middleware: Register locals */
@@ -56,7 +58,8 @@ function _registerNativeMiddleware(app, oasFile, config) {
     logger.info(`Response validator middleware registered`);
   }
   if(!config.middleware.router.disable) {
-    OASRouter.initialize(expressOasFile, {...config.middleware.router, endpoints: config.endpointCfg}).register(app);
+    const middleware = await OASRouter.initialize(expressOasFile, {...config.middleware.router, endpoints: config.endpointCfg})
+    middleware.register(app);
     logger.info(`Router middleware registered`);
   }
   if (/^3\.1\.\d+(-.+)?$/.test(oasFile.openapi)) {

@@ -2,38 +2,20 @@
   "name": "oas-tools",
   "version": "2.2.1",
   "description": "",
-  "type": "commonjs",
-  "main": "./common/index.js",
+  "type": "module",
+  "main": "./src/index.js",
   "exports": {
-    ".": {
-      "require": "./common/index.js",
-      "default": "./lib/index.mjs"
-    },
-    "./utils": {
-      "require": "./common/utils/index.js",
-      "default": "./lib/utils/index.mjs"
-    }
+    ".": "./src/index.js"
   },
-  "module": "./lib/index.mjs",
   "files": [
-    "src",
-    "common",
-    "lib"
+    "src"
   ],
   "engines": {
-    "node": ">=12.22"
+    "node": ">=14.0.0"
   },
   "scripts": {
-    "build": "npm run build-module && npm run build-commonjs",
-    "build-commonjs": "cross-env BABEL_ENV=commonjs babel ./src --out-dir common --source-maps --copy-files",
-    "build-module": "cross-env BABEL_ENV=module babel ./src --out-dir lib --source-maps --out-file-extension .mjs --copy-files",
-    "pretest": "npm run build-commonjs",
-    "test": "cross-env BABEL_ENV=test mocha --require @babel/register --reporter spec ./tests/basic.mjs",
-    "test:tdd": "npm run test -- -w",
     "lint": "eslint src tests --ext .mjs --ext .js",
-    "format": "npm run lint -- --fix",
-    "precoverage": "npm run build-commonjs",
-    "coverage": "cross-env BABEL_ENV=test nyc mocha --require @babel/register ./tests/basic.mjs"
+    "format": "npm run lint -- --fix"
   },
   "author": "ISA Group, University of Seville",
   "license": "Apache-2.0",
@@ -48,19 +30,13 @@
     "js-yaml": "^3.13.1",
     "json-schema-ref-parser": "^9.0.9",
     "lodash": "^4.17.21",
+    "oas-devtools": "^0.1.0",
     "rc": "^1.2.8",
     "swagger-ui-express": "^4.3.0",
     "validator": "^13.0.0",
-    "whatwg-mimetype": "^2.3.0",
-    "winston": "^3.2.1"
+    "whatwg-mimetype": "^2.3.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.13",
-    "@babel/core": "^7.12.13",
-    "@babel/preset-env": "^7.12.13",
-    "@babel/register": "^7.12.13",
-    "@babel/runtime": "^7.12.13",
-    "babel-plugin-module-resolver": "^4.1.0",
     "chai": "^4.2.0",
     "chai-http": "^4.2.1",
     "cross-env": "^7.0.3",
@@ -71,23 +47,5 @@
     "mocha": "^9.2.0",
     "nyc": "^15.1.0",
     "prettier": "^2.2.1"
-  },
-  "eslintIgnore": [
-    "/lib",
-    "/common",
-    "/node_modules",
-    "/lib-tests"
-  ],
-  "nyc": {
-    "exclude": [
-      "node_modules",
-      "tests/**/*.js"
-    ],
-    "reporter": [
-      "json",
-      "html",
-      "text",
-      "lcovonly"
-    ]
   }
 }

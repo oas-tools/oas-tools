@@ -1,5 +1,7 @@
-import * as validator from "validator";
-import { logger } from "./logger"
+import validator from "validator";
+import { logger } from "oas-devtools/utils";
+import fs from "fs";
+
 /**
  * Generates a valid name, according to value of nameFor.
  * @param {string} input - String to generate a name from.
@@ -47,4 +49,15 @@ export function arrayDiff(arr1, arr2) {
 export function handle(errorClass, message, strict = false) {
   if (strict) throw new errorClass(message);
   else logger.warn(message);
+}
+
+/** Returns the complete path of a file including extension.
+ * @param {String} path - Path of the file
+ * @param {String} name - Name of the file
+ */
+export function filePath(path, name) {
+  const matches = fs.readdirSync(path).filter(file => file.includes(name));
+  if(matches.length > 0) {
+    return `${path}/${matches[0]}`;
+  }
 }
