@@ -1,5 +1,6 @@
-import { OASBase } from "./oas-base";
-import { logger, errors, commons } from "../../utils";
+import { OASBase } from "oas-devtools/middleware";
+import { logger, errors } from "oas-devtools/utils";
+import { commons } from "../../utils";
 import MIMEtype from "whatwg-mimetype";
 import addFormats from "ajv-formats";
 import Ajv2020 from "ajv/dist/2020";

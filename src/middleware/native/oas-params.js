@@ -1,5 +1,5 @@
-import { OASBase } from "./oas-base";
-import { logger } from "../../utils";
+import { OASBase } from "oas-devtools/middleware";
+import { logger } from "oas-devtools/utils";
 import _ from "lodash";
 
 export class OASParams extends OASBase {

@@ -1,5 +1,5 @@
-import { OASBase } from "./oas-base";
-import { logger, errors } from "../../utils";
+import { OASBase } from "oas-devtools/middleware";
+import { logger, errors } from "oas-devtools/utils";
 import _ from "lodash";
 
 const { SecurityError, UnsupportedError, ConfigError } = errors;
