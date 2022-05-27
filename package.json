@@ -1,6 +1,6 @@
 {
   "name": "oas-tools",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "",
   "type": "commonjs",
   "main": "./common/index.js",
