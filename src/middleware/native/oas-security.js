@@ -51,7 +51,7 @@ export class OASSecurity extends OASBase {
                 } break;
               case 'oauth2':
               case 'openIdConnect':
-                handlers[secName](secDef, secScope, (status) => res.status(status));
+                handlers[secName](secDef, secScope, (status) => res.status(status)); break;
               default:
                 throw new UnsupportedError(`Security scheme ${secName} is invalid or not supported.`);
             }
@@ -62,7 +62,11 @@ export class OASSecurity extends OASBase {
           });
         })).catch(err => {
           if (err instanceof AggregateError) {
-            next(err.errors[0]);
+            if (!err.errors.every(e => e instanceof SecurityError)) {
+              next(err.errors[0]);
+            } else if (err.errors.length >= secReqs.length) {
+              next(err.errors[0]);
+            }
           }
         });
       } else {

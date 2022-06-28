@@ -58,7 +58,7 @@ function _getParameterValue(req, parameter) {
             }
         case "header": // transform any style,explode param into default (style=simple, explode=false)
             if (!parameter.content && parameter.explode){ // ignores style and explode when content is defined
-                val = req.headers[parameter.name.toLowerCase()].replaceAll('=', ','); break;
+                val = req.headers[parameter.name.toLowerCase()]?.replaceAll('=', ','); break;
             } else{
                 val = req.headers[parameter.name.toLowerCase()]; break;
             }
@@ -120,6 +120,7 @@ function _parseValue(val, paramDefinition, schema, type) {
                 };
             } else {
                 logger.warn(`Parameter [${paramDefinition.name}] sent in the ${paramDefinition.in} is an object. Consider using content instead of schema or send it in request body.`);
+                if(typeof val === 'object') return val;
                 let map = new Map(val.split(',').reduce((res, _val, idx, arr) => {
                     if (idx %2 === 0) res.push(arr.slice(idx, idx + 2));
                     return res;
