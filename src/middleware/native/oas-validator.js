@@ -58,7 +58,7 @@ export class OASRequestValidator extends OASBase {
       }
 
       /* Check parameters */
-      if (res.locals.oas.params && JSON.stringify(res.locals.oas.params) !== "{}") {
+      if (res.locals.oas.params && Object.keys(res.locals.oas.params).length > 0) {
         oasRequest.parameters.forEach(param => {
           const value = res.locals.oas.params[param.name];
           if (typeof value !== "undefined") {
