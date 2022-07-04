@@ -343,6 +343,7 @@ export default (controllers) => {
         arguments
       );
     };
-    controller[opID].apply(undefined, [req, res, next]); // execute function by name
+    const controllerFn = controller[opID].apply(undefined, [req, res, next]); // execute function by name
+    controllerFn.catch(e =>  next(e))
   };
 };
