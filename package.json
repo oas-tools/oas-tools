@@ -1,7 +1,7 @@
 {
-  "name": "@bitbeanllc/oas-tools",
+  "name": "oas-tools",
   "version": "2.2.5",
-  "description": "Small fixes to the OAS-Tools library",
+  "description": "Swagger validation tools for OpenAPI and OAS.",
   "type": "commonjs",
   "main": "./common/index.js",
   "exports": {
