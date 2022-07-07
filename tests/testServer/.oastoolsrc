@@ -1,0 +1,9 @@
+{
+    "oasFile": "tests/testServer/api/3.0.yaml",
+    "logger": { "level": "error" },
+    "useAnnotations": true,
+    "middleware": { 
+        "router": { "controllers": "tests/testServer/controllers" },
+        "error": { "printStackTrace": false }
+    }
+}

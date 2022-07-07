@@ -1,0 +1,13 @@
+openapi: 3.1.0
+info:
+  version: 0.1.0
+  title: Test server
+  description: Server for OAS-Tools Testing
+paths:
+  # OAS ROUTER TEST ENDPOINT
+  /api/v1/oasRouter:
+    get:
+      operationId: getRequest
+      x-router-controller: oasRouterTestController
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}

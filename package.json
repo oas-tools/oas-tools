@@ -14,8 +14,10 @@
     "node": ">=14.0.0"
   },
   "scripts": {
-    "lint": "eslint src tests --ext .mjs --ext .js",
-    "format": "npm run lint -- --fix"
+    "lint": "eslint src tests --ext .mjs --ext .js --ext .cjs",
+    "format": "npm run lint -- --fix",
+    "test": "mocha ./tests/index.test.js --experimental-specifier-resolution=node",
+    "cov": "c8 --all --reporter=lcov --reporter=text npm run test"
   },
   "author": "ISA Group, University of Seville",
   "license": "Apache-2.0",
@@ -37,15 +39,14 @@
     "whatwg-mimetype": "^2.3.0"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "chai-http": "^4.2.1",
-    "cross-env": "^7.0.3",
+    "axios": "^0.27.2",
+    "c8": "^7.11.3",
     "eslint": "^7.18.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",
     "express": "^4.17.2",
     "mocha": "^9.2.0",
-    "nyc": "^15.1.0",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "sinon": "^14.0.0"
   }
 }

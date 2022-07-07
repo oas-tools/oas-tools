@@ -1,0 +1,40 @@
+'200':
+    description: Success
+    content:
+      application/json:
+        schema:
+          oneOf:
+            - $ref: './schemas.yaml#/oasParamsResponse'
+            - $ref: './schemas.yaml#/stringResponse'
+'204':
+  description: Resource deleted
+'400':
+  description: Bad Request
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/errorModel'
+'401':
+  description: Unauthorized
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/errorModel'
+'403':
+  description: Forbidden
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/errorModel'
+'404':
+  description: Not Found
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/errorModel'
+'500':
+  description: Internal Server Error
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/errorModel'

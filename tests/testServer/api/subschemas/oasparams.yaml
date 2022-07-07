@@ -1,0 +1,137 @@
+noexplode:
+  pathparams:  
+    - name: testparamsimple
+      description: test parameter style simple
+      style: simple
+      in: path
+      schema:
+        type: integer
+    
+    - name: testparamslabel
+      description: test parameter style label
+      in: path
+      style: label
+      schema:
+        type: array
+    
+    - name: testparamsmatrix
+      description: test parameter style matrix
+      in: path
+      style: matrix
+      schema:
+        type: object
+
+  queryparams:
+    - name: queryparamform
+      description: query parameter style form
+      explode: false
+      style: form
+      in: query
+      schema:
+        type: boolean
+
+    - name: queryparamspacedelimited
+      description: query parameter style spaceDelimited
+      explode: false
+      style: spaceDelimited
+      in: query
+      schema:
+        type: array
+    
+    - name: queryparampipedelimited
+      description: query parameter style pipeDelimited
+      explode: false
+      style: pipeDelimited
+      in: query
+      schema:
+        type: array
+
+  headerparams:
+    - name: headerparam
+      description: header parameter
+      in: header
+      schema:
+        type: string
+        format: date-time
+
+  cookieparams:
+    - name: cookieparam
+      description: cookie parameter
+      in: cookie
+      schema:
+        type: integer
+
+explode:
+  pathparams:
+    - name: testparamsimple
+      description: test parameter style simple
+      explode: true
+      style: simple
+      in: path
+      schema:
+        type: integer
+
+    - name: testparamslabel
+      description: test parameter style label
+      explode: true
+      in: path
+      style: label
+      schema:
+        type: array
+    
+    - name: testparamsmatrix
+      description: test parameter style matrix
+      explode: true
+      in: path
+      style: matrix
+      schema:
+        type: object
+    
+  queryparams:
+    - name: queryparamform
+      description: query parameter style form
+      explode: true
+      style: form
+      in: query
+      schema:
+        type: boolean
+
+    - name: queryparamspacedelimited
+      description: query parameter style spaceDelimited
+      explode: true
+      style: spaceDelimited
+      in: query
+      schema:
+        type: array
+    
+    - name: queryparampipedelimited
+      description: query parameter style pipeDelimited
+      explode: true
+      style: pipeDelimited
+      in: query
+      schema:
+        type: array
+
+    - name: queryparamdeepobject
+      description: query parameter style deepObject
+      explode: true
+      style: deepObject
+      in: query
+      schema:
+        type: object
+  
+  headerparams:
+    - name: headerparam
+      description: header parameter
+      explode: true
+      in: header
+      schema:
+        type: object
+
+  cookieparams:
+    - name: cookieparam
+      description: cookie parameter
+      explode: true
+      in: cookie
+      schema:
+        type: array  

@@ -1,0 +1,168 @@
+openapi: 3.0.0
+info:
+  version: 0.1.0
+  title: Test server
+  description: Server for OAS-Tools Testing
+paths:
+  # OAS PARAMS TEST ENDPOINTS
+  /api/v1/oasParams:
+    x-router-controller: oasParamsTestController
+    get:
+      operationId: getRequest
+      parameters:
+        - $ref: 'subschemas/oasparams.yaml#/noexplode/queryparams/0'
+        - $ref: 'subschemas/oasparams.yaml#/noexplode/queryparams/1'
+        - $ref: 'subschemas/oasparams.yaml#/noexplode/queryparams/2'
+        - $ref: 'subschemas/oasparams.yaml#/noexplode/headerparams/0'
+        - $ref: 'subschemas/oasparams.yaml#/noexplode/cookieparams/0'
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+  /api/v1/oasParams/explode:
+    x-router-controller: oasParamsTestController
+    get:
+      operationId: getRequest
+      parameters:
+        - $ref: 'subschemas/oasparams.yaml#/explode/queryparams/0'
+        - $ref: 'subschemas/oasparams.yaml#/explode/queryparams/1'
+        - $ref: 'subschemas/oasparams.yaml#/explode/queryparams/2'
+        - $ref: 'subschemas/oasparams.yaml#/explode/queryparams/3'
+        - $ref: 'subschemas/oasparams.yaml#/explode/headerparams/0'
+        - $ref: 'subschemas/oasparams.yaml#/explode/cookieparams/0'
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+  /api/v1/oasParams/{testparamsimple}/{testparamslabel}/{testparamsmatrix}:
+    x-router-controller: oasParamsTestController
+    get:
+      operationId: getRequest
+      parameters:
+        - $ref: 'subschemas/oasparams.yaml#/noexplode/pathparams/0'
+        - $ref: 'subschemas/oasparams.yaml#/noexplode/pathparams/1'
+        - $ref: 'subschemas/oasparams.yaml#/noexplode/pathparams/2'
+
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+  /api/v1/oasParams/explode/{testparamsimple}/{testparamslabel}/{testparamsmatrix}:
+    x-router-controller: oasParamsTestController
+    get:
+      operationId: getRequest
+      parameters:
+        - $ref: 'subschemas/oasparams.yaml#/explode/pathparams/0'
+        - $ref: 'subschemas/oasparams.yaml#/explode/pathparams/1'
+        - $ref: 'subschemas/oasparams.yaml#/explode/pathparams/2'
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+
+  # OAS SECURITY TEST ENDPOINT
+  /api/v1/oasSecurity:
+    x-router-controller: oasSecurityTestController
+    get:
+      operationId: getRequest
+      security: # basicAuth AND openID OR bearerAuth OR apiKey(all three)
+        - basicAuth: []
+          openID: [read, write]
+        - bearerAuth: []
+        - apiKeyQuery: []
+          apiKeyHeader: []
+          apiKeyCookie: []
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+  /api/v1/oasSecurity/invalid:
+    x-router-controller: oasSecurityTestController
+    get:
+      operationId: getRequest
+      security:
+        - undeclaredScheme: []
+      responses:
+        '500': {$ref: 'subschemas/responses.yaml#/500'}
+
+  # OAS REQUEST VALIDATOR TEST ENDPOINT
+  /api/v1/oasRequestValidator:
+    x-router-controller: oasRequestValidatorTestController
+    post:
+      operationId: postRequest
+      parameters:
+        - name: queryparamform
+          required: true
+          explode: false
+          style: form
+          in: query
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - test
+              properties:
+                test:
+                  type: string
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+        '400': {$ref: 'subschemas/responses.yaml#/400'}
+  /api/v1/oasRequestValidator/missingBody:
+    x-router-controller: oasRequestValidatorTestController
+    post:
+      operationId: postRequest
+      responses:
+        '400': {$ref: 'subschemas/responses.yaml#/400'}
+
+  # OAS ROUTER TEST ENDPOINT
+  /api/v1/oasRouter:
+    get:
+      operationId: getRequest
+      x-router-controller: oasRouterTestController
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+
+  # OAS RESPONSE VALIDATOR TEST ENDPOINT
+  /api/v1/oasResponseValidator:
+    x-router-controller: oasResponseValidatorTestController
+    get:
+      operationId: getRequest
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+    delete:
+      operationId: deleteRequest
+      responses:
+        '204': {$ref: 'subschemas/responses.yaml#/204'}
+  
+  /api/v1/oasResponseValidator/unexpectedResponse:
+    x-router-controller: oasResponseValidatorTestController
+    get:
+      operationId: getRequestUnexpected
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+
+  /api/v1/oasResponseValidator/wrongData:
+    x-router-controller: oasResponseValidatorTestController
+    get:
+      operationId: getRequestWrongData
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+  
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    bearerAuth:
+      type: http
+      scheme: bearer
+    apiKeyHeader:
+      name: apiKeyHeader
+      type: apiKey
+      in: header
+    apiKeyCookie:
+      name: apiKeyCookie
+      type: apiKey
+      in: cookie
+    apiKeyQuery:
+      name: apiKeyQuery
+      type: apiKey
+      in: query
+    openID:
+      type: openIdConnect
+      openIdConnectUrl: https://test.com/openid/connect   
