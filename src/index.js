@@ -5,13 +5,12 @@ https://github.com/ignpelloz
 https://github.com/isa-group/project-oas-tools
 */
 
+import { OASBase, OASErrorHandler } from "oas-devtools/middleware";
+import { OASParams, OASRequestValidator, OASResponseValidator, OASRouter, OASSecurity, OASSwagger } from "./middleware";
 import $RefParser from "@apidevtools/json-schema-ref-parser";
+import loadConfig from "./config";
 import { logger } from "oas-devtools/utils";
 import { schema } from "./utils";
-import loadConfig from "./config";
-import { OASBase } from "oas-devtools/middleware";
-import { OASSwagger, OASRouter, OASParams, OASRequestValidator, OASResponseValidator, OASSecurity } from "./middleware";
-import { OASErrorHandler } from "oas-devtools/middleware";
 
 /**
  * Function to initialize OAS-tools middlewares.
@@ -20,12 +19,12 @@ import { OASErrorHandler } from "oas-devtools/middleware";
  */
 export async function initialize(app, config) {
 
-    await loadConfig(config).then(async cfg => {
+    await loadConfig(config).then(async (cfg) => {
       logger.configure(cfg.logger);
 
-      if(cfg.useAnnotations) {
+      if(cfg.useAnnotations) 
         logger.warn("Annotations enabled. This feature is currently experimental and may not work as expected.");
-      }
+      
       schema.validate(cfg.oasFile);
       logger.info("Valid specification file");
 
@@ -37,12 +36,12 @@ export async function initialize(app, config) {
       const middlewareChain = await _initExternalMiddleware(oasFile, cfg, nativeChain);
 
       /* Register middleware in express */
-      middlewareChain.forEach(middleware => {
+      middlewareChain.forEach((middleware) => {
         middleware.register(app);
-        let name = middleware.constructor.name;
+        const name = middleware.constructor.name;
         logger.info(`Registered ${name === 'OASBase' ? name + '[' + middleware.name + ']' : name} middleware`);
       })
-    }).catch(err => {
+    }).catch((err) => {
       logger.error(err.stack);
       process.exit(1);
     });
@@ -72,7 +71,7 @@ async function _initNativeMiddleware(oasFile, config) {
     middlewareChain.push(middleware);
     logger.debug(`Router middleware initialized`);
   }
-  if (/^3\.1\.\d+(-.+)?$/.test(oasFile.openapi)) {
+  if((/^3\.1\.\d+(-.+)?$/).test(oasFile.openapi)) {
     logger.warn("Swagger UI is not supported for OpenAPI 3.1.x, middleware will be disabled");
   } else if(!config.middleware.swagger.disable){
     middlewareChain.push(OASSwagger.initialize(oasFile, {...config.middleware.swagger, endpoints: config.endpointCfg}));
@@ -88,13 +87,13 @@ async function _initNativeMiddleware(oasFile, config) {
 
 async function _initExternalMiddleware(oasFile, config, nativeChain) {
   const expressOasFile = schema.expressPaths(oasFile);
-  let middlewareChain = [...nativeChain];
+  const middlewareChain = [...nativeChain];
 
   if (!Array.isArray(config.middleware.external)) {
     throw new TypeError("config.middleware.external must be an array");
   } else {
-    await Promise.all(config.middleware.external.flatMap(mod => {
-      let tmp = {};
+    await Promise.all(config.middleware.external.flatMap((mod) => {
+      const tmp = {};
 
       /* Get the import name and configs */
       if (typeof mod === "object") { 
@@ -104,7 +103,7 @@ async function _initExternalMiddleware(oasFile, config, nativeChain) {
             tmp[`${module.split('/').at(-1)}/${key}`] = {...value, priority: value.priority ?? submodules.priority};
           });
         } else { // module with options
-          const [ name, options ] = Object.entries(mod)[0];
+          const [name, options] = Object.entries(mod)[0];
           tmp[name.split('/').at(-1)] = options;
         }
       } else { // module with no options
@@ -114,7 +113,7 @@ async function _initExternalMiddleware(oasFile, config, nativeChain) {
       /* Import and initialize the middleware */
       return Object.entries(tmp).map(async ([name, options]) => {
         const importedObj = await import(name);
-        return await Promise.all(Object.values(importedObj).map(async imported => {
+        return await Promise.all(Object.values(importedObj).map(async (imported) => {
           if (typeof imported === "function" && imported.length >= 3) {
             return {middleware: new OASBase(expressOasFile, imported), priority: options.priority ?? 3};
           } else if (Object.getPrototypeOf(imported).constructor === OASBase.constructor) {
@@ -124,7 +123,7 @@ async function _initExternalMiddleware(oasFile, config, nativeChain) {
           }
         }));
       });
-    })).then(middleware => {
+    })).then((middleware) => {
       middleware.flat().sort((a,b) => a.priority - b.priority).forEach(({middleware, priority}) => {
         middlewareChain.splice(priority, 0, middleware);
       });

@@ -1,6 +1,5 @@
 import { OASBase } from "oas-devtools/middleware";
-import { logger, errors } from "oas-devtools/utils";
-import _ from "lodash";
+import { errors, logger } from "oas-devtools/utils";
 
 const { SecurityError, UnsupportedError, ConfigError } = errors;
 
@@ -17,10 +16,10 @@ export class OASSecurity extends OASBase {
     if (!handlers && secSchemes) {
       throw new ConfigError("No security handlers defined in config for security schemes.");
     }
-    if (Object.keys(secSchemes).some(key => !handlers[key])) {
+    if (Object.keys(secSchemes).some((key) => !handlers[key])) {
       throw new ConfigError("Missing handlers for some of the security schemes declared in OAS Document.");
     }
-    if (handlers && Object.values(handlers).some(handler => typeof handler !== 'function')) {
+    if (handlers && Object.values(handlers).some((handler) => typeof handler !== 'function')) {
       throw new ConfigError("Security handlers must be functions.");
     }
 
@@ -29,8 +28,10 @@ export class OASSecurity extends OASBase {
       const oasRequest = oasFile.paths[req.route.path][req.method.toLowerCase()];
       if (oasFile.security || oasRequest.security) {
         const secReqs = oasRequest.security ?? oasFile.security;
+
         /* Logical OR */
-        await Promise.any(secReqs.map(async secReq => {
+        await Promise.any(secReqs.map(async (secReq) => {
+
           /* Logical AND */
           Object.entries(secReq).forEach(([secName, secScope]) => {
             const secDef = secSchemes[secName];
@@ -40,18 +41,21 @@ export class OASSecurity extends OASBase {
             }
             switch (secDef.type) {
               case 'http':
-                token = req.headers.authorization; break;
+                token = req.headers.authorization;
+                break;
               case 'apiKey':
                 if (secDef.in === 'header') {
                   token = req.headers[secDef.name.toLowerCase()];
                 } else if (secDef.in === 'query') {
                   token = req.query[secDef.name];
                 } else {
-                  token = req.headers.cookie?.split(';').find(c => c.trim().startsWith(`${secDef.name}=`))?.split('=')[1];
-                } break;
+                  token = req.headers.cookie?.split(';').find((c) => c.trim().startsWith(`${secDef.name}=`))?.split('=')[1];
+                } 
+                break;
               case 'oauth2':
               case 'openIdConnect':
-                handlers[secName](secDef, secScope, (status) => res.status(status)); break;
+                handlers[secName](secDef, secScope, (status) => res.status(status)); 
+                break;
               default:
                 throw new UnsupportedError(`Security scheme ${secName} is invalid or not supported.`);
             }
@@ -60,9 +64,9 @@ export class OASSecurity extends OASBase {
               handlers[secName](token, (status) => res.status(status));
             }
           });
-        })).catch(err => {
+        })).catch((err) => {
           if (err instanceof AggregateError) {
-            if (!err.errors.every(e => e instanceof SecurityError)) {
+            if (!err.errors.every((e) => e instanceof SecurityError)) {
               next(err.errors[0]);
             } else if (err.errors.length >= secReqs.length) {
               next(err.errors[0]);

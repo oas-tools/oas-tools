@@ -11,7 +11,7 @@ export class OASSwagger extends OASBase {
     }
 
     static initialize(oasFile, config) {
-      let swaggerFile = OASSwagger.#filterPaths(oasFile, config.endpoints);
+      const swaggerFile = OASSwagger.#filterPaths(oasFile, config.endpoints);
       return new OASSwagger(config, oasFile, (req, _res, next) => {
         req.swaggerDoc = swaggerFile;
         next();
@@ -25,13 +25,15 @@ export class OASSwagger extends OASBase {
 
     /* Private methods */
     static #filterPaths(oasFile, endpointCfg) {
-      let swaggerFile = _.cloneDeep(oasFile);
+      const swaggerFile = _.cloneDeep(oasFile);
 
       swaggerFile.paths = Object.fromEntries(Object.entries(swaggerFile.paths).map(([path, methods]) => {
-        return [path, Object.fromEntries(Object.entries(methods).filter(([method, methodObj]) => {
+        return [
+path, Object.fromEntries(Object.entries(methods).filter(([method, methodObj]) => {
           if (!endpointCfg) return methodObj['x-swagger-ui'] !== false;
-          return endpointCfg[path]?.find(e => e.method?.toLowerCase() === method)?.swaggerUI !== 'false';
-        }))];
+          return endpointCfg[path]?.find((e) => e.method?.toLowerCase() === method)?.swaggerUI !== 'false';
+        }))
+];
       }));
 
       return swaggerFile;

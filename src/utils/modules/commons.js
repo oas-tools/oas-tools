@@ -38,7 +38,7 @@ export function expressPath(path){
  * @param {Array} arr2 - Array to be substracted from source array.
  */
 export function arrayDiff(arr1, arr2) {
-  return arr1.filter(x => !arr2.includes(x));
+  return arr1.filter((x) => !arr2.includes(x));
 }
 
 /**
@@ -56,7 +56,7 @@ export function handle(errorClass, message, strict = false) {
  * @param {String} name - Name of the file
  */
 export function filePath(path, name) {
-  const matches = fs.readdirSync(path).filter(file => file.includes(name));
+  const matches = fs.readdirSync(path).filter((file) => file.includes(name));
   if(matches.length > 0) {
     return `${path}/${matches[0]}`;
   }

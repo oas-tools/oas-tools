@@ -12,8 +12,8 @@ export class OASRouter extends OASBase {
   static async initialize(oasFile, config) {
     const controllers = await OASRouter.#loadControllers(oasFile, config);
     return new OASRouter(oasFile, (req, res, next) => {  
-      let requestPath = req.route.path;
-      let method = req.method;
+      const requestPath = req.route.path;
+      const method = req.method;
       controllers[requestPath][method](req, res);
       next();
     });
@@ -21,17 +21,17 @@ export class OASRouter extends OASBase {
 
   /* Private methods */
   static async #loadControllers(oasFile, config) {
-    let controllers = {};
+    const controllers = {};
 
     try {
       if (config.endpoints) { // Load when annotations enabled
 
         /* Previous validations */
-        let oasEndpoints = Object.entries(oasFile.paths).flatMap(([path, pathObj]) => Object.keys(pathObj).map(method => `${method.toUpperCase()} ${path}`));
-        let annEndpoints = Object.entries(config.endpoints).flatMap(([path, pathArr]) => pathArr.map(obj => `${obj.method} ${commons.expressPath(path)}`));
-        let oasDiff = commons.arrayDiff(oasEndpoints, annEndpoints);
-        let annDiff = commons.arrayDiff(annEndpoints, oasEndpoints);
-        let missingMethod = annEndpoints.filter(x => /undefined [\S]+/.test(x)).map(x => x.split(' ')[1]);
+        const oasEndpoints = Object.entries(oasFile.paths).flatMap(([path, pathObj]) => Object.keys(pathObj).map((method) => `${method.toUpperCase()} ${path}`));
+        const annEndpoints = Object.entries(config.endpoints).flatMap(([path, pathArr]) => pathArr.map((obj) => `${obj.method} ${commons.expressPath(path)}`));
+        const oasDiff = commons.arrayDiff(oasEndpoints, annEndpoints);
+        const annDiff = commons.arrayDiff(annEndpoints, oasEndpoints);
+        const missingMethod = annEndpoints.filter((x) => (/undefined [\S]+/).test(x)).map((x) => x.split(' ')[1]);
 
         if (missingMethod.length > 0) throw new Error(`No HTTP method specified for:\n > ${missingMethod.join('\n > ')}`);
         if (oasDiff.length > 0) logger.warn(`Missing Routing annotations(path, method) for:\n > ${oasDiff.join('\n > ')}`);
@@ -39,22 +39,22 @@ export class OASRouter extends OASBase {
         
         /* Import functions */
         await Promise.all(Object.entries(config.endpoints).map(async ([path, arr]) => {
-          let tmp = {};
-          let expressPath = commons.expressPath(path);
-          await Promise.all(arr.map(e => import(pathToFileURL(e.exportPath)).then(imp => tmp[e.method] = imp[e.exportName])));
+          const tmp = {};
+          const expressPath = commons.expressPath(path);
+          await Promise.all(arr.map((e) => import(pathToFileURL(e.exportPath)).then((imp) => tmp[e.method] = imp[e.exportName])));
           controllers[expressPath] = tmp;
         }));
       } else { // Load when annotations disabled
         await Promise.all(Object.entries(oasFile.paths).map(async ([expressPath, obj]) => {
-          let tmp = {};
+          const tmp = {};
           let opId = commons.generateName(expressPath, "function");
           let controllerName = obj['x-router-controller'] ?? commons.generateName(expressPath, "controller");
           await Promise.all(Object.entries(obj).map(([method, methodObj]) => {
-            opId = methodObj['operationId'] ?? opId;
+            opId = methodObj.operationId ?? opId;
             controllerName = methodObj['x-router-controller'] ?? controllerName;
-            let path = commons.filePath(config.controllers, controllerName);
+            const path = commons.filePath(config.controllers, controllerName);
             if (!path) throw new errors.RoutingError(`Controller ${controllerName} not found`);
-            return import(pathToFileURL(path)).then(imp => {
+            return import(pathToFileURL(path)).then((imp) => {
               tmp[method.toUpperCase()] = imp[opId]
               if (!tmp[method.toUpperCase()])
                 throw new Error(`Controller ${path} does not have method ${opId}`);
