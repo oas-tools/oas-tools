@@ -13,7 +13,10 @@ export class OASSecurity extends OASBase {
     const secSchemes = oasFile.components.securitySchemes;
 
     /* Initial checks */
-    if (!handlers && secSchemes) {
+    if (!secSchemes) {
+      throw new ConfigError("No security schemes defined in the OAS Document.");
+    }
+    if (!handlers) {
       throw new ConfigError("No security handlers defined in config for security schemes.");
     }
     if (Object.keys(secSchemes).some((key) => !handlers[key])) {
