@@ -104,7 +104,6 @@ function _parseValue(val, paramDefinition, schema, type) {
         case "null":
         case "string":
             if (typeof val !== "string") return val;
-            if (schema.format === "date-time" || schema.format === "date") return new Date(val) === 'Invalid Date' ? val : new Date(val);
             return val;
         case "number":
         case "integer":
