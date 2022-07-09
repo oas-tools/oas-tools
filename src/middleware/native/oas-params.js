@@ -37,9 +37,9 @@ function _getParameterValue(req, parameter) {
     switch (paramLocation) {
         case "path": // transform any style,explode param into default (style=simple, explode=false)
             if (parameter.explode){
-                if (parameter.style === "label") val = req.params[parameter.name]?.replace('.','').replaceAll('.', ',').replaceAll('=', ',');
-                else if (parameter.style === "matrix") val = req.params[parameter.name]?.replace(';', '').replaceAll(`${parameter.name}=`, '').replaceAll(';', ',').replaceAll('=', ',');
-                else val = req.params[parameter.name].replaceAll('=', ',');
+                if (parameter.style === "label") val = req.params[parameter.name]?.replace('.','').replace(/\./g, ',').replace(/=/g, ',');
+                else if (parameter.style === "matrix") val = req.params[parameter.name]?.replace(';', '').replace(new RegExp(`${parameter.name}=`,"g"), '').replace(/;/g, ',').replace(/=/g, ',');
+                else val = req.params[parameter.name].replace(/=/g, ',');
                 break;
             } else {
                 if (parameter.style === "label") val = req.params[parameter.name]?.replace('.', '');
@@ -52,8 +52,8 @@ function _getParameterValue(req, parameter) {
                 val = _.get(req.query, parameter.name);
                 break;
             } else if(parameter.explode === false) {
-                if (parameter.style === "spaceDelimited") val = _.get(req.query, parameter.name)?.replaceAll(' ', ',');
-                else if (parameter.style === "pipeDelimited") val = _.get(req.query, parameter.name)?.replaceAll('|', ',');
+                if (parameter.style === "spaceDelimited") val = _.get(req.query, parameter.name)?.replace(/\s/g, ',');
+                else if (parameter.style === "pipeDelimited") val = _.get(req.query, parameter.name)?.replace(/\|/g, ',');
                 else val = _.get(req.query, parameter.name)?.replace(`${parameter.name}=`, '');
                 break;
             } else {
@@ -63,7 +63,7 @@ function _getParameterValue(req, parameter) {
             }
         case "header": // transform any style,explode param into default (style=simple, explode=false)
             if (!parameter.content && parameter.explode){ // ignores style and explode when content is defined
-                val = req.headers[parameter.name.toLowerCase()]?.replaceAll('=', ',');
+                val = req.headers[parameter.name.toLowerCase()]?.replace(/=/g, ',');
             } else {
                 val = req.headers[parameter.name.toLowerCase()];
             }

@@ -6,14 +6,16 @@ import routerTest from './suites/router.test.js';
 import responseValidatorTest from './suites/responseValidator.test.js';
 
 describe('OAS TOOLS TESING SUITE', () => {
+    const nodeMajor = parseInt(process.version.split('.')[0].replace('v',''));
+    
     after(() => {
         process.exit(0);
     });
-
+    
     // Test suites
     initTest();
     paramTest();
-    securityTest();
+    if(nodeMajor >= 16) securityTest();
     requestValidatorTest();
     routerTest();
     responseValidatorTest();
