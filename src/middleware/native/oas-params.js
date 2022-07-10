@@ -37,9 +37,9 @@ function _getParameterValue(req, parameter) {
     switch (paramLocation) {
         case "path": // transform any style,explode param into default (style=simple, explode=false)
             if (parameter.explode){
-                if (parameter.style === "label") val = req.params[parameter.name]?.replace('.','').replace(/\./g, ',').replace(/=/g, ',');
-                else if (parameter.style === "matrix") val = req.params[parameter.name]?.replace(';', '').replace(new RegExp(`${parameter.name}=`,"g"), '').replace(/;/g, ',').replace(/=/g, ',');
-                else val = req.params[parameter.name].replace(/=/g, ',');
+                if (parameter.style === "label") val = req.params[parameter.name]?.replace('.','').replace(/\./g, ',').replace(/[=]/g, ',');
+                else if (parameter.style === "matrix") val = req.params[parameter.name]?.replace(';', '').replace(new RegExp(`${parameter.name}=`,"g"), '').replace(/;/g, ',').replace(/[=]/g, ',');
+                else val = req.params[parameter.name].replace(/[=]/g, ',');
                 break;
             } else {
                 if (parameter.style === "label") val = req.params[parameter.name]?.replace('.', '');
@@ -63,7 +63,7 @@ function _getParameterValue(req, parameter) {
             }
         case "header": // transform any style,explode param into default (style=simple, explode=false)
             if (!parameter.content && parameter.explode){ // ignores style and explode when content is defined
-                val = req.headers[parameter.name.toLowerCase()]?.replace(/=/g, ',');
+                val = req.headers[parameter.name.toLowerCase()]?.replace(/[=]/g, ',');
             } else {
                 val = req.headers[parameter.name.toLowerCase()];
             }
