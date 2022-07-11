@@ -15,7 +15,6 @@
         "validator": { "requestValidation": true, "responseValidation": true, "strict": false },
         "security": { "disable": true, "auth": null },
         "swagger": { "disable": false, "path": "/docs", "ui": { "customCss": null, "customJs": null }},
-        "error": { "disable": false, "printStackTrace": false, "customHandler": null },
-        "external": []
+        "error": { "disable": false, "printStackTrace": false, "customHandler": null }
     }
 }

@@ -10,7 +10,18 @@ import { OASParams, OASRequestValidator, OASResponseValidator, OASRouter, OASSec
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import loadConfig from "./config";
 import { logger } from "oas-devtools/utils";
+import { pathToFileURL } from "url";
 import { schema } from "./utils";
+
+const middlewareChain = [ 
+  OASParams, 
+  OASSecurity, 
+  OASRequestValidator, 
+  OASResponseValidator, 
+  OASRouter, 
+  OASSwagger,
+  OASErrorHandler
+];
 
 /**
  * Function to initialize OAS-tools middlewares.
@@ -32,11 +43,10 @@ export async function initialize(app, config) {
       logger.info("Specification file dereferenced");
 
       /* Initialize native & external middleware */
-      const nativeChain = await _initNativeMiddleware(oasFile, cfg);
-      const middlewareChain = await _initExternalMiddleware(oasFile, cfg, nativeChain);
+      const finalChain = await _initMiddleware(oasFile, cfg).then(chain => chain.filter(m => m!==null));
 
       /* Register middleware in express */
-      middlewareChain.forEach((middleware) => {
+      finalChain.forEach((middleware) => {
         middleware.register(app);
         const name = middleware.constructor.name;
         logger.info(`Registered ${name === 'OASBase' ? name + '[' + middleware.name + ']' : name} middleware`);
@@ -47,87 +57,58 @@ export async function initialize(app, config) {
     });
 }
 
-async function _initNativeMiddleware(oasFile, config) {
-  const expressOasFile = schema.expressPaths(oasFile);
-  const middlewareChain = [];
-
-  /* Params middleware: Register locals */
-  middlewareChain.push(OASParams.initialize(expressOasFile, config));
-
-  if(!config.middleware.security.disable) {
-    middlewareChain.push(OASSecurity.initialize(expressOasFile, {...config.middleware.security, endpoints: config.endpointCfg}));
-    logger.debug(`Security middleware initialized`);
+/**
+ * Load external modules into the middleware chain.
+ *@param {string | function} npmModule - name or url of the module, or the middleware function itself.
+ *@param {object} options - Config object.
+ *@param {integer} priority - Position of the chain in which the module will be inserted.
+ */
+export function use( npmModule, options, priority ) {
+  if (typeof npmModule === "string") {
+    if (/\w+\.(?:js|cjs|mjs)/.test(npmModule))
+      npmModule = pathToFileURL(npmModule);
+    middlewareChain.splice(priority ?? 3, 0, {mod: import(npmModule).then(m => Object.values(m)[0]), options: options ?? {}})
+  } else {
+    middlewareChain.splice(priority ?? 3, 0, {mod: npmModule, options: options ?? {}})
   }
-  if(config.middleware.validator.requestValidation) {
-    middlewareChain.push(OASRequestValidator.initialize(expressOasFile, {...config.middleware.validator, endpoints: config.endpointCfg}));
-    logger.debug(`Request validator middleware initialized`);
-  } 
-  if(config.middleware.validator.responseValidation) {
-    middlewareChain.push(OASResponseValidator.initialize(expressOasFile, {...config.middleware.validator, endpoints: config.endpointCfg}));
-    logger.debug(`Response validator middleware initialized`);
-  }
-  if(!config.middleware.router.disable) {
-    const middleware = await OASRouter.initialize(expressOasFile, {...config.middleware.router, endpoints: config.endpointCfg});
-    middlewareChain.push(middleware);
-    logger.debug(`Router middleware initialized`);
-  }
-  if((/^3\.1\.\d+(-.+)?$/).test(oasFile.openapi)) {
-    logger.warn("Swagger UI is not supported for OpenAPI 3.1.x, middleware will be disabled");
-  } else if(!config.middleware.swagger.disable){
-    middlewareChain.push(OASSwagger.initialize(oasFile, {...config.middleware.swagger, endpoints: config.endpointCfg}));
-    logger.debug(`Swagger middleware initialized. Swagger UI will be available at: ${config.middleware.swagger.path}`);
-  }
-  if(!config.middleware.error.disable) {
-    middlewareChain.push(OASErrorHandler.initialize(oasFile, {...config.middleware.error, endpoints: config.endpointCfg}));
-    logger.debug(`Error handler middleware initialized`);
-  }
-
-  return middlewareChain;
 }
 
-async function _initExternalMiddleware(oasFile, config, nativeChain) {
+/* Map native middlewares to {mod, options} object 
+and initialize native and external middleware */
+async function _initMiddleware(oasFile, config) {
   const expressOasFile = schema.expressPaths(oasFile);
-  const middlewareChain = [...nativeChain];
+  return Promise.all(middlewareChain.map(async (middleware) => {
+    let initObj;
+    if (middleware.name === "OASParams") {
+      initObj = { mod: middleware, options: config }
+    } else if (middleware.name === "OASSecurity") {
+      initObj = { mod: middleware, options: {...config.middleware.security, endpoints: config.endpointCfg}}
+    } else if (middleware.name === "OASRequestValidator") {
+      initObj = { mod: middleware, options: {...config.middleware.validator, disable: !config.middleware.validator.requestValidation, endpoints: config.endpointCfg}}
+    } else if (middleware.name === "OASResponseValidator") {
+      initObj = { mod: middleware, options: {...config.middleware.validator, disable: !config.middleware.validator.responseValidation, endpoints: config.endpointCfg}}
+    } else if (middleware.name === "OASRouter") {
+      initObj = { mod: middleware, options: {...config.middleware.router, endpoints: config.endpointCfg}}
+    } else if (middleware.name === "OASSwagger") {
+      initObj = { mod: middleware, options: {...config.middleware.swagger, endpoints: config.endpointCfg, file: oasFile}}
+    } else if (middleware.name === "OASErrorHandler") {
+      initObj = { mod: middleware, options: {...config.middleware.error, endpoints: config.endpointCfg, file: oasFile}}
+    } else { // external middleware
+      initObj = {mod: await Promise.resolve(middleware.mod), options: {...middleware.options, endpoints: config.endpointCfg}};
+    }
 
-  if (!Array.isArray(config.middleware.external)) {
-    throw new TypeError("config.middleware.external must be an array");
-  } else {
-    await Promise.all(config.middleware.external.flatMap((mod) => {
-      const tmp = {};
-
-      /* Get the import name and configs */
-      if (typeof mod === "object") { 
-        if (Array.isArray(mod)) { // module library
-          const [module, submodules] = mod;
-          Object.entries(submodules).filter(([key, value]) => key !== 'priority' && value).forEach(([key, value]) => {
-            tmp[`${module.split('/').at(-1)}/${key}`] = {...value, priority: value.priority ?? submodules.priority};
-          });
-        } else { // module with options
-          const [name, options] = Object.entries(mod)[0];
-          tmp[name.split('/').at(-1)] = options;
-        }
-      } else { // module with no options
-        tmp[mod.split('/').at(-1)] = {};
-      }
-
-      /* Import and initialize the middleware */
-      return Object.entries(tmp).map(async ([name, options]) => {
-        const importedObj = await import(name);
-        return await Promise.all(Object.values(importedObj).map(async (imported) => {
-          if (typeof imported === "function" && imported.length >= 3) {
-            return {middleware: new OASBase(expressOasFile, imported), priority: options.priority ?? 3};
-          } else if (Object.getPrototypeOf(imported).constructor === OASBase.constructor) {
-            return {middleware: await imported.initialize(expressOasFile, {...options, endpoints: config.endpointCfg}), priority: options.priority ?? 3};
-          } else {
-            throw new TypeError(`${name} must be a middleware function or a class extending OASBase`);
-          }
-        }));
-      });
-    })).then((middleware) => {
-      middleware.flat().sort((a,b) => a.priority - b.priority).forEach(({middleware, priority}) => {
-        middlewareChain.splice(priority, 0, middleware);
-      });
-    });
-    return middlewareChain;
-  }
+    let res;
+    if (initObj.options.disable) {
+      res = null
+    } else if (typeof initObj.mod.initialize === "function") {
+      res = await initObj.mod.initialize(initObj.options.file ?? expressOasFile, initObj.options);
+      logger.debug(`${initObj.mod.name} middleware initialized`);
+    } else if (typeof initObj.mod === "function" && initObj.mod.length >= 3) {
+      res = new OASBase(expressOasFile, initObj.mod);
+      logger.debug(`External middleware "${initObj.mod.name}" initialized`);
+    } else {
+      throw new TypeError("External modules must be a middleware functions or classes extending OASBase");
+    }
+    return res;
+  }));
 }

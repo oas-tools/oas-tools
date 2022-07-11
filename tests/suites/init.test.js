@@ -1,4 +1,4 @@
-import {init, close} from '../testServer/index.js';
+import {init, use, close} from '../testServer/index.js';
 import fs from 'fs';
 import assert from 'assert';
 import axios from 'axios';
@@ -21,6 +21,27 @@ export default () => {
             await init();
             await axios.get('http://localhost:8080/status').then(res=> {
                 assert.equal(res.status, 200);
+            });
+        });
+
+        it('Should initialize correctly with an external test middleware wrapped in a class', async () => {
+            use('tests/testServer/modules/testModule.js', {test: 'some text'}, 2);
+            await init();
+            await axios.get('http://localhost:8080/api/v1/oasParams').then(res=> {
+                assert.equal(res.status, 200);
+                assert.equal(res.data.test, 'some text');
+            });
+        });
+
+        it('Should initialize correctly with an external test middleware declared as a function', async () => {
+            use((_req, res, next) => {
+                res.locals.oas = {...res.locals.oas, test: 'more text'};
+                next()
+            });
+            await init();
+            await axios.get('http://localhost:8080/api/v1/oasParams').then(res=> {
+                assert.equal(res.status, 200);
+                assert.equal(res.data.test, 'more text');
             });
         });
 
@@ -64,9 +85,9 @@ export default () => {
 
         it('Should fail initialization when invalid external middleware provided', async () => {
             sinon.stub(process, 'exit');
-            cfg.middleware.external = 'not an array';
-            cfg.logger.level = 'off';
-            
+            cfg.logger.level = 'off';            
+            use(123); // Using an invalid middleware
+
             await init(cfg);
             assert(process.exit.calledWith(1));
             process.exit.restore();
