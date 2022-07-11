@@ -43,7 +43,7 @@ export async function initialize(app, config) {
       logger.info("Specification file dereferenced");
 
       /* Initialize native & external middleware */
-      const finalChain = await _initMiddleware(oasFile, cfg).then(chain => chain.filter(m => m!==null));
+      const finalChain = await _initMiddleware(oasFile, cfg).then((chain) => chain.filter((m) => m!==null));
 
       /* Register middleware in express */
       finalChain.forEach((middleware) => {
@@ -63,11 +63,12 @@ export async function initialize(app, config) {
  *@param {object} options - Config object.
  *@param {integer} priority - Position of the chain in which the module will be inserted.
  */
-export function use( npmModule, options, priority ) {
+export function use(npmModule, options, priority) {
   if (typeof npmModule === "string") {
-    if (/\w+\.(?:js|cjs|mjs)/.test(npmModule))
-      npmModule = pathToFileURL(npmModule);
-    middlewareChain.splice(priority ?? 3, 0, {mod: import(npmModule).then(m => Object.values(m)[0]), options: options ?? {}})
+    let path = npmModule
+    if ((/\w+\.(?:js|cjs|mjs)/).test(path))
+      path = pathToFileURL(path);
+    middlewareChain.splice(priority ?? 3, 0, {mod: import(path).then((m) => Object.values(m)[0]), options: options ?? {}})
   } else {
     middlewareChain.splice(priority ?? 3, 0, {mod: npmModule, options: options ?? {}})
   }

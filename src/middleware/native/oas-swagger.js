@@ -29,11 +29,11 @@ export class OASSwagger extends OASBase {
 
       swaggerFile.paths = Object.fromEntries(Object.entries(swaggerFile.paths).map(([path, methods]) => {
         return [
-path, Object.fromEntries(Object.entries(methods).filter(([method, methodObj]) => {
-          if (!endpointCfg) return methodObj['x-swagger-ui'] !== false;
-          return endpointCfg[path]?.find((e) => e.method?.toLowerCase() === method)?.swaggerUI !== 'false';
-        }))
-];
+          path, Object.fromEntries(Object.entries(methods).filter(([method, methodObj]) => {
+            if (!endpointCfg) return methodObj['x-swagger-ui'] !== false;
+            return endpointCfg[path]?.find((e) => e.method?.toLowerCase() === method)?.swaggerUI !== 'false';
+          }))
+        ];
       }));
 
       return swaggerFile;
