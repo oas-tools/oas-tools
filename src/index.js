@@ -10,7 +10,6 @@ import { OASParams, OASRequestValidator, OASResponseValidator, OASRouter, OASSec
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import loadConfig from "./config";
 import { logger } from "oas-devtools/utils";
-import { pathToFileURL } from "url";
 import { schema } from "./utils";
 
 const middlewareChain = [ 
@@ -59,19 +58,12 @@ export async function initialize(app, config) {
 
 /**
  * Load external modules into the middleware chain.
- *@param {string | function} npmModule - name or url of the module, or the middleware function itself.
+ *@param {class | function} npmModule - class extending OASBase, or the middleware function itself.
  *@param {object} options - Config object.
  *@param {integer} priority - Position of the chain in which the module will be inserted.
  */
 export function use(npmModule, options, priority) {
-  if (typeof npmModule === "string") {
-    let path = npmModule
-    if ((/\w+\.(?:js|cjs|mjs)/).test(path))
-      path = pathToFileURL(path);
-    middlewareChain.splice(priority ?? 3, 0, {mod: import(path).then((m) => Object.values(m)[0]), options: options ?? {}})
-  } else {
     middlewareChain.splice(priority ?? 3, 0, {mod: npmModule, options: options ?? {}})
-  }
 }
 
 /* Map native middlewares to {mod, options} object 

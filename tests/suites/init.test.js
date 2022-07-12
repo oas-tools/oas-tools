@@ -25,7 +25,7 @@ export default () => {
         });
 
         it('Should initialize correctly with an external test middleware wrapped in a class', async () => {
-            use('tests/testServer/modules/testModule.js', {test: 'some text'}, 2);
+            use(import('../testServer/modules/testModule.js').then(m => m.OASTest), {test: 'some text'}, 2);
             await init();
             await axios.get('http://localhost:8080/api/v1/oasParams').then(res=> {
                 assert.equal(res.status, 200);
