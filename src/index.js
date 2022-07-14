@@ -48,7 +48,7 @@ export async function initialize(app, config) {
       finalChain.forEach((middleware) => {
         middleware.register(app);
         const name = middleware.constructor.name;
-        logger.info(`Registered ${name === 'OASBase' ? name + '[' + middleware.name + ']' : name} middleware`);
+        logger.info(`Registered ${name === 'OASBase' ? name + '[' + middleware.getMiddleware().name + ']' : name} middleware`);
       })
     }).catch((err) => {
       logger.error(err.stack);
