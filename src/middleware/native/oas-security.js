@@ -65,16 +65,19 @@ export class OASSecurity extends OASBase {
                 break;
               case 'oauth2':
               case 'openIdConnect':
-                await handlers[secName](secDef, secScope); 
-                break;
+                return [secName, await handlers[secName](secDef, secScope)]; 
               default:
                 throw new UnsupportedError(`Security scheme ${secName} is invalid or not supported.`);
             }
             if (['http', 'apiKey'].includes(secDef.type)) {
-              if (!token) throw new SecurityError(`Missing token for security scheme ${secName}.`);
-              await handlers[secName](token);
+              if (!token) throw new SecurityError(`Missing token for security scheme ${secName}.`);              
+              return [secName, await handlers[secName](token)];
             }
-          }));
+          })).then(results => {
+            results.forEach(([secName, result]) => {
+              if (result) res.locals.oas.security = {[secName]: result};
+            })
+          });
         })).catch((err) => {
           if (err instanceof AggregateError) {
             if (!err.errors.every((e) => e instanceof SecurityError)) {
