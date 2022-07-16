@@ -26,6 +26,14 @@ export class OASSecurity extends OASBase {
       throw new ConfigError("Security handlers must be functions.");
     }
 
+    // Check there are not multiple http schemes for the same operation
+    const secByOp = Object.values(oasFile.paths).flatMap((opObj) => Object.values(opObj)).map((op) => op.security ?? oasFile.security).filter((o) => o);
+    const multipleHttp = secByOp.filter((scheme) => scheme.flatMap((obj) => Object.keys(obj)).filter((k) => secSchemes[k]?.type === "http").length > 1).length;
+
+    if(multipleHttp > 0) {
+      throw new ConfigError("Operations must not have more than one Security Scheme of type 'http'");
+    }
+    
     /* Instanciate middleware */
     return new OASSecurity(oasFile, async (req, res, next) => {
       const oasRequest = oasFile.paths[req.route.path][req.method.toLowerCase()];
@@ -33,10 +41,10 @@ export class OASSecurity extends OASBase {
         const secReqs = oasRequest.security ?? oasFile.security;
 
         /* Logical OR */
-        await Promise.any(secReqs.map(async (secReq) => {
+        await Promise.any(secReqs.map((secReq) => {
 
           /* Logical AND */
-          Object.entries(secReq).forEach(([secName, secScope]) => {
+          return Promise.all(Object.entries(secReq).map(async ([secName, secScope]) => {
             const secDef = secSchemes[secName];
             let token;
             if (!secDef) {
@@ -57,20 +65,20 @@ export class OASSecurity extends OASBase {
                 break;
               case 'oauth2':
               case 'openIdConnect':
-                handlers[secName](secDef, secScope, (status) => res.status(status)); 
+                await handlers[secName](secDef, secScope); 
                 break;
               default:
                 throw new UnsupportedError(`Security scheme ${secName} is invalid or not supported.`);
             }
             if (['http', 'apiKey'].includes(secDef.type)) {
               if (!token) throw new SecurityError(`Missing token for security scheme ${secName}.`);
-              handlers[secName](token, (status) => res.status(status));
+              await handlers[secName](token);
             }
-          });
+          }));
         })).catch((err) => {
           if (err instanceof AggregateError) {
             if (!err.errors.every((e) => e instanceof SecurityError)) {
-              next(err.errors[0]);
+              next(err.errors.filter((e) => !(e instanceof SecurityError))[0]);
             } else if (err.errors.length >= secReqs.length) {
               next(err.errors[0]);
             }

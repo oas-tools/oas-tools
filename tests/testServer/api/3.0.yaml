@@ -57,15 +57,24 @@ paths:
     x-router-controller: oasSecurityTestController
     get:
       operationId: getRequest
-      security: # basicAuth AND openID OR bearerAuth OR apiKey(all three)
+      security: # basicAuth AND openID OR apiKey(all three)
         - basicAuth: []
           openID: [read, write]
-        - bearerAuth: []
         - apiKeyQuery: []
           apiKeyHeader: []
           apiKeyCookie: []
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
+        
+  /api/v1/oasSecurity/bearer:
+    x-router-controller: oasSecurityTestController
+    get:
+      operationId: getRequest
+      security:
+        - bearerAuth: []
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+  
   /api/v1/oasSecurity/invalid:
     x-router-controller: oasSecurityTestController
     get:

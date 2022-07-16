@@ -15,12 +15,12 @@ export default () => {
                 cfg.middleware.security = {
                     disable: false,
                     auth: {
-                        basicAuth: (credentials, _setStatus) => {global.basicAuthCredentials = credentials},
-                        bearerAuth: (credentials, _setStatus) => {global.bearerAuthCredentials = credentials},
-                        apiKeyQuery: (credentials, _setStatus) => {global.apiKeyQuerCredentials = credentials},
-                        apiKeyHeader: (credentials, _setStatus) => {global.apiKeyHeaderCredentials = credentials},
-                        apiKeyCookie: (credentials, _setStatus) => {global.apiKeyCookieCredentials = credentials},
-                        openID: (secDef, secScope, _setStatus) => {global.openIDCredentials = {secDef, secScope}}
+                        basicAuth: (credentials) => {global.basicAuthCredentials = credentials},
+                        bearerAuth: (credentials) => {global.bearerAuthCredentials = credentials},
+                        apiKeyQuery: (credentials) => {global.apiKeyQuerCredentials = credentials},
+                        apiKeyHeader: (credentials) => {global.apiKeyHeaderCredentials = credentials},
+                        apiKeyCookie: (credentials) => {global.apiKeyCookieCredentials = credentials},
+                        openID: (secDef, secScope) => {global.openIDCredentials = {secDef, secScope}}
                     }
                 }
             });
@@ -98,7 +98,7 @@ export default () => {
             });
     
             it('Should authenticate correctly with http bearer auth', async () => {
-                await axios.get('http://localhost:8080/api/v1/oasSecurity', { 
+                await axios.get('http://localhost:8080/api/v1/oasSecurity/bearer', { 
                     headers: { 
                         Authorization: 'Bearer ' + Buffer.from('test:test').toString('base64') 
                     } 

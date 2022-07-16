@@ -8,3 +8,12 @@ var service = require('./oasSecurityTestService.cjs');
  module.exports.getRequest = function getRequest(req, res, next) {
   service.getRequest(req.params, res, next);
 };
+
+
+/**
+ * @oastools {method} GET
+ * @oastools {path} /bearer
+ */
+ module.exports.getRequest = function getRequest(req, res, next) {
+  service.getRequest(req.params, res, next);
+};
