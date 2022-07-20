@@ -1,2 +1,2 @@
-export * as schema from "./modules/schema";
-export * as commons from "./modules/commons";
+export * as schema from "./modules/schema.js";
+export * as commons from "./modules/commons.js";

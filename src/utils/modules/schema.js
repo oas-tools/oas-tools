@@ -3,7 +3,7 @@ import fs from "fs";
 import _ from 'lodash';
 import path from "path";
 import { fileURLToPath } from "url";
-import Ajv2020 from "ajv/dist/2020";
+import Ajv2020 from "ajv/dist/2020.js";
 import Ajv04 from "ajv-draft-04";
 import addFormats from "ajv-formats";
 import { ValidationError, logger } from "oas-devtools/utils";

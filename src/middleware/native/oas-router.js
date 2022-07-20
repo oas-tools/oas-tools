@@ -1,5 +1,5 @@
 import { OASBase } from "oas-devtools/middleware";
-import { commons } from "../../utils";
+import { commons } from "../../utils/index.js";
 import { errors, logger } from "oas-devtools/utils";
 import { pathToFileURL } from "url";
 

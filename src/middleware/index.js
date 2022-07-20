@@ -1,5 +1,5 @@
-export { OASSwagger } from "./native/oas-swagger";
-export { OASRouter } from "./native/oas-router";
-export { OASParams } from "./native/oas-params";
-export { OASSecurity } from "./native/oas-security";
-export { OASRequestValidator, OASResponseValidator } from "./native/oas-validator";
+export { OASSwagger } from "./native/oas-swagger.js";
+export { OASRouter } from "./native/oas-router.js";
+export { OASParams } from "./native/oas-params.js";
+export { OASSecurity } from "./native/oas-security.js";
+export { OASRequestValidator, OASResponseValidator } from "./native/oas-validator.js";

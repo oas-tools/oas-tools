@@ -6,11 +6,11 @@ https://github.com/isa-group/project-oas-tools
 */
 
 import { OASBase, OASErrorHandler } from "oas-devtools/middleware";
-import { OASParams, OASRequestValidator, OASResponseValidator, OASRouter, OASSecurity, OASSwagger } from "./middleware";
+import { OASParams, OASRequestValidator, OASResponseValidator, OASRouter, OASSecurity, OASSwagger } from "./middleware/index.js";
 import $RefParser from "@apidevtools/json-schema-ref-parser";
-import loadConfig from "./config";
+import loadConfig from "./config/index.js";
 import { logger } from "oas-devtools/utils";
-import { schema } from "./utils";
+import { schema } from "./utils/index.js";
 
 const middlewareChain = [ 
   OASParams, 
