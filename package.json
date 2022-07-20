@@ -5,7 +5,8 @@
   "type": "module",
   "main": "./src/index.js",
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.js",
+    "./v2": "./src/index_old.js"
   },
   "files": [
     "src"
@@ -17,7 +18,7 @@
     "lint": "eslint src --ext .mjs --ext .js --ext .cjs",
     "format": "npm run lint -- --fix",
     "test": "mocha ./tests/index.test.js --experimental-specifier-resolution=node",
-    "cov": "c8 --all --reporter=lcov --reporter=text npm run test"
+    "cov": "c8 --all -n=src/* -x=src/index_old.js --reporter=lcov --reporter=text npm run test"
   },
   "author": "ISA Group, University of Seville",
   "license": "Apache-2.0",
