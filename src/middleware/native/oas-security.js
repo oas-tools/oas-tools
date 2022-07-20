@@ -73,7 +73,7 @@ export class OASSecurity extends OASBase {
               if (!token) throw new SecurityError(`Missing token for security scheme ${secName}.`);              
               return [secName, await handlers[secName](token)];
             }
-          })).then(results => {
+          })).then((results) => {
             results.forEach(([secName, result]) => {
               if (result) res.locals.oas.security = {[secName]: result};
             })
