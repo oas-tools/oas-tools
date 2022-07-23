@@ -5,8 +5,8 @@ https://github.com/ignpelloz
 https://github.com/isa-group/project-oas-tools
 */
 
-import { OASBase, OASErrorHandler } from "oas-devtools/middleware";
-import { OASParams, OASRequestValidator, OASResponseValidator, OASRouter, OASSecurity, OASSwagger } from "./middleware/index.js";
+import { OASBase } from "oas-devtools/middleware";
+import { OASErrorHandler, OASParams, OASRequestValidator, OASResponseValidator, OASRouter, OASSecurity, OASSwagger } from "./middleware/index.js";
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import loadConfig from "./config/index.js";
 import { logger } from "oas-devtools/utils";
