@@ -123,14 +123,18 @@ export default () => {
             });
     
             it('Should fail with code 401 when missing the required auth types', async () => {
-                await axios.get('http://localhost:8080/api/v1/oasSecurity').catch( err => {
+                await axios.get('http://localhost:8080/api/v1/oasSecurity')
+                .then(() => assert.fail("Expected code 401 but got 2XX"))
+                .catch( err => {
                     assert.deepStrictEqual(err.response.data, {error: 'SecurityError: Missing token for security scheme basicAuth.'});
                     assert.equal(err.response.status, 401);
                 });
             });
 
             it('Should fail with code 500 when using a non-declared security scheme', async () => {
-                await axios.get('http://localhost:8080/api/v1/oasSecurity/invalid').catch( err => {
+                await axios.get('http://localhost:8080/api/v1/oasSecurity/invalid')
+                .then(() => assert.fail("Expected code 500 but got 2XX"))
+                .catch( err => {
                     assert.deepStrictEqual(err.response.data, {error: "ConfigError: Security scheme 'undeclaredScheme' not found in OAS Document."});
                     assert.equal(err.response.status, 500);
                 });
