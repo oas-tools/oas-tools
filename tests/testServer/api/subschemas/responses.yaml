@@ -32,6 +32,14 @@
     application/json:
       schema:
         $ref: './schemas.yaml#/errorModel'
+
+'406':
+  description: Not Accepted
+  content:
+    application/json:
+      schema:
+        $ref: './schemas.yaml#/errorModel'
+
 '500':
   description: Internal Server Error
   content:

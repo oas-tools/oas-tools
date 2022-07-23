@@ -151,7 +151,24 @@ paths:
       operationId: getRequestWrongData
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
-  
+
+ # OAS ERROR HANDLER TEST ENDPOINT
+  /api/v1/oasErrorHandler/{error}:
+    get:
+      operationId: getRequest
+      x-router-controller: oasErrorHandlerTestController
+      parameters:
+        - name: error
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '400': {$ref: 'subschemas/responses.yaml#/400'}
+        '401': {$ref: 'subschemas/responses.yaml#/401'}
+        '403': {$ref: 'subschemas/responses.yaml#/403'}
+        '406': {$ref: 'subschemas/responses.yaml#/406'}
+        '500': {$ref: 'subschemas/responses.yaml#/500'}
 components:
   securitySchemes:
     basicAuth:

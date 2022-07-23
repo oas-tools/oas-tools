@@ -4,6 +4,7 @@ import securityTest from './suites/security.test.js';
 import requestValidatorTest from './suites/requestValidator.test.js';
 import routerTest from './suites/router.test.js';
 import responseValidatorTest from './suites/responseValidator.test.js';
+import errorHandlerTest from './suites/errorHandler.test.js';
 
 describe('OAS TOOLS TESING SUITE', () => {
     const nodeMajor = parseInt(process.version.split('.')[0].replace('v',''));
@@ -19,4 +20,5 @@ describe('OAS TOOLS TESING SUITE', () => {
     requestValidatorTest();
     routerTest();
     responseValidatorTest();
+    errorHandlerTest();
 });
