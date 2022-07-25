@@ -1,10 +1,7 @@
 import { OASBase } from "oas-devtools/middleware";
-import { errors, logger } from "oas-devtools/utils";
+import { errors, logger, validator } from "oas-devtools/utils";
 import { commons } from "../../utils/index.js";
 import MIMEtype from "whatwg-mimetype";
-import addFormats from "ajv-formats";
-import Ajv2020 from "ajv/dist/2020.js";
-import Ajv04 from "ajv-draft-04";
 
 const { RequestValidationError, ResponseValidationError } = errors;
 
@@ -14,12 +11,6 @@ export class OASRequestValidator extends OASBase {
   }
 
   static initialize(oasFile, config) {
-
-    /* Instanciate validator */
-    let ajv;
-    if((/^3\.0\.\d(-.+)?$/).test(oasFile.openapi)) ajv = new Ajv04({strict: false, logger: logger}); // 3.0.X - Json draft04
-    else ajv = new Ajv2020({strict: false, logger: logger}); // 3.1.X - Json schema 2020-12
-    addFormats(ajv);
 
     /* Instanciate middleware */
     return new OASRequestValidator(oasFile, (req, res, next) => {  
@@ -45,8 +36,7 @@ export class OASRequestValidator extends OASBase {
             });
           }
   
-          const validate = ajv.compile(schema);
-          const valid = validate(body);
+          const {validate, valid} = validator.validate(body, schema, oasFile.openapi);
   
           if (!valid) {
             commons.handle(RequestValidationError, `Request body does not match the schema specified in the OAS Document:\n${validate.errors.map((e) => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
@@ -70,8 +60,7 @@ export class OASRequestValidator extends OASBase {
               schema = param.content[contentType].schema;
             }
 
-            const validate = ajv.compile(schema);
-            const valid = validate(value);
+            const {validate, valid} = validator.validate(value, schema, oasFile.openapi);
 
             if (!valid) {
               commons.handle(RequestValidationError, `Parameter ${param.name} does not match the schema specified in the OAS Document:\n${validate.errors.map((e) => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
@@ -93,12 +82,6 @@ export class OASResponseValidator extends OASBase {
   }
 
   static initialize(oasFile, config) {
-
-    /* Instanciate validator */
-    let ajv;
-    if((/^3\.0\.\d(-.+)?$/).test(oasFile.openapi)) ajv = new Ajv04({strict: false, logger: logger}); // 3.0.X - Json draft04
-    else ajv = new Ajv2020({strict: false, logger: logger}); // 3.1.X - Json schema 2020-12
-    addFormats(ajv);
 
     /* Instanciate middleware */
     return new OASResponseValidator(oasFile, (req, res, next) => {
@@ -128,8 +111,7 @@ export class OASResponseValidator extends OASBase {
           } else {
             const schemaContentType = Object.keys(expectedResponse.content)[0];
             const schema = expectedResponse.content[schemaContentType].schema;
-            const validate = ajv.compile(schema);
-            const valid = validate(data);
+            const {validate, valid} = validator.validate(data, schema, oasFile.openapi);
 
             if (!valid) {
               commons.handle(ResponseValidationError, `Wrong data in response.\n${validate.errors.map((e) => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);

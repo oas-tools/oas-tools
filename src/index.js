@@ -9,7 +9,7 @@ import { OASBase } from "oas-devtools/middleware";
 import { OASErrorHandler, OASParams, OASRequestValidator, OASResponseValidator, OASRouter, OASSecurity, OASSwagger } from "./middleware/index.js";
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import loadConfig from "./config/index.js";
-import { logger } from "oas-devtools/utils";
+import { logger, validateOASFile } from "oas-devtools/utils";
 import { schema } from "./utils/index.js";
 
 const middlewareChain = [ 
@@ -35,7 +35,7 @@ export async function initialize(app, config) {
       if(cfg.useAnnotations) 
         logger.warn("Annotations enabled. This feature is currently experimental and may not work as expected.");
       
-      schema.validate(cfg.oasFile);
+      validateOASFile(cfg.oasFile);
       logger.info("Valid specification file");
 
       const oasFile = await $RefParser.dereference(cfg.oasFile);

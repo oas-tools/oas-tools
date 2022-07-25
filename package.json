@@ -27,9 +27,6 @@
     "url": "git+https://github.com/oas-tools/oas-tools.git"
   },
   "dependencies": {
-    "ajv": "^8.11.0",
-    "ajv-draft-04": "^1.0.0",
-    "ajv-formats": "^2.1.1",
     "js-yaml": "^3.13.1",
     "json-schema-ref-parser": "^9.0.9",
     "lodash": "^4.17.21",
