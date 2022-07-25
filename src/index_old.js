@@ -19,10 +19,12 @@ export function initialize(oasDoc, app, callback) {
     logger.warn("Compatibility functions try to adapt older functionality to the new versions of OAS-Tools. Bear in mind that it may not work as expected.");
     cfg.oasFile = findOASDoc('.', oasDoc);
 
-    use(function paramCompatibility(req,res,next) {
+    const paramCompatibility = (req,res,next) => {
         req.oas = res.locals.oas;
-        next() 
-    }, {}, 1);
+        next();
+    }
+    
+    use(paramCompatibility, {}, 1);
 
     Promise.all(
         Object.entries(cfg.middleware.security.auth).map(async ([secName, handler]) => {
@@ -74,7 +76,7 @@ export function configure(config) {
             }
         }
     }
-    if (Object.values(cfg.middleware.security.auth).some(handler => typeof handler === "object")) {
+    if (Object.values(cfg.middleware.security.auth).some((handler) => typeof handler === "object")) {
         try {
             require.resolve('../../oas-auth/handlers');
         } catch(err) {
