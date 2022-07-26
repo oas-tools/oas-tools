@@ -45,22 +45,26 @@ export class OASRouter extends OASBase {
           controllers[expressPath] = tmp;
         }));
       } else { // Load when annotations disabled
-        await Promise.all(Object.entries(oasFile.paths).map(async ([expressPath, obj]) => {
-          const tmp = {};
-          let opId = commons.generateName(expressPath, "function");
-          let controllerName = obj['x-router-controller'] ?? commons.generateName(expressPath, "controller");
-          await Promise.all(Object.entries(obj).map(([method, methodObj]) => {
-            opId = methodObj.operationId ?? opId;
-            controllerName = methodObj['x-router-controller'] ?? controllerName;
-            const path = commons.filePath(config.controllers, controllerName);
-            if (!path) throw new errors.RoutingError(`Controller ${controllerName} not found`);
-            return import(pathToFileURL(path)).then((imp) => {
-              tmp[method.toUpperCase()] = imp[opId]
-              if (!tmp[method.toUpperCase()])
+        await Promise.all(Object.entries(oasFile.paths).flatMap(([expressPath, obj]) => {
+          const controllerName = obj['x-router-controller'] ?? commons.generateName(expressPath, "controller");
+          
+          return Object.entries(obj)
+            .filter(([method, _methodObj]) => method !== 'x-router-controller')
+            .map(async ([method, methodObj]) => {
+              const opId = methodObj.operationId ?? commons.generateName(expressPath, "function");;
+              const opControllerName = methodObj['x-router-controller'] ?? controllerName;
+              const path = commons.filePath(config.controllers, opControllerName);
+
+              if (!path) throw new errors.RoutingError(`Controller ${opControllerName} not found`);
+              
+              controllers[expressPath] = {
+                ...controllers[expressPath],
+                [method.toUpperCase()]: (await import(pathToFileURL(path)))[opId]
+              };
+
+              if (!controllers[expressPath][method.toUpperCase()])
                 throw new Error(`Controller ${path} does not have method ${opId}`);
             });
-          }));
-          controllers[expressPath] = tmp;
         }));
       }
       return controllers;
