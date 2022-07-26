@@ -49,23 +49,31 @@ export class OASRouter extends OASBase {
           const controllerName = obj['x-router-controller'] ?? commons.generateName(expressPath, "controller");
           
           return Object.entries(obj)
-            .filter(([method, _methodObj]) => method !== 'x-router-controller')
-            .map(async ([method, methodObj]) => {
+          .filter(([method, _methodObj]) => method !== 'x-router-controller')
+          .map(async ([method, methodObj]) => {
+              const tmp = {};
               const opId = methodObj.operationId ?? commons.generateName(expressPath, "function");;
               const opControllerName = methodObj['x-router-controller'] ?? controllerName;
               const path = commons.filePath(config.controllers, opControllerName);
 
               if (!path) throw new errors.RoutingError(`Controller ${opControllerName} not found`);
               
-              controllers[expressPath] = {
-                ...controllers[expressPath],
+              tmp[expressPath] = {
+                ...tmp[expressPath],
                 [method.toUpperCase()]: (await import(pathToFileURL(path)))[opId]
               };
 
-              if (!controllers[expressPath][method.toUpperCase()])
+              if (!tmp[expressPath][method.toUpperCase()])
                 throw new Error(`Controller ${path} does not have method ${opId}`);
+                
+              return tmp
             });
-        }));
+        })).then((result) => {
+          result.forEach((obj) => {
+            const [path, methodObj] = Object.entries(obj)[0];
+            controllers[path] = {...controllers[path], ...methodObj};
+          });
+        });
       }
       return controllers;
     } catch (err) { // Exception handling
