@@ -5,8 +5,7 @@
   "type": "module",
   "main": "./src/index.js",
   "exports": {
-    ".": "./src/index.js",
-    "./v2": "./src/index_old.js"
+    ".": "./src/entrypoint.cjs"
   },
   "files": [
     "src"
