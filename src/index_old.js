@@ -16,7 +16,7 @@ const require = createRequire(import.meta.url);
  *@deprecated
  */
 export function initialize(oasDoc, app, callback) {
-    logger.warn("Compatibility functions try to adapt older functionality to the new versions of OAS-Tools. Bear in mind that it may not work as expected.");
+    logger.warn("This initialization is deprecated and will be removed in the future. Please read the docs.");
     cfg.oasFile = findOASDoc('.', oasDoc);
 
     const paramCompatibility = (req,res,next) => {
@@ -27,7 +27,7 @@ export function initialize(oasDoc, app, callback) {
     use(paramCompatibility, {}, 1);
 
     Promise.all(
-        Object.entries(cfg.middleware.security.auth).map(async ([secName, handler]) => {
+        Object.entries(cfg.middleware?.security?.auth ?? {}).map(async ([secName, handler]) => {
             if (typeof handler === "object") {
                 const newHandler = await import("../../oas-auth/handlers/index.js");
                 cfg.middleware.security.auth[secName] = newHandler.bearerJwt({...handler, secret: handler.key});
