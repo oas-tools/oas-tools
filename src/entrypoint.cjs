@@ -3,7 +3,7 @@ const oasNew = import('./index.js');
 
 function initialize() {
     if (arguments.length === 3) {
-        return oasOld.then(m => m.initialize(arguments[0], arguments[1], arguments[2]));
+        oasOld.then(m => m.initialize(arguments[0], arguments[1], arguments[2]));
     } else {
         return oasNew.then(m => m.initialize(arguments[0], arguments[1]));
     }
