@@ -317,7 +317,12 @@ function convertArrayValue(value, schema) {
     }
   }
 
-  return arrayValue.map(value, (item, index) => {
+  // Handle situation where value is not string type
+  if (!arrayValue && typeof value === "object") {
+    arrayValue = value;
+  }
+
+  return arrayValue.map((item, index) => {
     const itemSchema = Array.isArray(schema.items)
       ? schema.items[index]
       : schema.items;
