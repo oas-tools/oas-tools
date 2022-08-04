@@ -1,5 +1,4 @@
-import { OASBase } from "oas-devtools/middleware";
-import { errors, logger } from "oas-devtools/utils";
+import { OASBase, errors, logger } from "@oas-tools/commons";
 
 export class OASErrorHandler extends OASBase {
   constructor(oasFile, middleware) {

@@ -1,4 +1,4 @@
-import { logger, errors } from "oas-devtools/utils";
+import { logger, errors } from "@oas-tools/commons";
 import { createRequire } from 'node:module';
 import { initialize as init, use} from "./index.js";
 import jsyaml from 'js-yaml'

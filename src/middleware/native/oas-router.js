@@ -1,6 +1,5 @@
-import { OASBase } from "oas-devtools/middleware";
+import { OASBase, errors, logger } from "@oas-tools/commons";
 import { commons } from "../../utils/index.js";
-import { errors, logger } from "oas-devtools/utils";
 import { pathToFileURL } from "url";
 
 export class OASRouter extends OASBase {

@@ -21,7 +21,7 @@ import _ from "lodash";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import jsyaml from "js-yaml";
-import { logger } from "oas-devtools/utils";
+import { logger } from "@oas-tools/commons";
 import path from "path";
 import rc from "rc";
 import readline from "readline";

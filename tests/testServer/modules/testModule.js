@@ -1,4 +1,4 @@
-import { OASBase } from "oas-devtools/middleware";
+import { OASBase } from "@oas-tools/commons";
 
 export class OASTest extends OASBase {
 

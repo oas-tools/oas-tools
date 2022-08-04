@@ -1,6 +1,6 @@
+import { OASBase } from '@oas-tools/commons';
 import swaggerUI from 'swagger-ui-express';
 import _ from "lodash";
-import { OASBase } from 'oas-devtools/middleware';
 
 export class OASSwagger extends OASBase {
     #config;

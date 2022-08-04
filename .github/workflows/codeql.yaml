@@ -45,6 +45,7 @@ jobs:
         uses: github/codeql-action/analyze@v2
       
   Snyk-Analysis:
+    if: ${{github.event_name == 'push'}}
     name: Snyk analysis and CodeQL upload
     runs-on: ubuntu-latest
     steps:

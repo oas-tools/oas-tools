@@ -1,5 +1,5 @@
+import { logger } from "@oas-tools/commons";
 import validator from "validator";
-import { logger } from "oas-devtools/utils";
 import fs from "fs";
 
 /**

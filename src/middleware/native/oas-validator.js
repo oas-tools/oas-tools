@@ -1,5 +1,4 @@
-import { OASBase } from "oas-devtools/middleware";
-import { errors, logger, validator } from "oas-devtools/utils";
+import { OASBase, errors, logger, validator } from "@oas-tools/commons";
 import { commons } from "../../utils/index.js";
 import MIMEtype from "whatwg-mimetype";
 
