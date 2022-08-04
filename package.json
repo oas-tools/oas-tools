@@ -17,7 +17,7 @@
     "lint": "eslint src --ext .mjs --ext .js --ext .cjs",
     "format": "npm run lint -- --fix",
     "test": "mocha ./tests/index.test.js",
-    "cov": "c8 --all -n=src/* -x=src/index_old.js --reporter=lcov --reporter=text npm run test"
+    "cov": "c8 --all -n=src/* -x=src/index_old.js -x=src/entrypoint.cjs --reporter=lcov --reporter=text npm run test"
   },
   "author": "ISA Group, University of Seville",
   "license": "Apache-2.0",
@@ -26,10 +26,10 @@
     "url": "git+https://github.com/oas-tools/oas-tools.git"
   },
   "dependencies": {
+    "@oas-tools/commons": "^1.0.0",
     "js-yaml": "^3.13.1",
     "json-schema-ref-parser": "^9.0.9",
     "lodash": "^4.17.21",
-    "oas-devtools": "^0.1.0",
     "rc": "^1.2.8",
     "swagger-ui-express": "^4.3.0",
     "validator": "^13.0.0",
