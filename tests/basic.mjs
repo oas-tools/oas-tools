@@ -320,6 +320,22 @@ function getTests() {
         });
     });
 
+    it("it should return a 200 if an array of strings is defined duplicating param", (done) => {
+      chai
+        .request(server)
+        .get(
+          "/api/v1/arrayWithStringsTest?listTestParam=6363&listTestParam=6364"
+        )
+        .set("Authorization", "Bearer " + token)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          done();
+        });
+    });
+
     it("it should get a 403 error because the user role does not have access", (done) => {
       chai
         .request(server)
