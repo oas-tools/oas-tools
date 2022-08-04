@@ -51,7 +51,7 @@ export class OASRouter extends OASBase {
           .filter(([method, _methodObj]) => method !== 'x-router-controller')
           .map(async ([method, methodObj]) => {
               const tmp = {};
-              const opId = methodObj.operationId ?? commons.generateName(expressPath, "function");;
+              const opId = methodObj.operationId ?? commons.generateName(expressPath, "function");
               const opControllerName = methodObj['x-router-controller'] ?? controllerName;
               const path = commons.filePath(config.controllers, opControllerName);
 
