@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 import _ from "lodash";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 import fs from "fs";
 import jsyaml from "js-yaml";
 import { logger } from "@oas-tools/commons";
@@ -30,7 +30,8 @@ export default async(config_object) => {
   const defaults = _loadDefaults();
   const packageJSON = JSON.parse(fs.readFileSync(config_object?.packageJSON || defaults.packageJSON, "utf8"));
   const oastoolsrc = _.omit(rc('oastools', _.assign({}, defaults)), ['config', 'configs', '_']);
-  const config = _.merge(defaults, packageJSON['oas-tools'], oastoolsrc, config_object);
+  const jsfile = fs.existsSync('oastools.config.js') ? (await import(pathToFileURL(process.cwd())+'/oastools.config.js')) : null;
+  const config = _.merge(defaults, packageJSON['oas-tools'], oastoolsrc, jsfile, config_object);
   if (config.useAnnotations)
     config.endpointCfg = await _readJsDoc(config.middleware.router.controllers);
   return config;
