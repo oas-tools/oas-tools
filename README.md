@@ -15,6 +15,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/oas-tools/oas-tools/badge.svg?branch=main)](https://coveralls.io/github/oas-tools/oas-tools?branch=main)
 </div>
 
+> **Warning**
+>
 > OAS Tools package has been renamed from `oas-tools` to `@oas-tools/core`
 
 ## Quickstart
