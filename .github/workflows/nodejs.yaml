@@ -110,6 +110,6 @@ jobs:
           with:
             node-version: '16.x'
             registry-url: 'https://registry.npmjs.org'
-        - run: npm publish
+        - run: npm publish --access public
           env:
             NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
