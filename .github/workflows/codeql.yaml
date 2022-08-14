@@ -3,8 +3,12 @@ name: "Code Scanning - Action"
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - '**/*.md'
   pull_request:
     branches: [main, develop]
+    paths-ignore:
+      - '**/*.md'
   schedule:
     #        ┌───────────── minute (0 - 59)
     #        │  ┌───────────── hour (0 - 23)
@@ -36,15 +40,19 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
+        uses: github/codeql-action/init@v2
         with:
           languages: javascript, typescript
           config-file: ./.github/codeql/codeql-config.yaml
 
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v1
+        uses: github/codeql-action/analyze@v2
       
   Snyk-Analysis:
+    if: ${{github.event_name == 'push'}}
     name: Snyk analysis and CodeQL upload
     runs-on: ubuntu-latest
     steps:
@@ -60,6 +68,6 @@ jobs:
           args: --sarif-file-output=snyk.sarif
 
       - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk.sarif

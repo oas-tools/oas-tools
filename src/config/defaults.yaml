@@ -1,0 +1,33 @@
+packageJSON: 'package.json'
+oasFile: 'api/oas-file.yaml'
+useAnnotations: false
+
+endpointCfg: null
+
+logger:
+  customLogger: null
+  level: info
+  logFile: false
+  logFilePath: './logs/oas-tools.log'
+
+middleware:
+  router:
+    disable: false
+    controllers: './controllers'
+  validator:
+    requestValidation: true
+    responseValidation: true
+    strict: false
+  security:
+    disable: true
+    auth: null
+  swagger:
+    disable: false
+    path: '/docs'
+    ui:
+      customCss: null
+      customJs: null
+  error:
+    disable: false
+    printStackTrace: false
+    customHandler: null
