@@ -1,0 +1,40 @@
+openapi: 3.0.0
+paths:
+  '/api/v1/resources/{resourceId}':
+    get:
+      tags:
+        - Resources
+      description: Returns resource by id
+      operationId: getResource
+      parameters:
+        - name: resourceId
+          in: path
+          description: Resource id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resource'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorModel'

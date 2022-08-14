@@ -1,0 +1,14 @@
+errorModel:
+  type: string
+stringResponse:
+  type: string
+oasParamsResponse:
+  type: object
+  required:
+    - params
+    - body
+  properties:
+    params:
+      type: object
+    body:
+      type: object

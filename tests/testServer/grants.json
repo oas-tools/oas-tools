@@ -1,9 +1,0 @@
-{
-    "anonymous": {
-        "someResource": {
-            "create:any": [
-                "*"
-            ]
-        }
-    }
-}
