@@ -29,13 +29,13 @@ export function initialize(oasDoc, app, callback) {
     Promise.all(
         Object.entries(cfg.middleware?.security?.auth ?? {}).map(async ([secName, handler]) => {
             if (typeof handler === "object") {
-                const newHandler = await import("../../oas-auth/handlers/index.js");
+                const newHandler = await import("../../auth/handlers/index.js");
                 cfg.middleware.security.auth[secName] = newHandler.bearerJwt({...handler, secret: handler.key});
             }
         })
     ).then(async () => {
         if (cfg.authCfg) {
-            const authMiddleware = (await import('../../oas-auth/middleware/index.js')).OASBearerJWT;
+            const authMiddleware = (await import('../../auth/middleware/index.js')).OASBearerJWT;
             use(authMiddleware, {acl: cfg.authCfg}, 3);
         }
         await init(app, cfg);
@@ -78,17 +78,17 @@ export function configure(config) {
     }
     if (Object.values(cfg.middleware.security.auth).some((handler) => typeof handler === "object")) {
         try {
-            require.resolve('../../oas-auth/handlers');
+            require.resolve('../../auth/handlers');
         } catch(err) {
-            throw new errors.ConfigError('Auth middleware is required for using JWT handlers based on config. Please install oas-auth package.')
+            throw new errors.ConfigError('Auth middleware is required for using JWT handlers based on config. Please install @oas-tools/auth package.')
         }
     }
     if (config.oasAuth) {
         try {
-            require.resolve('../../oas-auth/middleware');
+            require.resolve('../../auth/middleware');
             cfg.authCfg = config.grantsFile ?? {};
         } catch(err) {
-            throw new errors.ConfigError('Auth middleware is enabled. Please install oas-auth package.')
+            throw new errors.ConfigError('Auth middleware is enabled. Please install @oas-tools/auth package.')
         }
     }
 }
