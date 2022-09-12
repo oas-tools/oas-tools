@@ -49,7 +49,11 @@ export class OASRequestValidator extends OASBase {
 
       /* Check parameters */
       if (res.locals.oas.params && Object.keys(res.locals.oas.params).length > 0) {
-        oasRequest.parameters.forEach((param) => {
+        const commonParams = oasFile.paths[req.route.path].parameters;
+        const methodParams = oasRequest.parameters ?? commonParams;
+        const parameters = commonParams ? [...new Set([...methodParams, ...commonParams])] : methodParams;
+
+        parameters.forEach((param) => {
           const value = res.locals.oas.params[param.name];
           if (typeof value !== "undefined") {
             let schema;
