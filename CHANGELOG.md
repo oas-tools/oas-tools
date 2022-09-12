@@ -1,4 +1,14 @@
-# 3.0.0 (2022-08-14)
+## [3.0.1](https://github.com/oas-tools/oas-tools/compare/v3.0.0...v3.0.1) (2022-09-12)
+
+
+### Bug Fixes
+
+* Fixed routing when controller is async ([ee1650b](https://github.com/oas-tools/oas-tools/commit/ee1650b6859b87b703f707b98d01755ef7f8b9a9))
+* support for common path parameters ([b299b62](https://github.com/oas-tools/oas-tools/commit/b299b6235d46bf066010cf40f89ffcd08476ce87))
+
+
+
+# [3.0.0](https://github.com/oas-tools/oas-tools/compare/4a98e980ae1f458ab9fbac05b3e9581a6478a965...v3.0.0) (2022-08-14)
 
 
 ### Bug Fixes
