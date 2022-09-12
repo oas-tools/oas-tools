@@ -10,11 +10,10 @@ export class OASRouter extends OASBase {
 
   static async initialize(oasFile, config) {
     const controllers = await OASRouter.#loadControllers(oasFile, config);
-    return new OASRouter(oasFile, (req, res, next) => {  
+    return new OASRouter(oasFile, (req, res, _next) => {  
       const requestPath = req.route.path;
       const method = req.method;
       controllers[requestPath][method](req, res);
-      next();
     });
   }
 
@@ -44,11 +43,12 @@ export class OASRouter extends OASBase {
           controllers[expressPath] = tmp;
         }));
       } else { // Load when annotations disabled
+        const allowedMethods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
         await Promise.all(Object.entries(oasFile.paths).flatMap(([expressPath, obj]) => {
           const controllerName = obj['x-router-controller'] ?? commons.generateName(expressPath, "controller");
           
           return Object.entries(obj)
-          .filter(([method, _methodObj]) => method !== 'x-router-controller')
+          .filter(([method, _methodObj]) => allowedMethods.includes(method.toLowerCase()))
           .map(async ([method, methodObj]) => {
               const tmp = {};
               const opId = methodObj.operationId ?? commons.generateName(expressPath, "function");
