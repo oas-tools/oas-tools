@@ -10,11 +10,10 @@ export class OASRouter extends OASBase {
 
   static async initialize(oasFile, config) {
     const controllers = await OASRouter.#loadControllers(oasFile, config);
-    return new OASRouter(oasFile, (req, res, next) => {  
+    return new OASRouter(oasFile, (req, res, _next) => {  
       const requestPath = req.route.path;
       const method = req.method;
       controllers[requestPath][method](req, res);
-      next();
     });
   }
 
