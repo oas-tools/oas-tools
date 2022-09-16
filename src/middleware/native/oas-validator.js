@@ -119,12 +119,11 @@ export class OASResponseValidator extends OASBase {
             if (!valid) {
               commons.handle(ResponseValidationError, `Wrong data in response.\n${validate.errors.map((e) => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
             } 
-            oldSend.call(res, contentType.essence === "application/json" ? JSON.stringify(data) : data);        
           }
         } else {
           logger.debug("Response content is not defined in the OAS Document for this response");
-          oldSend.call(res, contentType.essence === "application/json" ? JSON.stringify(data) : data);
         }
+        oldSend.call(res, contentType.essence === "application/json" ? JSON.stringify(data) : data);
       }
       next();
     });
