@@ -31,3 +31,11 @@ var service = require('./oasResponseValidatorTestService.cjs');
  module.exports.getRequestWrongData = function getRequestWrongData(req, res, next) {
   service.getRequestWrongData(req.params, res, next);
 };
+
+/**
+ * @oastools {method} GET
+ * @oastools {path} /body/defaultFields
+ */
+module.exports.getRequestDefaultBody = function getRequestDefaultBody(req, res, next) {
+  service.getRequestDefaultBody(req.params, res, next);
+}

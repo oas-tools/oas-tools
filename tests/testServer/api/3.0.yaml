@@ -51,6 +51,17 @@ paths:
         - $ref: 'subschemas/oasparams.yaml#/explode/pathparams/2'
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
+  /api/v1/oasParams/body/defaultFields:
+    x-router-controller: oasParamsTestController
+    post:
+      operationId: postRequest
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: 'subschemas/oasparams.yaml#/body/schemaWithDefaults'}
+      responses:
+          '200': {$ref: 'subschemas/responses.yaml#/200'}
 
   # OAS SECURITY TEST ENDPOINT
   /api/v1/oasSecurity:
@@ -157,6 +168,25 @@ paths:
       operationId: getRequestWrongData
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
+
+  /api/v1/oasResponseValidator/body/defaultFields:
+    x-router-controller: oasResponseValidatorTestController
+    get:
+      operationId: getRequestDefaultBody
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fixedProp:
+                    type: number
+                    default: 1
+                additionalProperties:
+                  type: string
+                  default: 'Default value'
 
  # OAS ERROR HANDLER TEST ENDPOINT
   /api/v1/oasErrorHandler/{error}:

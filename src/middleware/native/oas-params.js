@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { schema } from "../../utils/index.js";
 import { OASBase, logger } from "@oas-tools/commons";
 
 export class OASParams extends OASBase {
@@ -9,13 +10,19 @@ export class OASParams extends OASBase {
 
     static initialize(oasFile, _config) {
         return new OASParams(oasFile, (req, res, next) => {
-            const methodParams = oasFile.paths[req.route.path]?.[req.method.toLowerCase()]?.parameters;
+            const oasRequest = oasFile.paths[req.route.path]?.[req.method.toLowerCase()];
             const pathParams = oasFile.paths[req.route.path]?.parameters;
+            const methodParams = oasRequest?.parameters;
             const params = _.merge(pathParams, methodParams);
             const paramsObj = {};
+            let body = req.body;
+            if (oasRequest.requestBody) {
+                const contentType = Object.keys(oasRequest.requestBody.content)[0];
+                body = schema.parseBody(body, oasRequest.requestBody.content[contentType].schema);
+            }
             Object.values(params).forEach((param) => paramsObj[param.name] = _getParameterValue(req, param));
             res.defaultSend = res.send; // save original send for error handling
-            res.locals.oas = { params: paramsObj, body: req.body };
+            res.locals.oas = { params: paramsObj, body: body };
             if(req.file || req.files && req.files.length > 0) res.locals.oas.files = [req.files, req.file].flat().filter((file) => file !== undefined);
             next()
         });

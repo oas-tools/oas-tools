@@ -1,5 +1,5 @@
 import { OASBase, errors, logger, validator } from "@oas-tools/commons";
-import { commons } from "../../utils/index.js";
+import { commons, schema as schemaUtils } from "../../utils/index.js";
 import MIMEtype from "whatwg-mimetype";
 
 const { RequestValidationError, ResponseValidationError } = errors;
@@ -114,7 +114,8 @@ export class OASResponseValidator extends OASBase {
           } else {
             const schemaContentType = Object.keys(expectedResponse.content)[0];
             const schema = expectedResponse.content[schemaContentType].schema;
-            const {validate, valid} = validator.validate(data, schema, oasFile.openapi);
+            const parsedData = schemaUtils.parseBody(data, schema);
+            const {validate, valid} = validator.validate(parsedData, schema, oasFile.openapi);
 
             if (!valid) {
               commons.handle(ResponseValidationError, `Wrong data in response.\n${validate.errors.map((e) => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);

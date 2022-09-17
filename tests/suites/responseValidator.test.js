@@ -52,6 +52,17 @@ export default () => {
                 });
             });
 
+            it('Should parse the body before validating it according to the schema', async () => {
+                await axios.get('http://localhost:8080/api/v1/oasResponseValidator/body/defaultFields')
+                .then ((res) => {
+                    const expected = {
+                        message: 'Default value',
+                        fixedProp: 1
+                    }
+                    assert.deepStrictEqual(res.data, expected);
+                });
+            });
+
             after(() => {
                 close();
             });        
