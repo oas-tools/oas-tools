@@ -24,26 +24,24 @@ export function parseBody(body, schema) {
   
   if (bodyType === 'array' && schema.type === "array") {
       const newBody = body ?? [];
-      return newBody.map(item => parseBody(item, schema.items));
-  } 
-  else if ((bodyType === 'object' || bodyType === "undefined") && schema.type === "object") {
+      return newBody.map((item) => parseBody(item, schema.items));
+  } else if ((bodyType === 'object' || bodyType === "undefined") && schema.type === "object") {
       const newBody = body ?? {};
       
       // Parse properties
-      Object.keys(schema.properties ?? {}).map(field => {
-          newBody[field] = parseBody(newBody[field], schema.properties[field]);
-      });
+      Object.keys(schema.properties ?? {}).map((field) =>
+        newBody[field] = parseBody(newBody[field], schema.properties[field])
+      );
 
       // Parse additionalProperties
       if (schema.additionalProperties) { 
         Object.keys(newBody)
-          .filter(field => !Object.keys(schema.properties ?? {}).includes(field))
-          .map(field => newBody[field] = parseBody(newBody[field], schema.additionalProperties));
+          .filter((field) => !Object.keys(schema.properties ?? {}).includes(field))
+          .map((field) => newBody[field] = parseBody(newBody[field], schema.additionalProperties));
       }
       
       return _.omitBy(newBody, _.isNil);
-  } 
-  else {
+  } else {
     return body ?? schema.default;
   } 
 }
