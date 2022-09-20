@@ -6,6 +6,7 @@
           oneOf:
             - $ref: './schemas.yaml#/oasParamsResponse'
             - $ref: './schemas.yaml#/stringResponse'
+            - $ref: './schemas.yaml#/readWriteOnlyResponse'
 '204':
   description: Resource deleted
 '400':

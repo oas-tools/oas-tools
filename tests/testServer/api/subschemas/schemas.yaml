@@ -12,3 +12,15 @@ oasParamsResponse:
       type: object
     body:
       type: object
+readWriteOnlyResponse:
+  type: object
+  required:
+      - writeOnlyProp
+      - readOnlyProp
+  properties:
+    writeOnlyProp:
+      type: string
+      writeOnly: true
+    readOnlyProp:
+      type: string
+      readOnly: true

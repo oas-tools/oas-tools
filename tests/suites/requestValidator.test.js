@@ -21,6 +21,14 @@ export default () => {
                 });
             });
 
+            it('Should ignore readOnly required props on requests', async () => {
+                await axios.post('http://localhost:8080/api/v1/oasRequestValidator/body/readOnlyProp', {
+                    writeOnlyProp: 'read only props are ignored'
+                }).then(res => {
+                    assert.equal(res.status, 200);
+                }).catch(e => console.log(e.response.data));
+            });
+
             it('Should fail when body is not valid (strict mode)', async () => {
                 await axios.post('http://localhost:8080/api/v1/oasRequestValidator?queryparamform=false', {test: 11223})
                 .then( () => assert.fail('Got response code 200, expected 400'))

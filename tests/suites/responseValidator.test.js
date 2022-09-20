@@ -63,6 +63,14 @@ export default () => {
                 });
             });
 
+            it('Should ignore required props marked as write only on response', async () => {
+                await axios.get('http://localhost:8080/api/v1/oasResponseValidator/body/writeOnlyProp')
+                .then ((res) => {
+                    const expected = {readOnlyProp: "write only property is not required for response"}
+                    assert.deepStrictEqual(res.data, expected);
+                });
+            });
+
             after(() => {
                 close();
             });        

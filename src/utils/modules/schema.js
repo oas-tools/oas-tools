@@ -17,7 +17,7 @@ export function expressPaths(oasFile) {
 /**
  * Parse the request body taking defaults into account
  * @param {string} body - Request body.
- * @param {string} schema - OAS schema definition for request body.
+ * @param {string} schema - OAS schema declaration for request body.
  */
 export function parseBody(body, schema) {
   const bodyType = Array.isArray(body) ? 'array' : typeof body;
@@ -47,4 +47,36 @@ export function parseBody(body, schema) {
       return body ?? (schema.default ?? null); 
   }
 }
+
+/**
+ * Parse schemas depending on the scope
+ * @param {string} schema - OAS Schema declaration.
+ * @param {string} scope - Scope, can be `request` or `response`.
+ */
+ export function parseSchema(schema, scope) { 
+  const newSchema = JSON.parse(JSON.stringify(schema));
+  
+  if (schema.oneOf || schema.anyOf || schema.allOf) {
+    const keyword = Object.keys(schema)[0];
+    newSchema[keyword] = schema[keyword].map(sch => parseSchema(sch, scope));
+  } else if (schema.not) {
+    newSchema.not = parseSchema(schema.not, scope);
+  } else if (schema.type === "array") {
+      newSchema.items = parseSchema(schema.items, scope);
+  } else if (schema.type === "object") {
+
+      Object.keys(schema.properties ?? {}).forEach((prop) => {
+        const requiredIdx = schema.required?.indexOf(prop);
+
+        if (scope === "request" && requiredIdx > -1 && schema.properties[prop].readOnly) {
+          newSchema.required.splice(requiredIdx, 1);
+        } else if (scope === "response" && requiredIdx > -1 && schema.properties[prop].writeOnly) {
+          newSchema.required.splice(requiredIdx, 1);
+        }
+        newSchema.properties[prop] = parseSchema(newSchema.properties[prop], scope);
+      });
+  }
+  return _.omitBy(newSchema, i => Array.isArray(i) && i.length === 0);
+}
+
 

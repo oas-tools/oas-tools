@@ -20,9 +20,9 @@ export class OASRequestValidator extends OASBase {
       if (res.locals.oas.body && JSON.stringify(res.locals.oas.body) !== "{}") {
         if (oasRequest.requestBody) {
           const contentType = Object.keys(oasRequest.requestBody.content)[0];
-          const schema = oasRequest.requestBody.content[contentType].schema;
+          const schema = schemaUtils.parseSchema(oasRequest.requestBody.content[contentType].schema, "request");
           const body = res.locals.oas.body;
-          
+
           /* On multipart requests insert files in body for validation */
           if (contentType.toLocaleLowerCase() === 'multipart/form-data' && res.locals.oas.files) {
             res.locals.oas.files.forEach((file) => {
@@ -113,7 +113,7 @@ export class OASResponseValidator extends OASBase {
             commons.handle(ResponseValidationError, 'Response content-type is not accepted by the client', true);
           } else {
             const schemaContentType = Object.keys(expectedResponse.content)[0];
-            const schema = expectedResponse.content[schemaContentType].schema;
+            const schema = schemaUtils.parseSchema(expectedResponse.content[schemaContentType].schema, "response");
             const parsedData = schemaUtils.parseBody(data, schema);
             const {validate, valid} = validator.validate(parsedData, schema, oasFile.openapi);
 

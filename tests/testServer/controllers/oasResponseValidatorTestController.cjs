@@ -39,3 +39,11 @@ var service = require('./oasResponseValidatorTestService.cjs');
 module.exports.getRequestDefaultBody = function getRequestDefaultBody(req, res, next) {
   service.getRequestDefaultBody(req.params, res, next);
 }
+
+/**
+ * @oastools {method} GET
+ * @oastools {path} /body/writeOnlyProp
+ */
+ module.exports.getRequestWriteOnlyProp = function getRequestWriteOnlyProp(req, res, next) {
+  service.getRequestWriteOnlyProp(req.params, res, next);
+}

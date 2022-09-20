@@ -128,7 +128,18 @@ paths:
       operationId: postRequest
       responses:
         '400': {$ref: 'subschemas/responses.yaml#/400'}
-
+  /api/v1/oasRequestValidator/body/readOnlyProp:
+    x-router-controller: oasRequestValidatorTestController
+    post:
+      operationId: postRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'subschemas/schemas.yaml#/readWriteOnlyResponse'
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
   # OAS ROUTER TEST ENDPOINT
   /api/v1/oasRouter:
     get:
@@ -187,6 +198,14 @@ paths:
                 additionalProperties:
                   type: string
                   default: 'Default value'
+
+  /api/v1/oasResponseValidator/body/writeOnlyProp:
+    x-router-controller: oasResponseValidatorTestController
+    get:
+      operationId: getRequestWriteOnlyProp
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+                
 
  # OAS ERROR HANDLER TEST ENDPOINT
   /api/v1/oasErrorHandler/{error}:

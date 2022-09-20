@@ -17,3 +17,11 @@ var service = require('./oasRequestValidatorTestService.cjs');
   service.postRequest(req.params, res, next);
 };
 
+/**
+ * @oastools {path} /body/readOnlyProp
+ * @oastools {method} POST
+ */
+ module.exports.postRequest = function postRequest(req, res, next) {
+  service.postRequest(req.params, res, next);
+};
+
