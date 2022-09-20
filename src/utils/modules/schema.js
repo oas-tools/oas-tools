@@ -58,7 +58,7 @@ export function parseBody(body, schema) {
   
   if (schema.oneOf || schema.anyOf || schema.allOf) {
     const keyword = Object.keys(schema)[0];
-    newSchema[keyword] = schema[keyword].map(sch => parseSchema(sch, scope));
+    newSchema[keyword] = schema[keyword].map((sch) => parseSchema(sch, scope));
   } else if (schema.not) {
     newSchema.not = parseSchema(schema.not, scope);
   } else if (schema.type === "array") {
@@ -76,7 +76,7 @@ export function parseBody(body, schema) {
         newSchema.properties[prop] = parseSchema(newSchema.properties[prop], scope);
       });
   }
-  return _.omitBy(newSchema, i => Array.isArray(i) && i.length === 0);
+  return _.omitBy(newSchema, (i) => Array.isArray(i) && i.length === 0);
 }
 
 
