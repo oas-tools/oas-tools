@@ -39,10 +39,9 @@ export function parseBody(body, schema) {
           .filter((field) => !Object.keys(schema.properties ?? {}).includes(field))
           .map((field) => newBody[field] = parseBody(newBody[field], schema.additionalProperties));
       }
-      
-      return _.omitBy(newBody, _.isNil);
+      return _.omitBy(newBody, _.isUndefined);
   } else {
-    return body ?? schema.default;
+    return body ?? (schema.default ?? null);
   } 
 }
 
