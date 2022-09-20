@@ -40,8 +40,11 @@ export function parseBody(body, schema) {
           .map((field) => newBody[field] = parseBody(newBody[field], schema.additionalProperties));
       }
       return _.omitBy(newBody, _.isUndefined);
+
+  } else if (_.isUndefined(body)) {
+      return body ?? schema.default;
   } else {
-    return body ?? (schema.default ?? null);
-  } 
+      return body ?? (schema.default ?? null); 
+  }
 }
 

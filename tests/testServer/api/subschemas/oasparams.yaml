@@ -166,3 +166,7 @@ body:
                     items:
                       type: number
                       default: 10
+        prop3:
+            enum: ["test1", "test2", null]
+            type: string
+            nullable: true
