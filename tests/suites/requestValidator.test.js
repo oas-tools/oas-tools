@@ -56,6 +56,15 @@ export default () => {
                 })
             });
 
+            it('Should fail when extraneous params provided in request query (strict mode)', async () => {
+                await axios.post('http://localhost:8080/api/v1/oasRequestValidator?queryparamform=notBoolean&extraneousParam=one&extraneousParam2=two', {test: 'Valid body'}).then(() => {
+                    assert.fail('Got response code 200 but expected 400');
+                }).catch(err => {
+                    assert.match(err.response?.data?.error, /Extraneous parameter found in request query:\n  - Missing declaration for "extraneousParam"\n  - Missing declaration for "extraneousParam2"/);
+                    assert.equal(err.response.status, 400);
+                })
+            });
+
             it('Should fail when param is not provided (strict mode)', async () => {
                 await axios.post('http://localhost:8080/api/v1/oasRequestValidator', {test: 'Valid body'}).then(() => {
                     assert.fail('Got response code 200 but expected 400');

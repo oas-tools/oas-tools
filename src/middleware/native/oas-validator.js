@@ -48,11 +48,18 @@ export class OASRequestValidator extends OASBase {
       }
 
       /* Check parameters */
-      if (res.locals.oas.params && Object.keys(res.locals.oas.params).length > 0) {
-        const commonParams = oasFile.paths[req.route.path].parameters;
-        const methodParams = oasRequest.parameters ?? commonParams;
-        const parameters = commonParams ? [...new Set([...methodParams, ...commonParams])] : methodParams;
+      const commonParams = oasFile.paths[req.route.path].parameters;
+      const methodParams = oasRequest.parameters ?? commonParams;
+      const parameters = commonParams ? [...new Set([...methodParams, ...commonParams])] : methodParams;
 
+      // Check for extraneous query params
+      const missingParams = Object.keys(req.query ?? {}).filter((qp) => !parameters?.filter((p) => p.in === "query").map((p) => p.name).includes(qp));
+      if (missingParams.length > 0) {
+        commons.handle(RequestValidationError, "Extraneous parameter found in request query:\n" + missingParams.map((p) => `  - Missing declaration for "${p}"`).join("\n"), config.strict);
+      }
+
+      // Validate against schema
+      if (res.locals.oas.params && Object.keys(res.locals.oas.params).length > 0) {
         parameters.forEach((param) => {
           const value = res.locals.oas.params[param.name];
           if (typeof value !== "undefined") {
