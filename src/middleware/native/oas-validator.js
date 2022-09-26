@@ -1,5 +1,5 @@
 import { OASBase, errors, logger, validator } from "@oas-tools/commons";
-import { commons } from "../../utils/index.js";
+import { commons, schema as schemaUtils } from "../../utils/index.js";
 import MIMEtype from "whatwg-mimetype";
 
 const { RequestValidationError, ResponseValidationError } = errors;
@@ -20,9 +20,9 @@ export class OASRequestValidator extends OASBase {
       if (res.locals.oas.body && JSON.stringify(res.locals.oas.body) !== "{}") {
         if (oasRequest.requestBody) {
           const contentType = Object.keys(oasRequest.requestBody.content)[0];
-          const schema = oasRequest.requestBody.content[contentType].schema;
+          const schema = schemaUtils.parseSchema(oasRequest.requestBody.content[contentType].schema, "request");
           const body = res.locals.oas.body;
-          
+
           /* On multipart requests insert files in body for validation */
           if (contentType.toLocaleLowerCase() === 'multipart/form-data' && res.locals.oas.files) {
             res.locals.oas.files.forEach((file) => {
@@ -48,11 +48,18 @@ export class OASRequestValidator extends OASBase {
       }
 
       /* Check parameters */
-      if (res.locals.oas.params && Object.keys(res.locals.oas.params).length > 0) {
-        const commonParams = oasFile.paths[req.route.path].parameters;
-        const methodParams = oasRequest.parameters ?? commonParams;
-        const parameters = commonParams ? [...new Set([...methodParams, ...commonParams])] : methodParams;
+      const commonParams = oasFile.paths[req.route.path].parameters;
+      const methodParams = oasRequest.parameters ?? commonParams;
+      const parameters = commonParams ? [...new Set([...methodParams, ...commonParams])] : methodParams;
 
+      // Check for extraneous query params
+      const missingParams = Object.keys(req.query ?? {}).filter((qp) => !parameters?.filter((p) => p.in === "query").map((p) => p.name).includes(qp));
+      if (missingParams.length > 0) {
+        commons.handle(RequestValidationError, "Extraneous parameter found in request query:\n" + missingParams.map((p) => `  - Missing declaration for "${p}"`).join("\n"), config.strict);
+      }
+
+      // Validate against schema
+      if (res.locals.oas.params && Object.keys(res.locals.oas.params).length > 0) {
         parameters.forEach((param) => {
           const value = res.locals.oas.params[param.name];
           if (typeof value !== "undefined") {
@@ -113,18 +120,18 @@ export class OASResponseValidator extends OASBase {
             commons.handle(ResponseValidationError, 'Response content-type is not accepted by the client', true);
           } else {
             const schemaContentType = Object.keys(expectedResponse.content)[0];
-            const schema = expectedResponse.content[schemaContentType].schema;
-            const {validate, valid} = validator.validate(data, schema, oasFile.openapi);
+            const schema = schemaUtils.parseSchema(expectedResponse.content[schemaContentType].schema, "response");
+            const parsedData = schemaUtils.parseBody(data, schema);
+            const {validate, valid} = validator.validate(parsedData, schema, oasFile.openapi);
 
             if (!valid) {
               commons.handle(ResponseValidationError, `Wrong data in response.\n${validate.errors.map((e) => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
             } 
-            oldSend.call(res, contentType.essence === "application/json" ? JSON.stringify(data) : data);        
           }
         } else {
           logger.debug("Response content is not defined in the OAS Document for this response");
-          oldSend.call(res, contentType.essence === "application/json" ? JSON.stringify(data) : data);
         }
+        oldSend.call(res, contentType.essence === "application/json" ? JSON.stringify(data) : data);
       }
       next();
     });

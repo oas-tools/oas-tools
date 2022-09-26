@@ -135,3 +135,38 @@ explode:
       in: cookie
       schema:
         type: array  
+
+body:
+  schemaWithDefaults:
+    type: array
+    items:
+      type: object
+      properties:
+        prop1:
+          type: number
+          default: 1
+        prop2:
+          type: object
+          properties:
+            prop21:
+              type: boolean
+              default: false
+            prop22:
+              type: string
+            prop31:
+              type: array
+              items:
+                type: object
+                properties:
+                  prop311:
+                    type: string
+                    default: "hello"
+                  prop322:
+                    type: array
+                    items:
+                      type: number
+                      default: 10
+        prop3:
+            enum: ["test1", "test2", null]
+            type: string
+            nullable: true

@@ -21,6 +21,14 @@ export default () => {
                 });
             });
 
+            it('Should ignore readOnly required props on requests', async () => {
+                await axios.post('http://localhost:8080/api/v1/oasRequestValidator/body/readOnlyProp', {
+                    writeOnlyProp: 'read only props are ignored'
+                }).then(res => {
+                    assert.equal(res.status, 200);
+                }).catch(e => console.log(e.response.data));
+            });
+
             it('Should fail when body is not valid (strict mode)', async () => {
                 await axios.post('http://localhost:8080/api/v1/oasRequestValidator?queryparamform=false', {test: 11223})
                 .then( () => assert.fail('Got response code 200, expected 400'))
@@ -44,6 +52,15 @@ export default () => {
                     assert.fail('Got response code 200 but expected 400');
                 }).catch(err => {
                     assert.match(err.response?.data?.error, /.*Validation failed at #\/type > must be boolean.*/);
+                    assert.equal(err.response.status, 400);
+                })
+            });
+
+            it('Should fail when extraneous params provided in request query (strict mode)', async () => {
+                await axios.post('http://localhost:8080/api/v1/oasRequestValidator?queryparamform=notBoolean&extraneousParam=one&extraneousParam2=two', {test: 'Valid body'}).then(() => {
+                    assert.fail('Got response code 200 but expected 400');
+                }).catch(err => {
+                    assert.match(err.response?.data?.error, /Extraneous parameter found in request query:\n  - Missing declaration for "extraneousParam"\n  - Missing declaration for "extraneousParam2"/);
                     assert.equal(err.response.status, 400);
                 })
             });

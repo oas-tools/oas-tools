@@ -15,3 +15,11 @@ module.exports.getRequestUnexpected = function getRequestUnexpected(req, res, ne
 module.exports.getRequestWrongData = function getRequestWrongData(req, res, next) {
   res.status(200).send(['Unexpected data type']);
 };
+
+module.exports.getRequestDefaultBody = function getRequestDefaultBody(req, res, next) {
+  res.status(200).send({message: undefined});
+};
+
+module.exports.getRequestWriteOnlyProp = function getRequestWriteOnlyProp(req, res, next) {
+  res.status(200).send({readOnlyProp: "write only property is not required for response"});
+};

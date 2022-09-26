@@ -79,6 +79,7 @@ jobs:
           tag-prefix: 'v'
           release-count: 0
           fallback-version: '0.1.0'
+          skip-on-empty: 'false'
       - name: Create Release
         uses: actions/create-release@v1
         env:
