@@ -1,3 +1,17 @@
+## [3.0.2](https://github.com/oas-tools/oas-tools/compare/v3.0.1...v3.0.2) (2022-09-26)
+
+
+### Bug Fixes
+
+* Allow null values ([22e72d2](https://github.com/oas-tools/oas-tools/commit/22e72d291d432650f2a4e473404179981ce89675))
+* Check for extraneous query parameters ([5f0c59b](https://github.com/oas-tools/oas-tools/commit/5f0c59b6be4db3dff4c24dfe1663628d0fb5c0d1))
+* Data not being sent after response validation ([b85a6c4](https://github.com/oas-tools/oas-tools/commit/b85a6c46f927a0b107b9748bdc617aa3fc62f27c))
+* default and nullable fields logic ([2670211](https://github.com/oas-tools/oas-tools/commit/267021136dc6fddd0f2c09c66a933ad51c81b689))
+* Support for OAS 'default' keyword in schemas ([94c4297](https://github.com/oas-tools/oas-tools/commit/94c429708af18976e5cd3bc8a77f1560130a8693))
+* Support for readOnly and writeOnly ([be25966](https://github.com/oas-tools/oas-tools/commit/be25966e7c2a572da8f7e1dcf5193370ee766e17))
+
+
+
 ## [3.0.1](https://github.com/oas-tools/oas-tools/compare/v3.0.0...v3.0.1) (2022-09-12)
 
 
