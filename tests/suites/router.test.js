@@ -45,6 +45,17 @@ export default () => {
                     assert.equal(res.data, 'Test service for router middleware');
                 });
             });
+            it('Should route to controller correctly when controller is async and fail if an error is thrown', async () => {
+                cfg.useAnnotations = false;
+                await init(cfg);
+
+                await axios.get('http://localhost:8080/api/v1/oasRouter/asyncthrow')
+                .then(() => assert.fail('Expected request to fail but got code 2XX'))
+                .catch( err => {
+                    assert.equal(err.response.status, 500);
+                    assert.deepStrictEqual(err.response.data, {error: "Error: Error raised in async controller"});
+                });
+            });
         });
     });
 }
