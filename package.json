@@ -1,6 +1,6 @@
 {
   "name": "ingka-oas-tools",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "OAS Tools core library",
   "type": "module",
   "main": "./src/index.js",
