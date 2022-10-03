@@ -95,7 +95,7 @@ export class OASRouter extends OASBase {
 
             return Object.entries(obj)
               .filter(([method, _methodObj]) =>
-                allowedMethods.includes(method.toLowerCase())
+                Boolean(method) && allowedMethods.includes(method.toLowerCase())
               )
               .map(async ([method, methodObj]) => {
                 const tmp = {};

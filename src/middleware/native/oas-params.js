@@ -10,7 +10,7 @@ export class OASParams extends OASBase {
 
     static initialize(oasFile, _config) {
         return new OASParams(oasFile, (req, res, next) => {
-            const oasRequest = oasFile.paths[req.route.path]?.[req.method.toLowerCase()];
+            const oasRequest = oasFile.paths[req.route.path]?.[req?.method.toLowerCase()];
             const pathParams = oasFile.paths[req.route.path]?.parameters;
             const methodParams = oasRequest?.parameters;
             const params = _.merge(pathParams, methodParams);
@@ -23,7 +23,7 @@ export class OASParams extends OASBase {
             Object.values(params).forEach((param) => paramsObj[param.name] = _getParameterValue(req, param));
             res.defaultSend = res.send; // save original send for error handling
             res.locals.oas = { params: paramsObj, body: body };
-            if(req.file || req.files && req.files.length > 0) res.locals.oas.files = [req.files, req.file].flat().filter((file) => file !== undefined);
+            if (req.file || req.files && req.files.length > 0) res.locals.oas.files = [req.files, req.file].flat().filter((file) => file !== undefined);
             next()
         });
     }
@@ -38,13 +38,13 @@ function _getParameterValue(req, parameter) {
     const defaultVal = parameter.schema ? parameter.schema.default : undefined;
     const paramLocation = parameter.in;
     let val;
-    
+
     /* The following code takes into account OAS serialization. https://swagger.io/docs/specification/serialization/ */
     switch (paramLocation) {
         case "path": // transform any style,explode param into default (style=simple, explode=false)
-            if (parameter.explode){
-                if (parameter.style === "label") val = req.params[parameter.name]?.replace('.','').replace(/\./g, ',').replace(/[=]/g, ',');
-                else if (parameter.style === "matrix") val = req.params[parameter.name]?.replace(';', '').replace(new RegExp(`${parameter.name}=`,"g"), '').replace(/;/g, ',').replace(/[=]/g, ',');
+            if (parameter.explode) {
+                if (parameter.style === "label") val = req.params[parameter.name]?.replace('.', '').replace(/\./g, ',').replace(/[=]/g, ',');
+                else if (parameter.style === "matrix") val = req.params[parameter.name]?.replace(';', '').replace(new RegExp(`${parameter.name}=`, "g"), '').replace(/;/g, ',').replace(/[=]/g, ',');
                 else val = req.params[parameter.name].replace(/[=]/g, ',');
                 break;
             } else {
@@ -57,7 +57,7 @@ function _getParameterValue(req, parameter) {
             if (parameter.content) { // ignores style and explode when content is defined
                 val = _.get(req.query, parameter.name);
                 break;
-            } else if(parameter.explode === false) {
+            } else if (parameter.explode === false) {
                 if (parameter.style === "spaceDelimited") val = _.get(req.query, parameter.name)?.replace(/\s/g, ',');
                 else if (parameter.style === "pipeDelimited") val = _.get(req.query, parameter.name)?.replace(/\|/g, ',');
                 else val = _.get(req.query, parameter.name)?.replace(`${parameter.name}=`, '');
@@ -68,15 +68,15 @@ function _getParameterValue(req, parameter) {
                 break;
             }
         case "header": // transform any style,explode param into default (style=simple, explode=false)
-            if (!parameter.content && parameter.explode){ // ignores style and explode when content is defined
-                val = req.headers[parameter.name.toLowerCase()]?.replace(/[=]/g, ',');
+            if (!parameter.content && parameter.explode) { // ignores style and explode when content is defined
+                val = req.headers[parameter?.name.toLowerCase()]?.replace(/[=]/g, ',');
             } else {
-                val = req.headers[parameter.name.toLowerCase()];
+                val = req.headers[parameter?.name.toLowerCase()];
             }
             break;
         case "cookie":
             val = req.headers.cookie?.split(';').find((c) => c.trim().startsWith(`${parameter.name}=`))?.split('=')[1];
-            break;    
+            break;
     }
     if (_.isUndefined(val) && !_.isUndefined(defaultVal)) {
         val = defaultVal;
@@ -126,16 +126,16 @@ function _parseValue(val, paramDefinition, schema, type) {
             if (paramDefinition.content) {
                 const contentType = Object.keys(paramDefinition.content)[0];
                 if (contentType.toLocaleLowerCase() === "application/json") {
-                    return JSON.parse(val);   
+                    return JSON.parse(val);
                 } else {
                     logger.warn(`Content type ${contentType} is not supported. Raw value will be returned.`);
                     return val
                 }
             } else {
                 logger.warn(`Parameter [${paramDefinition.name}] sent in the ${paramDefinition.in} is an object. Consider using content instead of schema or send it in request body.`);
-                if(typeof val === 'object') return val;
+                if (typeof val === 'object') return val;
                 const map = new Map(val.split(',').reduce((res, _val, idx, arr) => {
-                    if (idx %2 === 0) res.push(arr.slice(idx, idx + 2));
+                    if (idx % 2 === 0) res.push(arr.slice(idx, idx + 2));
                     return res;
                 }, []));
                 return Object.fromEntries(map);

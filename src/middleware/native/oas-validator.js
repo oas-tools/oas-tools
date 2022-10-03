@@ -12,9 +12,9 @@ export class OASRequestValidator extends OASBase {
   static initialize(oasFile, config) {
 
     /* Instanciate middleware */
-    return new OASRequestValidator(oasFile, (req, res, next) => {  
+    return new OASRequestValidator(oasFile, (req, res, next) => {
       logger.info(`Requested ${req.method} ${req.originalUrl}`);
-      const oasRequest = oasFile.paths[req.route.path][req.method.toLowerCase()];
+      const oasRequest = oasFile.paths[req.route.path][req?.method.toLowerCase()];
 
       /* Check body */
       if (res.locals.oas.body && JSON.stringify(res.locals.oas.body) !== "{}") {
@@ -26,17 +26,17 @@ export class OASRequestValidator extends OASBase {
           /* On multipart requests insert files in body for validation */
           if (contentType.toLocaleLowerCase() === 'multipart/form-data' && res.locals.oas.files) {
             res.locals.oas.files.forEach((file) => {
-              if(file.fieldname && file.originalname) {
-                if(req.file?.fieldname === file.fieldname) body[file.fieldname] = file.originalname // single file uploaded
-                else body[file.fieldname] = body[file.fieldname]? [...body[file.fieldname], file.originalname] : [file.originalname] // multiple files uploaded
+              if (file.fieldname && file.originalname) {
+                if (req.file?.fieldname === file.fieldname) body[file.fieldname] = file.originalname // single file uploaded
+                else body[file.fieldname] = body[file.fieldname] ? [...body[file.fieldname], file.originalname] : [file.originalname] // multiple files uploaded
               } else {
                 logger.warn('Ignored files in validation: Unable to find properties {fieldname, originalname} in file', file);
               }
             });
           }
-  
-          const {validate, valid} = validator.validate(body, schema, oasFile.openapi);
-  
+
+          const { validate, valid } = validator.validate(body, schema, oasFile.openapi);
+
           if (!valid) {
             commons.handle(RequestValidationError, `Request body does not match the schema specified in the OAS Document:\n${validate.errors.map((e) => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
           }
@@ -70,7 +70,7 @@ export class OASRequestValidator extends OASBase {
               schema = param.content[contentType].schema;
             }
 
-            const {validate, valid} = validator.validate(value, schema, oasFile.openapi);
+            const { validate, valid } = validator.validate(value, schema, oasFile.openapi);
 
             if (!valid) {
               commons.handle(RequestValidationError, `Parameter ${param.name} does not match the schema specified in the OAS Document:\n${validate.errors.map((e) => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
@@ -95,7 +95,7 @@ export class OASResponseValidator extends OASBase {
 
     /* Instanciate middleware */
     return new OASResponseValidator(oasFile, (req, res, next) => {
-      const oasRequest = oasFile.paths[req.route.path][req.method.toLowerCase()];
+      const oasRequest = oasFile.paths[req.route.path][req?.method.toLowerCase()];
 
       /* Intercepts response */
       const oldSend = res.send;
@@ -114,7 +114,7 @@ export class OASResponseValidator extends OASBase {
         if (!expectedResponse) {
           commons.handle(ResponseValidationError, `Response ${code} is not defined in the OAS Document for ${req.method} ${req.route.path}`, config.strict);
         } else if (expectedResponse.content) {
-          const acceptTypes = req.headers.accept? req.headers.accept.split(",").map((type) => new MIMEtype(type.trim()).essence) : ["*/*"];
+          const acceptTypes = req.headers.accept ? req.headers.accept.split(",").map((type) => new MIMEtype(type.trim()).essence) : ["*/*"];
           const neededTypes = [contentType.essence, `${contentType.type}/*`, `*/*`];
           if (neededTypes.every((type) => !acceptTypes.includes(type))) {
             commons.handle(ResponseValidationError, 'Response content-type is not accepted by the client', true);
@@ -122,11 +122,11 @@ export class OASResponseValidator extends OASBase {
             const schemaContentType = Object.keys(expectedResponse.content)[0];
             const schema = schemaUtils.parseSchema(expectedResponse.content[schemaContentType].schema, "response");
             const parsedData = schemaUtils.parseBody(data, schema);
-            const {validate, valid} = validator.validate(parsedData, schema, oasFile.openapi);
+            const { validate, valid } = validator.validate(parsedData, schema, oasFile.openapi);
 
             if (!valid) {
               commons.handle(ResponseValidationError, `Wrong data in response.\n${validate.errors.map((e) => `- Validation failed at ${e.schemaPath} > ${e.message}`).join("\n")}`, config.strict);
-            } 
+            }
           }
         } else {
           logger.debug("Response content is not defined in the OAS Document for this response");
@@ -136,5 +136,5 @@ export class OASResponseValidator extends OASBase {
       next();
     });
   }
-    
+
 }
