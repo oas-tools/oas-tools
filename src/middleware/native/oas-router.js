@@ -13,7 +13,7 @@ export class OASRouter extends OASBase {
       const requestPath = req.route.path;
       const method = req.method;
       try {
-        controllers[requestPath][method](req, res);
+        await controllers[requestPath][method](req, res, _next);
       } catch (err) {
         _next(err);
       }
@@ -42,7 +42,7 @@ export class OASRouter extends OASBase {
         const oasDiff = commons.arrayDiff(oasEndpoints, annEndpoints);
         const annDiff = commons.arrayDiff(annEndpoints, oasEndpoints);
         const missingMethod = annEndpoints
-          .filter((x) => /undefined [\S]+/.test(x))
+          .filter((x) => `/undefined []+/`.test(x))
           .map((x) => x.split(" ")[1]);
 
         if (missingMethod.length > 0)
@@ -68,7 +68,7 @@ export class OASRouter extends OASBase {
             await Promise.all(
               arr.map((e) =>
                 import(pathToFileURL(e.exportPath)).then(
-                  (imp) => (tmp[e.method] = imp[e.exportName])
+                  (imp) => tmp[e.method] = imp[e.exportName]
                 )
               )
             );
