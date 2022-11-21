@@ -101,7 +101,7 @@ function findOASDoc(path, oasDocContent) {
     } else {
         try {
             if (!(/\w+\.\w+$/).test(path)){
-                const dirs = readdirSync(path).filter((fileDir) => !['node_modules', '.oas-generator'].includes(fileDir))
+                const dirs = readdirSync(path).filter((fileDir) => !['node_modules'].includes(fileDir) && !(/^\..*$/.test(fileDir)))
                 for (const dir of dirs) {
                     return findOASDoc(`${path}/${dir}`, oasDocContent);
                 }
