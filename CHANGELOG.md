@@ -1,3 +1,12 @@
+## [3.0.3](https://github.com/oas-tools/oas-tools/compare/v3.0.2...v3.0.3) (2022-11-21)
+
+
+### Bug Fixes
+
+* Backward compatibility function error ([a401ca6](https://github.com/oas-tools/oas-tools/commit/a401ca6e605795a2f9d2f6658fe55df68ac4ac27))
+
+
+
 ## [3.0.2](https://github.com/oas-tools/oas-tools/compare/v3.0.1...v3.0.2) (2022-09-26)
 
 
