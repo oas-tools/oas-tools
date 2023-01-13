@@ -20,7 +20,8 @@ export class OASParams extends OASBase {
                 const contentType = Object.keys(oasRequest.requestBody.content)[0];
                 body = schema.parseBody(body, oasRequest.requestBody.content[contentType].schema);
             }
-            Object.values(params).forEach((param) => paramsObj[param.name] = _getParameterValue(req, param));
+            //added null check to fix wrong .merge which is causing was causing bug TypeError: Cannot convert undefined or null to object
+            Object.values(params).forEach(param => param.name && (paramsObj[param.name] = _getParameterValue(req, param)));
             res.defaultSend = res.send; // save original send for error handling
             res.locals.oas = { params: paramsObj, body: body };
             if(req.file || req.files && req.files.length > 0) res.locals.oas.files = [req.files, req.file].flat().filter((file) => file !== undefined);
