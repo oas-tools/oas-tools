@@ -42,3 +42,11 @@ module.exports.getRequestPath = function getRequest(req, res, next) {
   service.postRequest(req.params, res, next);
 };
 
+/**
+ * @oastools {method} POST
+ * @oastools {path} /body/requiredFields
+ */
+module.exports.postRequest2 = function postRequest2(req, res, next) {
+ service.postRequest(req.params, res, next);
+};
+
