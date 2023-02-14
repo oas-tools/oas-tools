@@ -12,8 +12,8 @@ export default () => {
                 cfg = JSON.parse(fs.readFileSync('tests/testServer/.oastoolsrc'));
             });
 
-            afterEach(() => {
-                close();
+            afterEach((done) => {
+                close().then(() => done());
             });   
             
             it('Should route to controller correctly with annotations disabled', async () => {
@@ -48,6 +48,7 @@ export default () => {
             
             it('Should route to controller correctly when controller is async and fail if an error is thrown', async () => {
                 cfg.useAnnotations = false;
+                cfg.logger.level = 'off';
                 await init(cfg);
                 
                 await axios.get('http://localhost:8080/api/v1/oasRouter/asyncthrow')

@@ -21,10 +21,10 @@ export async function init(config) {
   });
 }
 
-export function close() {
+export async function close() {
   app = express();
   server.close();
-  clearCache(); // Clears module cache
+  await clearCache(); // Clears module cache
   process.removeAllListeners(); // prevents memory leak
 }
 

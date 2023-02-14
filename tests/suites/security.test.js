@@ -25,8 +25,8 @@ export default () => {
                 }
             });
 
-            afterEach(() => {
-                close();
+            afterEach((done) => {
+                close().then(() => done());
             });
 
             it('Should initialize correctly', async () => {
@@ -140,8 +140,8 @@ export default () => {
                 });
             });
     
-            after(() => {
-                close();
+            after((done) => {
+                close().then(() => done());
             });        
         })
         
