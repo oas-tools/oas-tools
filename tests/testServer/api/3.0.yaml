@@ -153,6 +153,12 @@ paths:
       x-router-controller: oasRouterTestController
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
+  /api/v1/oasRouter/asyncthrow: 
+    get:
+      operationId: getRequestAsyncThrow
+      x-router-controller: oasRouterTestController
+      responses:
+        '500': {$ref: 'subschemas/responses.yaml#/500'}
 
   # OAS RESPONSE VALIDATOR TEST ENDPOINT
   /api/v1/oasResponseValidator:
@@ -224,6 +230,7 @@ paths:
         '403': {$ref: 'subschemas/responses.yaml#/403'}
         '406': {$ref: 'subschemas/responses.yaml#/406'}
         '500': {$ref: 'subschemas/responses.yaml#/500'}
+        
 components:
   securitySchemes:
     basicAuth:
