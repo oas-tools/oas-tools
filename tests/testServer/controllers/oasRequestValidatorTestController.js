@@ -1,11 +1,11 @@
 /** @oastools {Controller} /api/v1/oasRequestValidator */
 
-var service = require('./oasRequestValidatorTestService.cjs');
+import * as service from './oasRequestValidatorTestService.js';
 
 /**
  * @oastools {method} POST
  */
- module.exports.postRequest = function postRequest(req, res, next) {
+export function postRequest(req, res, next) {
   service.postRequest(req.params, res, next);
 };
 
@@ -13,7 +13,7 @@ var service = require('./oasRequestValidatorTestService.cjs');
  * @oastools {path} /missingBody
  * @oastools {method} POST
  */
- module.exports.postRequest = function postRequest(req, res, next) {
+export function postRequestNoBody(req, res, next) {
   service.postRequest(req.params, res, next);
 };
 
@@ -21,7 +21,7 @@ var service = require('./oasRequestValidatorTestService.cjs');
  * @oastools {path} /body/readOnlyProp
  * @oastools {method} POST
  */
- module.exports.postRequest = function postRequest(req, res, next) {
+export function postRequestReadOnly(req, res, next) {
   service.postRequest(req.params, res, next);
 };
 

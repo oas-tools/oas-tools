@@ -146,8 +146,8 @@ export default () => {
               });
         });
 
-        after(() => {
-            close();
-        });
+        after((done) => {
+            close().then(() => done());
+        });          
     })
 }

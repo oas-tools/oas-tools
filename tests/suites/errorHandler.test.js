@@ -14,8 +14,8 @@ export default () => {
                 cfg.logger.level = 'off'; // Set to 'error' if any test fail to see the error message
             });
 
-            afterEach(() => {
-                close();
+            afterEach((done) => {
+                close().then(() => done());
             });
 
             it('Should initialize correctly', async () => {
@@ -105,9 +105,9 @@ export default () => {
                 });
             });
     
-            after(() => {
-                close();
-            });        
+            after((done) => {
+                close().then(() => done());
+            });          
         })
         
     })
