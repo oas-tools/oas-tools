@@ -41,3 +41,11 @@ export function getRequestPathExplode(req, res, next) {
 export function postRequest(req, res, next) {
   service.postRequest(req.params, res, next);
 }
+
+/**
+ * @oastools {method} POST
+ * @oastools {path} /body/requiredFields
+ */
+export function postRequest2(req, res, next) {
+ service.postRequest(req.params, res, next);
+}

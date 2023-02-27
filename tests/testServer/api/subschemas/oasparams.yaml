@@ -1,19 +1,19 @@
 noexplode:
-  pathparams:  
+  pathparams:
     - name: testparamsimple
       description: test parameter style simple
       style: simple
       in: path
       schema:
         type: integer
-    
+
     - name: testparamslabel
       description: test parameter style label
       in: path
       style: label
       schema:
         type: array
-    
+
     - name: testparamsmatrix
       description: test parameter style matrix
       in: path
@@ -37,7 +37,7 @@ noexplode:
       in: query
       schema:
         type: array
-    
+
     - name: queryparampipedelimited
       description: query parameter style pipeDelimited
       explode: false
@@ -78,7 +78,7 @@ explode:
       style: label
       schema:
         type: array
-    
+
     - name: testparamsmatrix
       description: test parameter style matrix
       explode: true
@@ -86,7 +86,7 @@ explode:
       style: matrix
       schema:
         type: object
-    
+
   queryparams:
     - name: queryparamform
       description: query parameter style form
@@ -103,7 +103,7 @@ explode:
       in: query
       schema:
         type: array
-    
+
     - name: queryparampipedelimited
       description: query parameter style pipeDelimited
       explode: true
@@ -119,7 +119,7 @@ explode:
       in: query
       schema:
         type: object
-  
+
   headerparams:
     - name: headerparam
       description: header parameter
@@ -134,7 +134,7 @@ explode:
       explode: true
       in: cookie
       schema:
-        type: array  
+        type: array
 
 body:
   schemaWithDefaults:
@@ -170,3 +170,24 @@ body:
             enum: ["test1", "test2", null]
             type: string
             nullable: true
+
+  schemaWithRequired:
+    type: object
+    required:
+      - prop1
+    properties:
+      prop1:
+        type: number
+      prop2:
+        type: object
+        required:
+          - prop21
+        properties:
+          prop21:
+            type: boolean
+          prop22:
+            type: string
+      prop3:
+        enum: ["test1", "test2", null]
+        type: string
+        nullable: true

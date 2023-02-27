@@ -132,4 +132,7 @@ dist
 !.vscode/extensions.json
 *.code-workspace
 
+### JetBrains ###
+.idea/*
+
 # End of https://www.toptal.com/developers/gitignore/api/node,vscode,grunt

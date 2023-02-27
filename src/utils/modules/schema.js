@@ -21,30 +21,35 @@ export function expressPaths(oasFile) {
  */
 export function parseBody(body, schema) {
   const bodyType = Array.isArray(body) ? 'array' : typeof body;
-  
+
   if (bodyType === 'array' && schema.type === "array") {
       const newBody = body ?? [];
       return newBody.map((item) => parseBody(item, schema.items));
   } else if ((bodyType === 'object' || bodyType === "undefined") && schema.type === "object") {
       const newBody = body ?? {};
-      
+
       // Parse properties
       Object.keys(schema.properties ?? {}).map((field) =>
         newBody[field] = parseBody(newBody[field], schema.properties[field])
       );
 
       // Parse additionalProperties
-      if (schema.additionalProperties) { 
+      if (schema.additionalProperties) {
         Object.keys(newBody)
           .filter((field) => !Object.keys(schema.properties ?? {}).includes(field))
           .map((field) => newBody[field] = parseBody(newBody[field], schema.additionalProperties));
       }
+
+    if (!body && !Object.keys(newBody).some((key) => newBody[key])) {
+      return body;
+    }
+
       return _.omitBy(newBody, _.isUndefined);
 
   } else if (_.isUndefined(body)) {
       return body ?? schema.default;
   } else {
-      return body ?? (schema.default ?? null); 
+      return body ?? (schema.default ?? null);
   }
 }
 
@@ -53,9 +58,9 @@ export function parseBody(body, schema) {
  * @param {string} schema - OAS Schema declaration.
  * @param {string} scope - Scope, can be `request` or `response`.
  */
- export function parseSchema(schema, scope) { 
+ export function parseSchema(schema, scope) {
   const newSchema = JSON.parse(JSON.stringify(schema));
-  
+
   if (schema.oneOf || schema.anyOf || schema.allOf) {
     const keyword = Object.keys(schema)[0];
     newSchema[keyword] = schema[keyword].map((sch) => parseSchema(sch, scope));
