@@ -46,6 +46,6 @@ export function postRequest(req, res, next) {
  * @oastools {method} POST
  * @oastools {path} /body/requiredFields
  */
-module.exports.postRequest2 = function postRequest2(req, res, next) {
+export function postRequest2(req, res, next) {
  service.postRequest(req.params, res, next);
 }
