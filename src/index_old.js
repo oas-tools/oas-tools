@@ -96,7 +96,7 @@ export function configure(config) {
 function findOASDoc(path, oasDocContent) {
     if ((/\w+\.(?:yaml|json)$/).test(path)){
         let fileStr = readFileSync(path, 'utf-8');
-        fileStr = (/\w+\.json$/).test(path) ? fileStr : JSON.stringify(jsyaml.safeLoad(fileStr))
+        fileStr = (/\w+\.json$/).test(path) ? fileStr : JSON.stringify(jsyaml.load(fileStr))
         if (fileStr === JSON.stringify(oasDocContent)) return path
     } else {
         try {
