@@ -27,13 +27,13 @@ export function initialize(oasDoc, app, callback) {
 
         req.swagger = {
             params: {
-                ...(requestBody ? {[requestBody?.["x-name"] ?? "body"]: {
+                ...requestBody ? {[requestBody?.["x-name"] ?? "body"]: {
                     path: path,
                     schema: requestBody?.content[contentType]?.schema,
                     originalValue: req.body,
                     value: req.body,
-                    ...(req.files?.length > 0 ? {files: req.files} : {})
-                }} : {})
+                    ...req.files?.length > 0 ? {files: req.files} : {}
+                }} : {}
             },
             operation: operation,
         };
