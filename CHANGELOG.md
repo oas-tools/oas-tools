@@ -1,3 +1,21 @@
+# [3.1.0](https://github.com/oas-tools/oas-tools/compare/v3.0.3...v3.1.0) (2023-03-07)
+
+
+### Bug Fixes
+
+* Avoid route overlapping when registering ([eaf73a0](https://github.com/oas-tools/oas-tools/commit/eaf73a03f5129ee3a818418f1b2bef5872e2458b))
+* Compatibility issue with parameter parsing ([8bb0aa5](https://github.com/oas-tools/oas-tools/commit/8bb0aa523ce3919d0bb0118ee8cffb265a6a7e5a)), closes [#362](https://github.com/oas-tools/oas-tools/issues/362) [#357](https://github.com/oas-tools/oas-tools/issues/357)
+* support jest test ([918de8c](https://github.com/oas-tools/oas-tools/commit/918de8ca0e75a21598a5e79b4e374f3badb558c6))
+* when an option field is object type and is missing from request body, the request body shall considered as valid ([68e860b](https://github.com/oas-tools/oas-tools/commit/68e860b36cb2ab41601bc2c82015c3ce8d289687)), closes [#356](https://github.com/oas-tools/oas-tools/issues/356)
+
+
+### Features
+
+* added async error handling for router and associated tests ([6c4a53f](https://github.com/oas-tools/oas-tools/commit/6c4a53f614f1d462e484c84255ba6600962645c1))
+* upgrade js-yaml to v4.1.0 ([906596a](https://github.com/oas-tools/oas-tools/commit/906596aa04fc9c93f2a17872787066ff8fee0df4))
+
+
+
 ## [3.0.3](https://github.com/oas-tools/oas-tools/compare/v3.0.2...v3.0.3) (2022-11-21)
 
 
