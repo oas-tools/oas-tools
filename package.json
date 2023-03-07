@@ -1,6 +1,6 @@
 {
   "name": "@oas-tools/core",
-  "version": "3.0.3",
+  "version": "3.1.0",
   "description": "OAS Tools core library",
   "type": "module",
   "main": "./src/index.js",
