@@ -44,11 +44,13 @@ export async function initialize(app, config) {
       const finalChain = await _initMiddleware(oasFile, cfg).then((chain) => chain.filter((m) => m!==null));
 
       /* Register middleware in express */
-      finalChain.forEach((middleware) => {
-        middleware.register(app);
-        const name = middleware.constructor.name;
-        logger.info(`Registered ${name === 'OASBase' ? name + '[' + middleware.getMiddleware().name + ']' : name} middleware`);
-      })
+      Object.keys(oasFile.paths ?? {}).forEach((path) => {
+        finalChain.forEach((middleware) => {
+          middleware.register(app, path.replace(/{/g, ':').replace(/}/g, ''));
+          const name = middleware.constructor.name;
+          logger.info(`Registered ${name === 'OASBase' ? name + '[' + middleware.getMiddleware().name + ']' : name} middleware`);
+        })
+      });
     }).catch((err) => {
       logger.error(err.stack);
       process.exit(1);

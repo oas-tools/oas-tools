@@ -20,7 +20,33 @@ export function initialize(oasDoc, app, callback) {
     cfg.oasFile = findOASDoc('.', oasDoc);
 
     const paramCompatibility = (req,res,next) => {
-        req.oas = res.locals.oas;
+        const path = req.route.path.replace(/:.+?(?=\/|$)/g, (m) => `{${m.substring(1)}}`);
+        const operation = oasDoc.paths[path][req.method.toLowerCase()];
+        const requestBody = operation.requestBody;
+        const contentType = Object.keys(requestBody?.content ?? {})[0];
+
+        req.swagger = {
+            params: {
+                ...requestBody ? {[requestBody?.["x-name"] ?? "body"]: {
+                    path: path,
+                    schema: requestBody?.content[contentType]?.schema,
+                    originalValue: req.body,
+                    value: req.body,
+                    ...req.files?.length > 0 ? {files: req.files} : {}
+                }} : {}
+            },
+            operation: operation,
+        };
+
+        Object.entries(res.locals.oas.params ?? {}).forEach(([paramName, paramValue]) => {
+            const schema = operation.parameters.find((param) => param.name === paramName);
+            req.swagger.params[paramName] = {
+                path,
+                schema,
+                originalValue: req[schema.in === "query" ? "query" : "params"]?.[paramName],
+                value: paramValue
+            }
+        });
         next();
     }
     
@@ -96,7 +122,7 @@ export function configure(config) {
 function findOASDoc(path, oasDocContent) {
     if ((/\w+\.(?:yaml|json)$/).test(path)){
         let fileStr = readFileSync(path, 'utf-8');
-        fileStr = (/\w+\.json$/).test(path) ? fileStr : JSON.stringify(jsyaml.safeLoad(fileStr))
+        fileStr = (/\w+\.json$/).test(path) ? fileStr : JSON.stringify(jsyaml.load(fileStr))
         if (fileStr === JSON.stringify(oasDocContent)) return path
     } else {
         try {

@@ -13,9 +13,9 @@ export default () => {
             cfg = JSON.parse(fs.readFileSync('tests/testServer/.oastoolsrc'));
         });
 
-        afterEach(() => {
-            close();
-        })
+        afterEach((done) => {
+            close().then(() => done());
+        });
     
         it('Should initialize correctly with default config for OAS 3.0', async () => {
             await init();

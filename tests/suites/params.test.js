@@ -5,7 +5,7 @@ import axios from 'axios';
 export default () => {
 
     describe('\n    OAS-Params Middleware tests', () => {
-        
+
         before(async () => {
             await init(); //init server with default config
         });
@@ -24,7 +24,7 @@ export default () => {
                 assert.deepStrictEqual(res.data, expected);
             });
         });
-        
+
         it('Should parse path params correctly (explode true)', async () => {
             await axios.get('http://localhost:8080/api/v1/oasParams/explode/1/.3.4.5/;key=value;otherkey=othervalue')
             .then(res => {
@@ -123,19 +123,31 @@ export default () => {
             });
         });
 
+
         it('Should parse request body correctly taking defaults into account', async () => {
             await axios.post('http://localhost:8080/api/v1/oasParams/body/defaultFields', [{prop2: {prop31: [null, {}]}, prop3: null}] )
-            .then(res => {
-                let expected = {
-                    params: {},
-                    body: [{ prop2: { prop31: [{ prop311:"hello" }, { prop311:"hello" }], prop21: false}, prop3: null, prop1: 1 }]
-                }
-                assert.deepStrictEqual(res.data, expected);
-            });
+              .then(res => {
+                  let expected = {
+                      params: {},
+                      body: [{ prop2: { prop31: [{ prop311:"hello" }, { prop311:"hello" }], prop21: false}, prop3: null, prop1: 1 }]
+                  }
+                  assert.deepStrictEqual(res.data, expected);
+              });
         });
 
-        after(() => {
-            close();
-        });        
+        it('Should parse request body correctly taking required into account', async () => {
+            await axios.post('http://localhost:8080/api/v1/oasParams/body/requiredFields', {prop1: 1})
+              .then(res => {
+                  let expected = {
+                      params: {},
+                      body: { prop1: 1}
+                  }
+                  assert.deepStrictEqual(res.data, expected);
+              });
+        });
+
+        after((done) => {
+            close().then(() => done());
+        });          
     })
 }

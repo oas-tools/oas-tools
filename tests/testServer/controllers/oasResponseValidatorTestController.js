@@ -1,18 +1,18 @@
 /** @oastools {Controller} /api/v1/oasResponseValidator */
 
-var service = require('./oasResponseValidatorTestService.cjs');
+import * as service from './oasResponseValidatorTestService.js';
 
 /**
  * @oastools {method} GET
  */
- module.exports.getRequest = function getRequest(req, res, next) {
+export function getRequest(req, res, next) {
   service.getRequest(req.params, res, next);
 };
 
 /**
  * @oastools {method} DELETE
  */
- module.exports.deleteRequest = function deleteRequest(req, res, next) {
+export function deleteRequest(req, res, next) {
   service.deleteRequest(req.params, res, next);
 };
 
@@ -20,7 +20,7 @@ var service = require('./oasResponseValidatorTestService.cjs');
  * @oastools {method} GET
  * @oastools {path} /unexpectedResponse
  */
- module.exports.getRequestUnexpected = function getRequestUnexpected(req, res, next) {
+export function getRequestUnexpected(req, res, next) {
   service.getRequestUnexpected(req.params, res, next);
 };
 
@@ -28,7 +28,7 @@ var service = require('./oasResponseValidatorTestService.cjs');
  * @oastools {method} GET
  * @oastools {path} /wrongData
  */
- module.exports.getRequestWrongData = function getRequestWrongData(req, res, next) {
+export function getRequestWrongData(req, res, next) {
   service.getRequestWrongData(req.params, res, next);
 };
 
@@ -36,7 +36,7 @@ var service = require('./oasResponseValidatorTestService.cjs');
  * @oastools {method} GET
  * @oastools {path} /body/defaultFields
  */
-module.exports.getRequestDefaultBody = function getRequestDefaultBody(req, res, next) {
+export function getRequestDefaultBody(req, res, next) {
   service.getRequestDefaultBody(req.params, res, next);
 }
 
@@ -44,6 +44,6 @@ module.exports.getRequestDefaultBody = function getRequestDefaultBody(req, res, 
  * @oastools {method} GET
  * @oastools {path} /body/writeOnlyProp
  */
- module.exports.getRequestWriteOnlyProp = function getRequestWriteOnlyProp(req, res, next) {
+export function getRequestWriteOnlyProp(req, res, next) {
   service.getRequestWriteOnlyProp(req.params, res, next);
 }

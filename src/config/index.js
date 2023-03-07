@@ -41,7 +41,7 @@ export default async(config_object) => {
 function _loadDefaults(){
   const __filename = fileURLToPath(import.meta.url);
   const defaultString = fs.readFileSync(path.join(path.dirname(__filename), 'defaults.yaml'), "utf8");
-  const defaults = jsyaml.safeLoad(defaultString);
+  const defaults = jsyaml.load(defaultString);
   defaults.middleware.router.controllers = path.join(process.cwd(), 'controllers');
   defaults.packageJSON = path.join(process.cwd(), 'package.json');
   defaults.oasFile = path.join(process.cwd(), 'api/oas-file.yaml');

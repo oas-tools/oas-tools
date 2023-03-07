@@ -62,7 +62,17 @@ paths:
             schema: { $ref: 'subschemas/oasparams.yaml#/body/schemaWithDefaults'}
       responses:
           '200': {$ref: 'subschemas/responses.yaml#/200'}
-
+  /api/v1/oasParams/body/requiredFields:
+    x-router-controller: oasParamsTestController
+    post:
+      operationId: postRequest2
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: 'subschemas/oasparams.yaml#/body/schemaWithRequired' }
+      responses:
+        '200': { $ref: 'subschemas/responses.yaml#/200' }
   # OAS SECURITY TEST ENDPOINT
   /api/v1/oasSecurity:
     x-router-controller: oasSecurityTestController
@@ -76,7 +86,7 @@ paths:
           apiKeyCookie: []
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
-        
+
   /api/v1/oasSecurity/bearer:
     x-router-controller: oasSecurityTestController
     get:
@@ -85,7 +95,7 @@ paths:
         - bearerAuth: []
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
-  
+
   /api/v1/oasSecurity/invalid:
     x-router-controller: oasSecurityTestController
     get:
@@ -147,12 +157,18 @@ paths:
       x-router-controller: oasRouterTestController
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
-  /api/v1/oasRouter/async: 
+  /api/v1/oasRouter/async:
     get:
       operationId: getRequestAsync
       x-router-controller: oasRouterTestController
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
+  /api/v1/oasRouter/asyncthrow: 
+    get:
+      operationId: getRequestAsyncThrow
+      x-router-controller: oasRouterTestController
+      responses:
+        '500': {$ref: 'subschemas/responses.yaml#/500'}
 
   # OAS RESPONSE VALIDATOR TEST ENDPOINT
   /api/v1/oasResponseValidator:
@@ -165,7 +181,7 @@ paths:
       operationId: deleteRequest
       responses:
         '204': {$ref: 'subschemas/responses.yaml#/204'}
-  
+
   /api/v1/oasResponseValidator/unexpectedResponse:
     x-router-controller: oasResponseValidatorTestController
     get:
@@ -205,7 +221,7 @@ paths:
       operationId: getRequestWriteOnlyProp
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
-                
+
 
  # OAS ERROR HANDLER TEST ENDPOINT
   /api/v1/oasErrorHandler/{error}:
@@ -224,6 +240,7 @@ paths:
         '403': {$ref: 'subschemas/responses.yaml#/403'}
         '406': {$ref: 'subschemas/responses.yaml#/406'}
         '500': {$ref: 'subschemas/responses.yaml#/500'}
+        
 components:
   securitySchemes:
     basicAuth:
@@ -246,4 +263,4 @@ components:
       in: query
     openID:
       type: openIdConnect
-      openIdConnectUrl: https://test.com/openid/connect   
+      openIdConnectUrl: https://test.com/openid/connect
