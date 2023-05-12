@@ -45,7 +45,7 @@ export default () => {
                     assert.equal(res.data, 'Test service for router middleware');
                 });
             });
-            
+
             it('Should route to controller correctly when controller is async and fail if an error is thrown', async () => {
                 cfg.useAnnotations = false;
                 cfg.logger.level = 'off';
@@ -57,6 +57,16 @@ export default () => {
                     assert.equal(err.response.status, 500);
                     assert.deepStrictEqual(err.response.data, {error: "Error: Error raised in async controller"});
                 });
+            });
+
+            it('Should route to controller correctly when controller uses default exports', async () => {
+              cfg.useAnnotations = false;
+              await init(cfg);
+              
+              await axios.get('http://localhost:8080/api/v1/oasRouter/defaultexport').then(res => {
+                  assert.equal(res.status, 200);
+                  assert.equal(res.data, 'Test service for router middleware');
+              });
             });
         });
     });
