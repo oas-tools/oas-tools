@@ -42,7 +42,9 @@ export class OASErrorHandler extends OASBase {
         sendErr(401);
       } else if (err.name === "AuthError") {
         sendErr(403);
-      } else if (config.customHandler) {
+      }
+      
+      if (config.customHandler) {
         config.customHandler(err, sendErr);
       }
 
