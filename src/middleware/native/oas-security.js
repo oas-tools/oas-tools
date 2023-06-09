@@ -67,11 +67,14 @@ export class OASSecurity extends OASBase {
               case 'openIdConnect':
                 return [secName, await handlers[secName](secDef, secScope)]; 
               case 'mutualTLS':
-                let cert = null;
-                if (req.socket instanceof TLSSocket)
-                  cert = req.socket.getPeerCertificate(true); 
-                // cert could be null or {} or a peer cert
-                return [secName, await handlers[secName](cert)]; 
+                {
+                  let cert = null;
+                  if (req.socket instanceof TLSSocket){
+                    cert = req.socket.getPeerCertificate(true); 
+                  }
+                  // cert could be null or {} or a peer cert
+                  return [secName, await handlers[secName](cert)]; 
+                }
               default:
                 throw new UnsupportedError(`Security scheme ${secName} is invalid or not supported.`);
             }
