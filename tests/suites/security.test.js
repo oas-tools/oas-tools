@@ -170,7 +170,6 @@ export default () => {
                   })
                 })
                 .then( res => {
-                console.log(res.status);
                     assert("certCredentials" in global &&
                            "subject" in global.certCredentials &&
                            "CN" in global.certCredentials.subject,
