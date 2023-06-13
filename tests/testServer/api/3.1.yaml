@@ -11,3 +11,16 @@ paths:
       x-router-controller: oasRouterTestController
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
+  # OAS SECURITY TEST ENDPOINT
+  /api/v1/oasSecurity:
+    x-router-controller: oasSecurityTestController
+    get:
+      operationId: getRequest
+      security: # mutualTLS for openapi 3.1
+        - mutualTLSScheme: []
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
+components:
+  securitySchemes:
+    mutualTLSScheme:
+      type: mutualTLS
