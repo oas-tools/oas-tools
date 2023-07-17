@@ -169,6 +169,12 @@ paths:
       x-router-controller: oasRouterTestController
       responses:
         '500': {$ref: 'subschemas/responses.yaml#/500'}
+  /api/v1/oasRouter/defaultexport: 
+    get:
+      operationId: getRequest
+      x-router-controller: oasRouterDefaultExportTestController
+      responses:
+        '500': {$ref: 'subschemas/responses.yaml#/500'}
 
   # OAS RESPONSE VALIDATOR TEST ENDPOINT
   /api/v1/oasResponseValidator:
