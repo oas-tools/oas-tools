@@ -2,6 +2,7 @@
 
 import express from 'express';
 import http from 'http';
+import https from 'https';
 import fs from 'fs';
 
 var server;
@@ -12,11 +13,13 @@ let defaults = JSON.parse(fs.readFileSync('tests/testServer/.oastoolsrc'));
 let {use, initialize} = await importFresh('../../src/index.js');
 
 export {use};
-export async function init(config) {
+export async function init(config,serverOpt,secureServer) {
   app.use(express.json({limit: '50mb'}));
   app.get('/status', (_req, res, _next) => res.status(200).send('Up'));
   await initialize(app, config ?? defaults).then(() => {
-    server = http.createServer(app)
+    const serverType = (secureServer?https:http);
+    server = (serverOpt?serverType.createServer(serverOpt,app):
+                       serverType.createServer(app));
     server.listen(8080);
   });
 }

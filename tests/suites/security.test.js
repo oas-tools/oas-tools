@@ -3,9 +3,11 @@ import fs from 'fs';
 import sinon from 'sinon';
 import assert from 'assert';
 import axios from 'axios';
+import https from 'https';
 
 export default () => {
     let cfg;
+    let secureServerOpt;
 
     describe('\n    OAS-Security Middleware tests', () => {
         describe('Initialization tests', () => {
@@ -65,7 +67,7 @@ export default () => {
         });
 
         describe('Function tests', () => {
-            before(async () => {
+            beforeEach(async () => {
                 cfg = JSON.parse(fs.readFileSync('tests/testServer/.oastoolsrc'));
                 cfg.logger.level = 'off'; // Set to 'error' if any test fail to see the error message
                 cfg.middleware.security = {
@@ -79,10 +81,16 @@ export default () => {
                         openID: (secDef, secScope, _setStatus) => {global.openIDCredentials = {secDef, secScope}}
                     }
                 }
-                await init(cfg); //init server with default config
+                secureServerOpt =  {
+                  key: fs.readFileSync('tests/testServer/testCerts/server.key'),
+                  cert: fs.readFileSync('tests/testServer/testCerts/server.crt'),
+                  requestCert: true,
+                  rejectUnauthorized: false // don't care about valid chain
+                };
             });
             
             it('Should authenticate correctly with http basic auth and openID', async () => {
+                await init(cfg); //init server with default config
                 await axios.get('http://localhost:8080/api/v1/oasSecurity', { 
                     headers: { 
                         Authorization: 'Basic ' + Buffer.from('test:test').toString('base64') 
@@ -98,6 +106,7 @@ export default () => {
             });
     
             it('Should authenticate correctly with http bearer auth', async () => {
+                await init(cfg); //init server with default config
                 await axios.get('http://localhost:8080/api/v1/oasSecurity/bearer', { 
                     headers: { 
                         Authorization: 'Bearer ' + Buffer.from('test:test').toString('base64') 
@@ -109,6 +118,7 @@ export default () => {
             });
     
             it('Should authenticate correctly with all apiKeys defined in OAS Doc', async () => {
+                await init(cfg); //init server with default config
                 await axios.get('http://localhost:8080/api/v1/oasSecurity?apiKeyQuery=testApiKeyQuery', { 
                     headers: { 
                         apiKeyHeader: 'testApiKeyHeader',
@@ -123,6 +133,7 @@ export default () => {
             });
     
             it('Should fail with code 401 when missing the required auth types', async () => {
+                await init(cfg); //init server with default config
                 await axios.get('http://localhost:8080/api/v1/oasSecurity')
                 .then(() => assert.fail("Expected code 401 but got 2XX"))
                 .catch( err => {
@@ -132,6 +143,7 @@ export default () => {
             });
 
             it('Should fail with code 500 when using a non-declared security scheme', async () => {
+                await init(cfg); //init server with default config
                 await axios.get('http://localhost:8080/api/v1/oasSecurity/invalid')
                 .then(() => assert.fail("Expected code 500 but got 2XX"))
                 .catch( err => {
@@ -139,8 +151,57 @@ export default () => {
                     assert.equal(err.response.status, 500);
                 });
             });
+
+            it('Should authenticate correctly with mutualTLS under openapi 3.1', async () => {
+                cfg.middleware.security = {
+                    disable: false,
+                    auth: {
+                        mutualTLSScheme: (cert) => {global.certCredentials = cert}
+                    }
+                };
+                cfg.oasFile = 'tests/testServer/api/3.1.yaml';
+
+                await init(cfg,secureServerOpt,true); // init https server
+                await axios.get('https://localhost:8080/api/v1/oasSecurity', { 
+                  httpsAgent: new https.Agent({
+                    rejectUnauthorized: false, // don't care about valid chain
+                    cert: fs.readFileSync('tests/testServer/testCerts/client.crt'),
+                    key: fs.readFileSync('tests/testServer/testCerts/client.key'),
+                  })
+                })
+                .then( res => {
+                    assert("certCredentials" in global &&
+                           "subject" in global.certCredentials &&
+                           "CN" in global.certCredentials.subject,
+                           "No client credentials");
+                    assert.equal(global.certCredentials.subject.CN,'client.example.com');
+                })
+            });
+
+            it('Should get empty client cert when server not requesting one, and mutualTLS under openapi 3.1', async () => {
+                cfg.middleware.security = {
+                    disable: false,
+                    auth: {
+                        mutualTLSScheme: (cert) => {global.certCredentials = cert}
+                    }
+                };
+                cfg.oasFile = 'tests/testServer/api/3.1.yaml';
+                secureServerOpt.requestCert =  false;
+                secureServerOpt.rejectUnauthorized = true;
+
+                await init(cfg,secureServerOpt,true); // init https server
+                await axios.get('https://localhost:8080/api/v1/oasSecurity', {
+                  httpsAgent: new https.Agent({
+                    rejectUnauthorized: false // don't care about valid chain
+                  })
+                })
+                .then( res => {
+                    assert.equal(res.status, 200);
+                    assert.equal(Object.keys(global.certCredentials).length, 0);
+                })
+            });
     
-            after((done) => {
+            afterEach((done) => {
                 close().then(() => done());
             });        
         })
