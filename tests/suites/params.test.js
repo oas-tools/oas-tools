@@ -1,13 +1,17 @@
 import {init, close} from '../testServer/index.js';
+import fs from 'fs';
 import assert from 'assert';
 import axios from 'axios';
 
 export default () => {
+    let cfg;
 
     describe('\n    OAS-Params Middleware tests', () => {
 
         before(async () => {
-            await init(); //init server with default config
+            cfg = JSON.parse(fs.readFileSync('tests/testServer/.oastoolsrc'));
+            cfg.logger.level = 'off'; // Set to 'error' if any test fail to see the error message
+            await init(cfg); //init server with default config
         });
 
         it('Should parse path params correctly (explode false)', async () => {
@@ -69,6 +73,28 @@ export default () => {
                 }
                 assert.deepStrictEqual(res.data, expected);
             });
+        });
+
+        it('Should parse query params correctly (content application/json)', async () => {
+            await axios.get('http://localhost:8080/api/v1/oasParams/json?queryparamjson={"key":"value","otherkey":"othervalue"}')
+            .then(res => {
+                let expected = {
+                    params: {
+                        queryparamjson: {key: 'value', otherkey: 'othervalue'}
+                    },
+                    body: {}
+                }
+                assert.deepStrictEqual(res.data, expected);
+            });
+        });
+
+        it('Should fail when JSON query params are not valid JSON', async () => {
+            await axios.get('http://localhost:8080/api/v1/oasParams/json?queryparamjson={"key":,"otherkey":"othervalue"}')
+            .then(() => assert.fail('Got unexpected response, expected 400'))
+            .catch(err => {
+                assert.match(err.response?.data?.error, /.*Invalid JSON in parameter '.*'*/);
+                assert.equal(err.response.status, 400);
+            })
         });
 
         it('Should parse header params correctly (explode false)', async () => {

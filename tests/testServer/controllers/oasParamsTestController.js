@@ -19,6 +19,14 @@ export function getRequestExplode(req, res, next) {
 
 /**
  * @oastools {method} GET
+ * @oastools {path} /json
+ */
+export function getRequestJson(req, res, next) {
+  service.getRequest(req.params, res, next);
+}
+
+/**
+ * @oastools {method} GET
  * @oastools {path} /explode/{testparamsimple}/{testparamslabel}/{testparamsmatrix}
  * @oastools {path} /{testparamsimple}/{testparamslabel}/{testparamsmatrix}
  */

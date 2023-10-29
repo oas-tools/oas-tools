@@ -1,6 +1,8 @@
 import _ from "lodash";
-import { schema } from "../../utils/index.js";
-import { OASBase, logger } from "@oas-tools/commons";
+import { schema, commons } from "../../utils/index.js";
+import { OASBase, logger, errors } from "@oas-tools/commons";
+
+const { RequestValidationError } = errors;
 
 export class OASParams extends OASBase {
 
@@ -126,7 +128,11 @@ function _parseValue(val, paramDefinition, schema, type) {
             if (paramDefinition.content) {
                 const contentType = Object.keys(paramDefinition.content)[0];
                 if (contentType.toLocaleLowerCase() === "application/json") {
-                    return JSON.parse(val);   
+                    try {
+                        return JSON.parse(val);   
+                    } catch {
+                        commons.handle(RequestValidationError, `Invalid JSON in parameter '${paramDefinition.name}'.`, true);
+                    }
                 } else {
                     logger.warn(`Content type ${contentType} is not supported. Raw value will be returned.`);
                     return val

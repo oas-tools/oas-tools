@@ -136,6 +136,21 @@ explode:
       schema:
         type: array
 
+json:
+  queryparams:
+    - name: queryparamjson
+      description: query parameter content application/json
+      in: query
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              key:
+                type: string
+              otherkey:
+                type: string
+
 body:
   schemaWithDefaults:
     type: array
