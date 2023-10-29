@@ -30,6 +30,14 @@ paths:
         - $ref: 'subschemas/oasparams.yaml#/explode/cookieparams/0'
       responses:
         '200': {$ref: 'subschemas/responses.yaml#/200'}
+  /api/v1/oasParams/json:
+    x-router-controller: oasParamsTestController
+    get:
+      operationId: getRequest
+      parameters:
+        - $ref: 'subschemas/oasparams.yaml#/json/queryparams/0'
+      responses:
+        '200': {$ref: 'subschemas/responses.yaml#/200'}
   /api/v1/oasParams/{testparamsimple}/{testparamslabel}/{testparamsmatrix}:
     x-router-controller: oasParamsTestController
     get:
