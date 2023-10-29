@@ -132,6 +132,7 @@ function _parseValue(val, paramDefinition, schema, type) {
                         return JSON.parse(val);   
                     } catch {
                         commons.handle(RequestValidationError, `Invalid JSON in parameter '${paramDefinition.name}'.`, true);
+                        break;
                     }
                 } else {
                     logger.warn(`Content type ${contentType} is not supported. Raw value will be returned.`);
